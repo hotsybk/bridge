@@ -19,11 +19,12 @@ import { Reveal } from "@/components/shared/reveal";
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+    <>
       {/* 전역 radial gradient overlay — 화면 우상단·좌하단 미세 톤 */}
       <div className="landing-bg-overlay" aria-hidden />
 
-      <div className="relative z-10">
+      {/* sticky 가 깨지지 않도록 page wrapper 에 overflow-hidden 사용 금지 */}
+      <div className="relative z-10 min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
         <TopNav />
         <Hero />
         <Features />
@@ -32,7 +33,7 @@ export default function LandingPage() {
         <BottomCTA />
         <Footer />
       </div>
-    </div>
+    </>
   );
 }
 

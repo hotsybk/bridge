@@ -88,14 +88,16 @@
     0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
 
-  /* Glass tokens (메인 리뉴얼 기획안 §4.1) */
-  --color-glass-bg-light: rgba(255, 255, 255, 0.85);
-  --color-glass-bg-strong: rgba(255, 255, 255, 0.7);
-  --color-glass-border: rgba(255, 255, 255, 0.4);
-  --shadow-glass: 0 10px 30px rgba(0, 0, 0, 0.06),
-    0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-glass-hover: 0 20px 50px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.06);
+  /* Glass tokens (메인 리뉴얼 기획안 §4.1)
+   * alpha 70% = 글래스 효과 명확 + 가독성 유지 (텍스트는 #1D1D1F solid)
+   */
+  --color-glass-bg-light: rgba(255, 255, 255, 0.7);
+  --color-glass-bg-strong: rgba(255, 255, 255, 0.55);
+  --color-glass-border: rgba(255, 255, 255, 0.6);
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.08),
+    0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow-glass-hover: 0 20px 60px rgba(0, 0, 0, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 /* =====================================================================
@@ -264,7 +266,7 @@
    (docs/landing-design-renewal-plan.md 합의 명세)
    ===================================================================== */
 
-/* 화면 우상단 미세 radial gradient — body 위 고정 레이어 */
+/* 화면 우상단/좌하단 radial gradient — 글래스 카드 뒤에 색감 확보 */
 .landing-bg-overlay {
   position: fixed;
   inset: 0;
@@ -272,14 +274,19 @@
   z-index: 0;
   background:
     radial-gradient(
-      circle at 85% 10%,
-      rgba(0, 102, 204, 0.08) 0%,
+      circle at 80% 15%,
+      rgba(0, 102, 204, 0.18) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(0, 102, 204, 0.12) 0%,
       transparent 45%
     ),
     radial-gradient(
-      circle at 10% 90%,
+      circle at 50% 50%,
       rgba(0, 102, 204, 0.05) 0%,
-      transparent 40%
+      transparent 60%
     );
 }
 
