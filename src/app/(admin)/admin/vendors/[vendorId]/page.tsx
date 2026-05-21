@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink } from "lucide-react";
+import {
+  Building2,
+  ChevronLeft,
+  Eye,
+  FileText,
+} from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { extractStoragePath, getStorageSignedUrl } from "@/server/firebase/admin";
 import { trpcServer } from "@/lib/trpc/server";
 
@@ -24,10 +28,18 @@ const STATUS_LABEL: Record<string, string> = {
   REJECTED: "반려",
 };
 
+const STATUS_TONE: Record<string, string> = {
+  PENDING_DOCS: "bg-[var(--color-warning)]/12 text-[var(--color-warning)]",
+  PENDING_REVIEW: "bg-[var(--color-accent-light)] text-[var(--color-accent)]",
+  APPROVED: "bg-[var(--color-success)]/12 text-[var(--color-success)]",
+  SUSPENDED: "bg-[var(--color-warning)]/12 text-[var(--color-warning)]",
+  REJECTED: "bg-[var(--color-error)]/12 text-[var(--color-error)]",
+};
+
 async function safeSignedUrl(downloadUrl: string | undefined): Promise<string | null> {
   if (!downloadUrl) return null;
   const path = extractStoragePath(downloadUrl);
-  if (!path) return downloadUrl; // path 추출 실패 시 원본 사용
+  if (!path) return downloadUrl;
   try {
     return await getStorageSignedUrl(path, 300);
   } catch {
@@ -51,22 +63,24 @@ export default async function AdminVendorDetailPage({
     safeSignedUrl(vendor.manufactureLicenseUrl),
   ]);
 
+  const statusTone = STATUS_TONE[vendor.status] ?? "bg-[var(--color-bg-secondary)]";
+
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12 md:px-12 md:py-16">
+    <main className="mx-auto max-w-6xl px-6 py-10 md:px-12 md:py-14">
       <Link
         href="/admin/vendors"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:underline"
+        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:underline"
       >
         <ChevronLeft className="h-4 w-4" />
         심사 큐로
       </Link>
 
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <header className="mt-6 flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
           <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
             Vendor {vendor.id}
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+          <h1 className="mt-2 truncate text-3xl font-semibold tracking-tight md:text-4xl">
             {vendor.companyName}
           </h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
@@ -74,18 +88,17 @@ export default async function AdminVendorDetailPage({
             <span className="font-mono">{vendor.bizRegNo}</span>
           </p>
         </div>
-        <span className="inline-flex rounded-full bg-[var(--color-bg-secondary)] px-3 py-1 text-xs font-medium">
-          현재 상태: {STATUS_LABEL[vendor.status] ?? vendor.status}
+        <span
+          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium ${statusTone}`}
+        >
+          {STATUS_LABEL[vendor.status] ?? vendor.status}
         </span>
       </header>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* 회사 정보 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>회사 정보</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
+        {/* Left — 상세 정보 */}
+        <div className="space-y-6 min-w-0">
+          <Section title="회사 정보">
             <Dl>
               <Row k="대표자" v={vendor.ceoName} />
               <Row k="전화" v={vendor.phone} />
@@ -97,37 +110,22 @@ export default async function AdminVendorDetailPage({
               {vendor.salesLicenseNo && (
                 <Row k="판매업 신고번호" v={vendor.salesLicenseNo} />
               )}
-              {(vendor.statusReason ?? null) && (
-                <Row k="이전 사유" v={vendor.statusReason ?? ""} />
-              )}
             </Dl>
-          </CardContent>
-        </Card>
+          </Section>
 
-        {/* 정산 계좌 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>정산 계좌</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <Section title="정산 계좌">
             <Dl>
-              <Row k="은행 코드" v={vendor.payoutBankCode ?? ""} />
-              <Row k="계좌번호" v={vendor.payoutBankAccount ?? ""} />
-              <Row k="예금주" v={vendor.payoutAccountHolder ?? ""} />
+              <Row k="은행 코드" v={vendor.payoutBankCode ?? "—"} />
+              <Row k="계좌번호" v={vendor.payoutBankAccount ?? "—"} />
+              <Row k="예금주" v={vendor.payoutAccountHolder ?? "—"} />
               <Row
                 k="기본 수수료율"
                 v={`${(vendor.defaultCommissionRate * 100).toFixed(1)}%`}
               />
             </Dl>
-          </CardContent>
-        </Card>
+          </Section>
 
-        {/* 영업 카테고리 */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>영업 카테고리</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <Section title="영업 카테고리">
             <div className="flex flex-wrap gap-2">
               {(vendor.categories ?? []).map((c: string) => (
                 <span
@@ -137,72 +135,172 @@ export default async function AdminVendorDetailPage({
                   {c}
                 </span>
               ))}
+              {(vendor.categories ?? []).length === 0 && (
+                <span className="text-xs text-[var(--color-text-tertiary)]">
+                  카테고리 미선택
+                </span>
+              )}
             </div>
-          </CardContent>
-        </Card>
+          </Section>
 
-        {/* 서류 미리보기 */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>제출 서류</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <DocLink label="사업자등록증" url={bizRegUrl} />
-            {vendor.vendorType === "DISTRIBUTOR" && (
-              <DocLink label="의료기기 판매업 신고증" url={salesLicenseUrl} />
-            )}
-            {(vendor.vendorType === "MANUFACTURER" ||
-              vendor.vendorType === "IMPORTER") && (
-              <DocLink label="제조·수입업 허가증" url={manufactureLicenseUrl} />
-            )}
-            <p className="pt-2 text-xs text-[var(--color-text-tertiary)]">
-              ※ 서류 링크는 5분 후 만료됩니다.
+          <Section
+            title="제출 서류"
+            footer="서류 링크는 5분 후 만료됩니다."
+          >
+            <div className="space-y-3">
+              <DocCard
+                label="사업자등록증"
+                url={bizRegUrl}
+                kind="biz-reg"
+              />
+              {vendor.vendorType === "DISTRIBUTOR" && (
+                <DocCard
+                  label="의료기기 판매업 신고증"
+                  url={salesLicenseUrl}
+                  kind="sales-license"
+                />
+              )}
+              {(vendor.vendorType === "MANUFACTURER" ||
+                vendor.vendorType === "IMPORTER") && (
+                <DocCard
+                  label="제조·수입업 허가증"
+                  url={manufactureLicenseUrl}
+                  kind="manufacture-license"
+                />
+              )}
+            </div>
+          </Section>
+        </div>
+
+        {/* Right — sticky 액션 패널 */}
+        <aside className="lg:sticky lg:top-8 lg:self-start space-y-5">
+          <VendorActions vendorId={vendor.id} currentStatus={vendor.status} />
+
+          <div className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              메타 정보
             </p>
-          </CardContent>
-        </Card>
-      </div>
+            <dl className="mt-4 space-y-3 text-xs">
+              <div>
+                <dt className="text-[var(--color-text-tertiary)]">Vendor ID</dt>
+                <dd className="mt-0.5 break-all font-mono text-[var(--color-text-secondary)]">
+                  {vendor.id}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[var(--color-text-tertiary)]">현재 상태</dt>
+                <dd className="mt-0.5 font-mono">{vendor.status}</dd>
+              </div>
+              {(vendor as { statusReason?: string }).statusReason && (
+                <div>
+                  <dt className="text-[var(--color-text-tertiary)]">이전 사유</dt>
+                  <dd className="mt-0.5 text-[var(--color-text-secondary)]">
+                    {(vendor as { statusReason?: string }).statusReason}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </div>
 
-      {/* 액션 — client component */}
-      <div className="mt-8">
-        <VendorActions vendorId={vendor.id} currentStatus={vendor.status} />
+          <div className="rounded-2xl border border-dashed border-[var(--color-border-light)] p-5 text-xs text-[var(--color-text-tertiary)]">
+            <p className="font-medium text-[var(--color-text-secondary)]">
+              심사 이력
+            </p>
+            <p className="mt-2">
+              Phase 2 백로그 — 상태 변경 이력은 추후 별도 패널에서 제공됩니다.
+            </p>
+          </div>
+        </aside>
       </div>
     </main>
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// 서브 컴포넌트
+// ─────────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  footer,
+  children,
+}: {
+  title: string;
+  footer?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] p-6">
+      <h2 className="text-base font-semibold">{title}</h2>
+      <div className="mt-4">{children}</div>
+      {footer && (
+        <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">{footer}</p>
+      )}
+    </section>
+  );
+}
+
 function Dl({ children }: { children: React.ReactNode }) {
-  return <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">{children}</dl>;
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 text-sm">
+      {children}
+    </dl>
+  );
 }
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <>
       <dt className="text-[var(--color-text-secondary)]">{k}</dt>
-      <dd>{v}</dd>
+      <dd className="break-all">{v}</dd>
     </>
   );
 }
 
-function DocLink({ label, url }: { label: string; url: string | null }) {
+function DocCard({
+  label,
+  url,
+  kind,
+}: {
+  label: string;
+  url: string | null;
+  kind: string;
+}) {
   if (!url) {
     return (
-      <div className="flex items-center justify-between rounded-xl border border-dashed border-[var(--color-border-light)] p-3 text-sm text-[var(--color-text-tertiary)]">
-        <span>{label}</span>
-        <span className="text-xs">미제출 또는 URL 없음</span>
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-[var(--color-border-light)] p-3 text-sm text-[var(--color-text-tertiary)]">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--color-bg-secondary)]">
+          <FileText className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{label}</p>
+          <p className="text-xs">미제출 또는 URL 없음</p>
+        </div>
       </div>
     );
   }
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-between rounded-xl border border-[var(--color-border-light)] p-3 text-sm transition-shadow hover:shadow-sm"
-    >
-      <span className="font-medium">{label}</span>
-      <span className="inline-flex items-center gap-1 text-xs text-[var(--color-accent)]">
-        새 탭에서 열기 <ExternalLink className="h-3.5 w-3.5" />
+    <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border-light)] p-3 transition-shadow hover:shadow-sm">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--color-accent-light)] text-[var(--color-accent)]">
+        <FileText className="h-4 w-4" aria-hidden />
       </span>
-    </a>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{label}</p>
+        <p className="text-xs text-[var(--color-text-tertiary)]">
+          {kind} · 5분 만료 signed URL
+        </p>
+      </div>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--color-bg-secondary)] px-3 text-xs font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-accent-light)]"
+      >
+        <Eye className="h-3 w-3" />새 탭
+      </a>
+    </div>
   );
 }
+
+// Building2 used in dl/dt above potentially (no current usage) — keep import to avoid unused warning is unneeded since we use it nowhere; tree-shaken.
+void Building2;

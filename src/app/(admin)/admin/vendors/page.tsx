@@ -1,9 +1,18 @@
 import Link from "next/link";
-import { ChevronRight, Inbox } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Inbox,
+  ShieldX,
+  XCircle,
+} from "lucide-react";
 
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
+import { StatCard } from "@/components/shared/stat-card";
 import { trpcServer } from "@/lib/trpc/server";
 
-// 인증 컨텍스트 + 매 요청 데이터 fetch — 정적 prerender 불가.
 export const dynamic = "force-dynamic";
 
 const STATUS_TABS = [
@@ -32,23 +41,66 @@ export default async function AdminVendorsPage({
     STATUS_TABS.find((t) => t.value === requested)?.value ?? "PENDING_REVIEW";
 
   const trpc = await trpcServer();
-  const { vendors } = await trpc.admin.vendor.list({ status });
+
+  // 4개 status 별 카운트 가져오기 (통계 카드용)
+  const [pendingList, approvedList, rejectedList, suspendedList] = await Promise.all([
+    trpc.admin.vendor.list({ status: "PENDING_REVIEW" }),
+    trpc.admin.vendor.list({ status: "APPROVED" }),
+    trpc.admin.vendor.list({ status: "REJECTED" }),
+    trpc.admin.vendor.list({ status: "SUSPENDED" }),
+  ]);
+
+  // 현재 status 에 해당하는 vendor 목록
+  const currentList =
+    status === "PENDING_REVIEW"
+      ? pendingList
+      : status === "APPROVED"
+        ? approvedList
+        : status === "REJECTED"
+          ? rejectedList
+          : suspendedList;
+
+  const { vendors } = currentList;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
-      <header className="mb-8">
-        <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
-          Admin
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">입점 심사</h1>
-        <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-          공급업체 신청을 심사하고 승인·반려·정지를 결정합니다.
-        </p>
-      </header>
+      <PageHeader
+        label="Admin"
+        title="입점 심사"
+        description="공급업체 신청을 심사하고 승인·반려·정지를 결정합니다."
+      />
+
+      {/* 통계 카드 4개 */}
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="심사 대기"
+          value={pendingList.vendors.length}
+          unit="건"
+          icon={Clock}
+        />
+        <StatCard
+          label="승인됨"
+          value={approvedList.vendors.length}
+          unit="건"
+          icon={CheckCircle2}
+        />
+        <StatCard
+          label="반려"
+          value={rejectedList.vendors.length}
+          unit="건"
+          icon={XCircle}
+        />
+        <StatCard
+          label="일시정지"
+          value={suspendedList.vendors.length}
+          unit="건"
+          icon={ShieldX}
+        />
+      </div>
 
       {/* Status 필터 탭 */}
       <nav
-        className="mb-6 flex gap-1 overflow-x-auto pb-1"
+        className="mt-10 flex gap-1 overflow-x-auto pb-1"
         aria-label="status 필터"
       >
         {STATUS_TABS.map((t) => {
@@ -71,14 +123,29 @@ export default async function AdminVendorsPage({
 
       {/* 빈 상태 / 목록 */}
       {vendors.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-[var(--color-bg-secondary)] p-16 text-center">
-          <Inbox className="h-10 w-10 text-[var(--color-text-tertiary)]" />
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            {STATUS_TABS.find((t) => t.value === status)?.label} 상태의 입점 신청이 없습니다.
-          </p>
+        <div className="mt-6">
+          <EmptyState
+            icon={Inbox}
+            title={`${STATUS_TABS.find((t) => t.value === status)?.label} 상태의 입점 신청이 없습니다`}
+            description={
+              status === "PENDING_REVIEW"
+                ? "새 신청은 자동으로 이 목록에 추가됩니다. 잠시 후 다시 확인해주세요."
+                : "필터를 다른 상태로 바꿔보세요."
+            }
+            action={
+              status !== "PENDING_REVIEW" ? (
+                <Link
+                  href="/admin/vendors?status=PENDING_REVIEW"
+                  className="inline-flex h-9 items-center rounded-full bg-[var(--color-accent)] px-4 text-sm font-medium text-white transition-colors hover:bg-[var(--color-accent-hover)]"
+                >
+                  심사 대기로 가기
+                </Link>
+              ) : undefined
+            }
+          />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[var(--color-border-light)]">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-[var(--color-border-light)]">
           <table className="w-full">
             <thead className="bg-[var(--color-bg-secondary)]">
               <tr>
@@ -146,7 +213,6 @@ function Th({
 
 function formatDate(ts: unknown): string {
   if (!ts || typeof ts !== "object") return "";
-  // Firestore Admin Timestamp (toDate 메서드)
   const withToDate = ts as { toDate?: () => Date };
   if (typeof withToDate.toDate === "function") {
     try {
@@ -155,7 +221,6 @@ function formatDate(ts: unknown): string {
       /* fallthrough */
     }
   }
-  // superjson serialize 후 { seconds, nanoseconds } 또는 { _seconds, _nanoseconds }
   const withSeconds = ts as { seconds?: number; _seconds?: number };
   const sec = withSeconds.seconds ?? withSeconds._seconds;
   if (typeof sec === "number") {
