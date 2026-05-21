@@ -4,7 +4,7 @@ import { authMiddleware, redirectToLogin } from "next-firebase-auth-edge";
 const PUBLIC_PATHS = ["/", "/login", "/register", "/about", "/pricing", "/search"];
 
 // /products/[id] 등 prefix 매칭 PUBLIC 경로 (비로그인 둘러보기 OK)
-const PUBLIC_PREFIXES = ["/products/", "/search?"];
+const PUBLIC_PREFIXES = ["/products/"];
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) return true;
@@ -90,10 +90,20 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next({ request: { headers } });
     },
     handleInvalidToken: async () => {
+      // PUBLIC_PREFIXES 매칭 시 비로그인 통과 (next-firebase-auth-edge 의 publicPaths 는
+      // 정확한 string 매칭만 지원 → /products/[id] 같은 동적 경로는 직접 처리)
+      const { pathname } = request.nextUrl;
+      if (isPublicPath(pathname)) {
+        return NextResponse.next({ request: { headers: request.headers } });
+      }
       return redirectToLogin(request, { path: "/login", publicPaths: PUBLIC_PATHS });
     },
     handleError: async (e) => {
       console.error("Auth proxy error:", e);
+      const { pathname } = request.nextUrl;
+      if (isPublicPath(pathname)) {
+        return NextResponse.next({ request: { headers: request.headers } });
+      }
       return redirectToLogin(request, { path: "/login", publicPaths: PUBLIC_PATHS });
     },
   });
