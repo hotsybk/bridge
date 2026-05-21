@@ -37,10 +37,10 @@ export function CatalogNav() {
   return (
     <nav
       aria-label="카테고리"
-      className="sticky top-16 z-20 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/85 backdrop-blur-md"
+      className="sticky top-14 z-20 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/90 backdrop-blur-md"
     >
-      <div className="mx-auto max-w-6xl px-4 md:px-12">
-        <ul className="flex h-20 items-stretch gap-1 overflow-x-auto md:gap-3 [&::-webkit-scrollbar]:hidden">
+      <div className="mx-auto max-w-7xl px-4 md:px-12">
+        <ul className="flex h-16 items-stretch gap-0 overflow-x-auto md:gap-2 [&::-webkit-scrollbar]:hidden">
           {ITEMS.map((item) => {
             const active =
               (item.id === null && !currentCategoryId) ||
@@ -51,14 +51,14 @@ export function CatalogNav() {
               <li key={item.label} className="shrink-0">
                 <Link
                   href={href}
-                  className={`group flex h-full flex-col items-center justify-center gap-1 border-b-2 px-3 transition-colors ${
+                  className={`group flex h-full flex-col items-center justify-center gap-0.5 border-b-2 px-3 transition-colors md:gap-1 md:px-4 ${
                     active
                       ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                       : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                   }`}
                 >
-                  <Icon className="h-5 w-5" aria-hidden />
-                  <span className="text-xs font-medium whitespace-nowrap">
+                  <Icon className="h-4 w-4 md:h-4 md:w-4" aria-hidden />
+                  <span className="text-[11px] font-medium whitespace-nowrap md:text-xs">
                     {item.label}
                   </span>
                 </Link>

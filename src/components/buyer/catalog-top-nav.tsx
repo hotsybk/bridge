@@ -53,19 +53,8 @@ export function CatalogTopNav({
         </div>
       </div>
 
-      {/* 모바일 — 메뉴를 가로 스크롤로 노출 */}
-      <nav
-        aria-label="주요 메뉴 (모바일)"
-        className="border-t border-[var(--color-border-light)]/60 md:hidden"
-      >
-        <ul className="flex items-center gap-1 overflow-x-auto px-4 py-2 [&::-webkit-scrollbar]:hidden">
-          <NavLinkMobile href="/search">둘러보기</NavLinkMobile>
-          <NavLinkMobile href="/about">소개</NavLinkMobile>
-          <NavLinkMobile href="/pricing">수수료</NavLinkMobile>
-          <NavLinkMobile href="/cart">장바구니</NavLinkMobile>
-          <NavLinkMobile href="/orders">주문 이력</NavLinkMobile>
-        </ul>
-      </nav>
+      {/* 모바일에서는 두 번째 줄 메뉴 제거 — 아래 CatalogNav (카테고리 가로 띠) 와
+          중복되지 않도록. 사용자 메뉴 (소개·수수료·장바구니·주문 이력) 는 데스크탑 nav 에만. */}
     </header>
   );
 }
@@ -89,21 +78,3 @@ function NavLink({
   );
 }
 
-function NavLinkMobile({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="shrink-0">
-      <Link
-        href={href}
-        className="inline-flex h-8 items-center rounded-full px-3 text-xs text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)]"
-      >
-        {children}
-      </Link>
-    </li>
-  );
-}
