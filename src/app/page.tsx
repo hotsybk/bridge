@@ -115,8 +115,9 @@ function Hero() {
             className="landing-fade-up mt-6 text-5xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-7xl lg:text-8xl"
             style={{ animationDelay: "150ms" }}
           >
-            병원 운영의 모든 것,
+            병원 운영의
             <br />
+            모든 것,{" "}
             <span
               className="landing-fade-up text-[var(--color-accent)]"
               style={{ animationDelay: "350ms", display: "inline-block" }}
@@ -130,7 +131,7 @@ function Hero() {
             style={{ animationDelay: "500ms" }}
           >
             의료기기와 소모품을 가장 빠르게, 가장 투명하게.
-            전국 공급업체와 곧바로 연결되는 B2B 마켓플레이스.
+            전국 공급업체와 바로 연결되는 거래 플랫폼.
           </p>
 
           <div
@@ -327,10 +328,10 @@ function Flow() {
             어떻게 동작하나
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] md:text-5xl">
-            간납사를 건너뛰는 직거래.
+            중간 도매상 없이, 바로 거래.
           </h2>
           <p className="mt-3 text-[var(--color-text-secondary)] md:text-lg">
-            병원과 공급업체가 직접. 가격은 투명하게, 정산은 4~6개월에서 D+3로.
+            병원과 공급업체가 직접 만납니다. 가격은 투명하게, 입금은 4~6개월에서 3일로.
           </p>
         </div>
 
@@ -343,21 +344,21 @@ function Flow() {
           <Reveal delay={120}>
             <article className="rounded-2xl bg-[var(--color-bg-primary)] p-6 text-center">
               <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                기존 정산
+                기존 입금
               </p>
               <p className="mt-3 text-2xl font-semibold text-[var(--color-text-secondary)]">
                 4~6개월
               </p>
-              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">간납사 결제 지연</p>
+              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">중간 도매상을 거치며 지연</p>
             </article>
           </Reveal>
           <Reveal delay={240}>
             <article className="rounded-2xl bg-[var(--color-accent)] p-6 text-center text-white">
               <p className="text-xs font-medium uppercase tracking-wider text-white/70">
-                MedPlace 정산
+                MedPlace 입금
               </p>
-              <p className="mt-3 text-2xl font-semibold">D+3</p>
-              <p className="mt-1 text-xs text-white/70">배송 완료 후 영업일</p>
+              <p className="mt-3 text-2xl font-semibold">3일</p>
+              <p className="mt-1 text-xs text-white/70">배송 완료 후 영업일 기준</p>
             </article>
           </Reveal>
           <Reveal delay={360}>
@@ -469,17 +470,17 @@ const FEATURES = [
   {
     icon: TrendingDown,
     title: "투명한 가격 비교",
-    desc: "정가가 없는 의료시장. 동일 제품·동일 등급의 가격을 한눈에 비교하고, 견적은 평균 1영업일 안에 받습니다.",
+    desc: "공급업체마다 가격이 다른 의료시장. 같은 제품·같은 등급의 가격을 한눈에 비교하고, 견적은 평균 1영업일 안에 받습니다.",
   },
   {
     icon: Repeat,
-    title: "정기 자동발주",
-    desc: "장갑·거즈·소독제처럼 매달 쓰는 품목은 한 번만 설정하면 자동으로 발주합니다. 재고 떨어질 일이 없습니다.",
+    title: "매달 쓰는 품목, 자동 주문",
+    desc: "장갑·거즈·소독제처럼 매달 쓰는 품목은 한 번만 설정하면 자동으로 주문됩니다. 재고가 떨어질 일이 없습니다.",
   },
   {
     icon: Users,
-    title: "공동구매로 더 낮은 단가",
-    desc: "여러 병원이 모이면 단가가 내려갑니다. 공동구매가 마감되면 자동으로 결제·발주가 진행됩니다.",
+    title: "공동구매로 더 낮은 가격",
+    desc: "여러 병원이 모이면 가격이 내려갑니다. 공동구매가 마감되면 자동으로 결제·주문이 진행됩니다.",
   },
 ] as const;
 
@@ -552,9 +553,9 @@ function Audience() {
               </p>
               <ul className="mt-6 space-y-3 text-sm">
                 <Bullet>여러 공급업체 가격을 한 화면에서 비교</Bullet>
-                <Bullet>정기구독 자동 발주로 재고 관리 부담 제거</Bullet>
-                <Bullet>다단계 결재 워크플로우 + 자동 세금계산서</Bullet>
-                <Bullet>대형 병원용 RFQ(견적 요청)와 UDI 자동 보고</Bullet>
+                <Bullet>매달 쓰는 품목은 자동 주문 — 재고 걱정 없음</Bullet>
+                <Bullet>단계별 결재 승인 + 세금계산서 자동 발행</Bullet>
+                <Bullet>대형 병원용 견적 요청 + 의료기기 사용 보고 자동화</Bullet>
               </ul>
               <Link
                 href="/register"
@@ -575,13 +576,13 @@ function Audience() {
               </span>
               <h3 className="mt-6 text-2xl font-semibold tracking-tight">공급업체</h3>
               <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                판매업·제조업·수입업. 간납사 없는 직접 거래.
+                판매업·제조업·수입업. 중간 도매상 없는 직거래.
               </p>
               <ul className="mt-6 space-y-3 text-sm">
-                <Bullet>4~6개월 결제 지연 없이 D+3 빠른 정산</Bullet>
-                <Bullet>주문·발송·정산이 한 화면에서</Bullet>
-                <Bullet>UDI 보고 자동화로 행정 부담 절감</Bullet>
-                <Bullet>전국 의료기관에 즉시 노출되는 카탈로그</Bullet>
+                <Bullet>4~6개월 결제 지연 대신 3일 만에 입금</Bullet>
+                <Bullet>주문·발송·입금 정리가 한 화면에서</Bullet>
+                <Bullet>의료기기 사용 보고 자동화로 행정 부담 절감</Bullet>
+                <Bullet>전국 병원에 바로 노출되는 상품 목록</Bullet>
               </ul>
               <Link
                 href="/register"
@@ -623,12 +624,12 @@ const STEPS = [
   {
     icon: ShieldCheck,
     title: "2. 사업자 인증",
-    desc: "사업자등록증 사진을 올리면 Naver Clova OCR과 국세청 진위확인으로 자동 검증합니다.",
+    desc: "사업자등록증 사진을 올리면 자동 글자 인식 + 국세청 조회로 빠르게 검증합니다.",
   },
   {
     icon: Sparkles,
     title: "3. 사용 시작",
-    desc: "병원은 바로 검색·주문, 공급업체는 운영자 입점 심사 후 셀러센터를 사용합니다.",
+    desc: "병원은 바로 검색·주문, 공급업체는 입점 심사 후 판매 관리 화면을 사용합니다.",
   },
 ] as const;
 
@@ -725,9 +726,9 @@ function Footer() {
               <span className="text-sm font-semibold tracking-tight">MedPlace</span>
             </div>
             <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
-              한국 의료기관과 의료기기·소모품 공급업체를 연결하는
+              병원과 의료기기·소모품 공급업체를
               <br />
-              멀티벤더 B2B 마켓플레이스.
+              바로 연결해주는 거래 플랫폼.
             </p>
             <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">
               사업자등록 진행 중 · 통신판매업 신고 예정 · Phase 1 베타
