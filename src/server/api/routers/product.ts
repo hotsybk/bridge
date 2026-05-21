@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { FieldValue } from "firebase-admin/firestore";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { adminDb } from "@/server/firebase/admin";
@@ -38,47 +39,35 @@ export const productRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const db = adminDb();
-      let q = db
-        .collection(COLLECTIONS.products)
-        .where("status", "==", "ACTIVE") as FirebaseFirestore.Query;
-
-      if (input.categoryId) q = q.where("categoryId", "==", input.categoryId);
-      if (input.deviceClass) q = q.where("deviceClass", "==", input.deviceClass);
-      if (input.subscribable === true) q = q.where("subscribable", "==", true);
-      if (input.groupBuyable === true) q = q.where("groupBuyable", "==", true);
-
-      // 정렬
-      switch (input.sort) {
-        case "priceAsc":
-          q = q.orderBy("basePrice", "asc");
-          break;
-        case "priceDesc":
-          q = q.orderBy("basePrice", "desc");
-          break;
-        case "popular":
-          q = q.orderBy("viewCount", "desc");
-          break;
-        case "latest":
-        default:
-          q = q.orderBy("createdAt", "desc");
-          break;
-      }
-
-      // cursor pagination
-      if (input.cursor) {
-        const cursorSnap = await db
-          .collection(COLLECTIONS.products)
-          .doc(input.cursor)
-          .get();
-        if (cursorSnap.exists) q = q.startAfter(cursorSnap);
-      }
-
-      q = q.limit(input.limit + 1); // hasMore 판정용 +1
-
-      const snap = await q.get();
+      // Phase 2 초기 — composite index 회피 위해 in-memory filter.
+      // 시드 + 초기 데이터 규모(<수백) 에서는 안전. Phase 2.5 에서 Algolia + composite index 도입.
+      const snap = await db.collection(COLLECTIONS.products).get();
       let products = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product);
 
-      // 클라이언트 측 부분 검색 (Phase 2.5 Algolia 전환 전 임시)
+      // 1) status == ACTIVE
+      products = products.filter(
+        (p) => (p as { status?: string }).status === "ACTIVE",
+      );
+
+      // 2) 추가 필터
+      if (input.categoryId) {
+        products = products.filter((p) => p.categoryId === input.categoryId);
+      }
+      if (input.deviceClass) {
+        products = products.filter((p) => p.deviceClass === input.deviceClass);
+      }
+      if (input.subscribable === true) {
+        products = products.filter(
+          (p) => (p as { subscribable?: boolean }).subscribable === true,
+        );
+      }
+      if (input.groupBuyable === true) {
+        products = products.filter(
+          (p) => (p as { groupBuyable?: boolean }).groupBuyable === true,
+        );
+      }
+
+      // 3) 부분검색 (Phase 2.5 Algolia 전환 예정)
       if (input.search) {
         const needle = input.search.toLowerCase();
         products = products.filter((p) => {
@@ -90,8 +79,36 @@ export const productRouter = createTRPCRouter({
         });
       }
 
-      const hasMore = products.length > input.limit;
-      const items = hasMore ? products.slice(0, input.limit) : products;
+      // 4) 정렬
+      products.sort((a, b) => {
+        switch (input.sort) {
+          case "priceAsc":
+            return a.basePrice - b.basePrice;
+          case "priceDesc":
+            return b.basePrice - a.basePrice;
+          case "popular":
+            return (
+              ((b as { viewCount?: number }).viewCount ?? 0) -
+              ((a as { viewCount?: number }).viewCount ?? 0)
+            );
+          case "latest":
+          default: {
+            const av = (a as { createdAt?: { seconds?: number } }).createdAt?.seconds ?? 0;
+            const bv = (b as { createdAt?: { seconds?: number } }).createdAt?.seconds ?? 0;
+            return bv - av;
+          }
+        }
+      });
+
+      // 5) cursor pagination (cursor = 마지막 id)
+      let startIdx = 0;
+      if (input.cursor) {
+        const idx = products.findIndex((p) => p.id === input.cursor);
+        if (idx >= 0) startIdx = idx + 1;
+      }
+      const page = products.slice(startIdx, startIdx + input.limit + 1);
+      const hasMore = page.length > input.limit;
+      const items = hasMore ? page.slice(0, input.limit) : page;
       const nextCursor = hasMore ? items[items.length - 1]?.id : null;
 
       return { items, nextCursor };
@@ -112,10 +129,14 @@ export const productRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "상품을 찾을 수 없습니다." });
       }
       const data = snap.data() as Omit<Product, "id">;
-      // viewCount fire-and-forget 증가 (best-effort)
-      void db.collection(COLLECTIONS.products).doc(input.id).update({
-        viewCount: FieldValueIncrement(1),
-      }).catch(() => {});
+      // viewCount fire-and-forget 증가 (best-effort, 에러 무시)
+      void db
+        .collection(COLLECTIONS.products)
+        .doc(input.id)
+        .update({ viewCount: FieldValue.increment(1) })
+        .catch(() => {
+          /* best-effort */
+        });
 
       return { id: snap.id, ...data } as Product;
     }),
@@ -132,14 +153,6 @@ export const productRouter = createTRPCRouter({
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Category);
   }),
 });
-
-// helper — fire-and-forget increment 용 (firebase-admin/firestore FieldValue)
-function FieldValueIncrement(by: number) {
-  // 동적 require 회피 — firebase-admin 의 FieldValue 사용
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { FieldValue } = require("firebase-admin/firestore") as typeof import("firebase-admin/firestore");
-  return FieldValue.increment(by);
-}
 
 type Category = {
   id: string;
