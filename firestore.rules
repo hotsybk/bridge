@@ -1,0 +1,213 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== 헬퍼 함수 =====
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function role() {
+      return request.auth.token.role;
+    }
+    function isAdmin() {
+      return isSignedIn() && (role() == 'ADMIN' || role() == 'SUPER_ADMIN');
+    }
+    function isBuyer() {
+      return isSignedIn() && role() in ['BUYER_OWNER', 'BUYER_STAFF', 'BUYER_VIEWER'];
+    }
+    function isVendor() {
+      return isSignedIn() && role() in ['VENDOR_OWNER', 'VENDOR_STAFF'];
+    }
+    function userHospital() {
+      return request.auth.token.hospitalId;
+    }
+    function userVendor() {
+      return request.auth.token.vendorId;
+    }
+
+    // ===== /users =====
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) &&
+                       !('role' in request.resource.data.diff(resource.data).affectedKeys()) &&
+                       !('hospitalId' in request.resource.data.diff(resource.data).affectedKeys()) &&
+                       !('vendorId' in request.resource.data.diff(resource.data).affectedKeys());
+      // role/hospitalId/vendorId 변경은 Cloud Function (Admin SDK) only
+      allow delete: if false;
+    }
+
+    // ===== /hospitals =====
+    match /hospitals/{hospitalId} {
+      allow read: if isAdmin() || (isBuyer() && userHospital() == hospitalId);
+      allow create: if isSignedIn();    // 가입 시 본인이 생성
+      allow update: if isAdmin() ||
+                       (isBuyer() && userHospital() == hospitalId &&
+                        role() == 'BUYER_OWNER');
+      allow delete: if false;
+
+      match /members/{memberId} {
+        allow read: if isAdmin() || (isBuyer() && userHospital() == hospitalId);
+        allow write: if isAdmin();      // 멤버 관리는 Cloud Function only
+      }
+    }
+
+    // ===== /vendors =====
+    match /vendors/{vendorId} {
+      allow read: if true;              // 공개 정보 (회사명/평점 등)
+      allow create: if isSignedIn();
+      allow update: if isAdmin() ||
+                       (isVendor() && userVendor() == vendorId &&
+                        !('status' in request.resource.data.diff(resource.data).affectedKeys()) &&
+                        !('defaultCommissionRate' in request.resource.data.diff(resource.data).affectedKeys()));
+      // status·수수료율은 admin only
+      allow delete: if false;
+
+      match /members/{memberId} {
+        allow read: if isAdmin() || (isVendor() && userVendor() == vendorId);
+        allow write: if isAdmin();
+      }
+    }
+
+    // ===== /products =====
+    match /products/{productId} {
+      allow read: if resource.data.status == 'ACTIVE' ||
+                     isAdmin() ||
+                     (isVendor() && userVendor() == resource.data.vendorId);
+      allow create: if isVendor() && request.resource.data.vendorId == userVendor();
+      allow update: if isAdmin() ||
+                       (isVendor() && userVendor() == resource.data.vendorId &&
+                        request.resource.data.vendorId == resource.data.vendorId);
+      allow delete: if false;           // archived만, hard delete 금지
+    }
+
+    // ===== /orders =====
+    match /orders/{orderId} {
+      allow read: if isAdmin() ||
+                     (isBuyer() && userHospital() == resource.data.hospitalId) ||
+                     (isVendor() && userVendor() in resource.data.vendorIds);
+      allow create: if isBuyer() &&
+                       request.resource.data.hospitalId == userHospital() &&
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if false;           // 모든 업데이트는 Cloud Function (Admin SDK) only
+      allow delete: if false;
+
+      match /subOrders/{subOrderId} {
+        allow read: if isAdmin() ||
+                       (isBuyer() && userHospital() == resource.data.hospitalId) ||
+                       (isVendor() && userVendor() == resource.data.vendorId);
+        allow write: if false;          // Cloud Function only
+
+        match /items/{itemId} {
+          allow read: if isAdmin() ||
+                         (isBuyer() && userHospital() == get(/databases/$(database)/documents/orders/$(orderId)).data.hospitalId) ||
+                         (isVendor() && userVendor() == get(/databases/$(database)/documents/orders/$(orderId)/subOrders/$(subOrderId)).data.vendorId);
+          allow write: if false;
+        }
+      }
+    }
+
+    // ===== /subscriptions =====
+    match /subscriptions/{subId} {
+      allow read: if isAdmin() ||
+                     (isBuyer() && userHospital() == resource.data.hospitalId);
+      allow create: if isBuyer() &&
+                       request.resource.data.hospitalId == userHospital();
+      allow update: if isAdmin() ||
+                       (isBuyer() && userHospital() == resource.data.hospitalId &&
+                        role() == 'BUYER_OWNER');
+      allow delete: if false;
+
+      match /runs/{runId} {
+        allow read: if isAdmin() ||
+                       (isBuyer() && userHospital() == get(/databases/$(database)/documents/subscriptions/$(subId)).data.hospitalId);
+        allow write: if false;          // Cloud Function only
+      }
+    }
+
+    // ===== /groupBuys =====
+    match /groupBuys/{gbId} {
+      allow read: if true;              // 공개
+      allow write: if false;            // 생성/수정은 Cloud Function only
+
+      match /participations/{pId} {
+        allow read: if isAdmin() ||
+                       (isBuyer() && resource.data.hospitalId == userHospital());
+        allow create: if isBuyer() &&
+                         request.resource.data.hospitalId == userHospital();
+        allow update, delete: if false; // Cloud Function only
+      }
+
+      match /counterShards/{shardId} {
+        allow read: if false;
+        allow write: if false;          // Cloud Function only
+      }
+    }
+
+    // ===== /rfqs =====
+    match /rfqs/{rfqId} {
+      allow read: if isAdmin() ||
+                     (isBuyer() && resource.data.hospitalId == userHospital()) ||
+                     (isVendor() && (resource.data.isPublic == true || userVendor() in resource.data.invitedVendorIds));
+      allow create: if isBuyer() &&
+                       request.resource.data.hospitalId == userHospital();
+      allow update: if isAdmin() ||
+                       (isBuyer() && resource.data.hospitalId == userHospital());
+      allow delete: if false;
+
+      match /quotes/{quoteId} {
+        allow read: if isAdmin() ||
+                       (isBuyer() && get(/databases/$(database)/documents/rfqs/$(rfqId)).data.hospitalId == userHospital()) ||
+                       (isVendor() && resource.data.vendorId == userVendor());
+        allow create: if isVendor() &&
+                         request.resource.data.vendorId == userVendor();
+        allow update: if isVendor() &&
+                         resource.data.vendorId == userVendor();
+        allow delete: if false;
+      }
+    }
+
+    // ===== /settlements (관리자 + 본인 vendor만) =====
+    match /settlements/{settlementId} {
+      allow read: if isAdmin() ||
+                     (isVendor() && resource.data.vendorId == userVendor());
+      allow write: if false;            // Cloud Function only
+    }
+
+    // ===== /notifications =====
+    match /notifications/{notifId} {
+      allow read: if (resource.data.targetType == 'USER' && resource.data.targetId == request.auth.uid) ||
+                     (resource.data.targetType == 'HOSPITAL' && resource.data.targetId == userHospital()) ||
+                     (resource.data.targetType == 'VENDOR' && resource.data.targetId == userVendor());
+      allow update: if isSignedIn() &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);
+      // 생성/삭제는 Cloud Function only
+      allow create, delete: if false;
+    }
+
+    // ===== /auditLogs =====
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;            // Cloud Function only
+    }
+
+    // ===== /categories =====
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ===== /_retryQueue =====
+    match /_retryQueue/{retryId} {
+      allow read, write: if false;     // Cloud Function only
+    }
+
+    // ===== Catch-all (보안 기본) =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

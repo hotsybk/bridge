@@ -1,0 +1,251 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =====================================================================
+   MedPlace Design Tokens  ( DESIGN_SYSTEM.md §12 )
+   - Tailwind v4 @theme inline form
+   - Token values live in :root / .dark below for runtime theming
+   ===================================================================== */
+@theme inline {
+  /* Surfaces */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+
+  /* Borders */
+  --color-border-default: var(--border-default);
+  --color-border-light: var(--border-light);
+
+  /* Brand accent */
+  --color-accent: var(--accent-color);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+
+  /* Semantic */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  /* Device class (1~4) */
+  --color-class-1: var(--class-1);
+  --color-class-2: var(--class-2);
+  --color-class-3: var(--class-3);
+  --color-class-4: var(--class-4);
+
+  /* Order status */
+  --color-status-pending: var(--status-pending);
+  --color-status-paid: var(--status-paid);
+  --color-status-shipped: var(--status-shipped);
+  --color-status-delivered: var(--status-delivered);
+  --color-status-cancelled: var(--status-cancelled);
+
+  /* shadcn semantic bridge (HSL variables, evaluated at runtime) */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent-shadcn: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Typography */
+  --font-sans: var(--font-pretendard), system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Page padding (DESIGN_SYSTEM §4.1) */
+  --spacing-page-x: 24px;
+  --spacing-page-x-md: 48px;
+  --spacing-page-x-lg: 64px;
+
+  /* Radius (Apple pill button style) */
+  --radius-card: 16px;
+  --radius-button: 9999px;
+  --radius-input: 12px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
+}
+
+/* =====================================================================
+   Token values  ( DESIGN_SYSTEM.md §2.1, §10.4 )
+   ===================================================================== */
+@layer base {
+  :root {
+    /* MedPlace tokens — light */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f7;
+    --bg-tertiary: #fafafa;
+
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #86868b;
+
+    --border-default: #d2d2d7;
+    --border-light: #e5e5ea;
+
+    --accent-color: #0066cc;
+    --accent-hover: #0052a3;
+    --accent-light: #e8f2ff;
+
+    --success: #00a86b;
+    --warning: #ff9500;
+    --error: #ff3b30;
+    --info: #5ac8fa;
+
+    --class-1: #34c759;
+    --class-2: #5ac8fa;
+    --class-3: #ff9500;
+    --class-4: #ff3b30;
+
+    --status-pending: #ff9500;
+    --status-paid: #5ac8fa;
+    --status-shipped: #007aff;
+    --status-delivered: #34c759;
+    --status-cancelled: #8e8e93;
+
+    /* shadcn HSL — light */
+    --background: 0 0% 100%;
+    --foreground: 220 9% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 9% 13%;
+
+    --primary: 211 100% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 220 9% 13%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 220 4% 44%;
+
+    --accent: 211 100% 91%;
+    --accent-foreground: 211 100% 40%;
+
+    --destructive: 4 100% 59%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 84%;
+    --input: 240 6% 84%;
+    --ring: 211 100% 40%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* MedPlace tokens — dark (DESIGN_SYSTEM.md §2.1 Dark Mode) */
+    --bg-primary: #000000;
+    --bg-secondary: #1c1c1e;
+    --bg-tertiary: #2c2c2e;
+
+    --text-primary: #f5f5f7;
+    --text-secondary: #98989d;
+    --text-tertiary: #636366;
+
+    --border-default: #38383a;
+    --border-light: #2c2c2e;
+
+    --accent-color: #0a84ff;
+    --accent-hover: #409cff;
+    --accent-light: #1a2333;
+
+    --success: #30d158;
+    --warning: #ff9f0a;
+    --error: #ff453a;
+    --info: #64d2fF;
+
+    /* shadcn HSL — dark */
+    --background: 0 0% 0%;
+    --foreground: 240 5% 96%;
+
+    --card: 240 4% 11%;
+    --card-foreground: 240 5% 96%;
+
+    --popover: 240 4% 11%;
+    --popover-foreground: 240 5% 96%;
+
+    --primary: 211 100% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 4% 11%;
+    --secondary-foreground: 240 5% 96%;
+
+    --muted: 240 4% 11%;
+    --muted-foreground: 240 2% 60%;
+
+    --accent: 211 100% 14%;
+    --accent-foreground: 211 100% 52%;
+
+    --destructive: 4 100% 61%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 3% 22%;
+    --input: 240 3% 22%;
+    --ring: 211 100% 52%;
+  }
+}
+
+/* =====================================================================
+   Base typography & body  ( DESIGN_SYSTEM.md §3 )
+   ===================================================================== */
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-feature-settings: "tnum" on;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+
+  /* Tabular numerals for prices/quantities */
+  .tabular-nums,
+  .text-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* =====================================================================
+   Accessibility — reduced motion ( DESIGN_SYSTEM.md §9.4 )
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "bridge-61dd9",
+    "dev": "bridge-61dd9",
+    "staging": "bridge-staging-PLACEHOLDER",
+    "prod": "bridge-prod-PLACEHOLDER"
+  }
+}

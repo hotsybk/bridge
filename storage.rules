@@ -1,0 +1,57 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() { return request.auth != null; }
+    function role() { return request.auth.token.role; }
+    function isAdmin() { return isSignedIn() && role() in ['ADMIN', 'SUPER_ADMIN']; }
+    function isVendor() { return isSignedIn() && role() in ['VENDOR_OWNER', 'VENDOR_STAFF']; }
+    function userVendor() { return request.auth.token.vendorId; }
+
+    // vendor 서류 (사업자증, 신고증, 통장 사본)
+    // 온보딩 시점에는 vendorId가 token에 없음 — 본인 uid를 path segment로 쓸 때 임시 허용
+    match /vendor-docs/{vendorId}/{allPaths=**} {
+      allow read: if isAdmin() ||
+                     (isVendor() && userVendor() == vendorId) ||
+                     (isSignedIn() && request.auth.uid == vendorId);          // 온보딩 임시
+      allow write: if isSignedIn() &&
+                      ((isVendor() && userVendor() == vendorId) ||
+                       request.auth.uid == vendorId) &&                       // 온보딩 임시 (uid path)
+                      request.resource.size < 10 * 1024 * 1024 &&             // 10MB
+                      request.resource.contentType.matches('image/.*|application/pdf');
+    }
+
+    // hospital 서류 (사업자등록증)
+    // 온보딩 시점에는 hospitalId가 token에 없음 — 본인 uid를 path segment로 쓸 때 임시 허용
+    match /hospital-docs/{hospitalId}/{allPaths=**} {
+      allow read: if isAdmin() ||
+                     (isSignedIn() && request.auth.token.hospitalId == hospitalId) ||
+                     (isSignedIn() && request.auth.uid == hospitalId);         // 온보딩 임시
+      allow write: if isSignedIn() &&
+                      (request.auth.token.hospitalId == hospitalId ||
+                       request.auth.uid == hospitalId) &&                      // 온보딩 임시 (uid path)
+                      request.resource.size < 10 * 1024 * 1024 &&
+                      request.resource.contentType.matches('image/.*|application/pdf');
+    }
+
+    // 상품 이미지 (vendor 업로드, 공개 읽기)
+    match /products/{productId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isVendor() &&
+                     request.resource.size < 5 * 1024 * 1024 &&
+                     request.resource.contentType.matches('image/.*');
+    }
+
+    // 세금계산서 PDF (Cloud Function이 생성, 본인만 다운로드)
+    // Firebase Storage Rules 문법상 {var}.확장자 형태 직접 표기 불가 — 단일 segment matcher 사용
+    match /invoices/{filename} {
+      allow read: if isSignedIn();      // Cloud Function이 사전 권한 확인 후 signed URL 발급
+      allow write: if false;
+    }
+
+    // 기타
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
