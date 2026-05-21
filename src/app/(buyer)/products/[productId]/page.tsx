@@ -8,13 +8,12 @@ import {
   FileText,
   Globe,
   Package,
-  Search as SearchIcon,
   ShieldCheck,
-  Stethoscope,
   Truck,
 } from "lucide-react";
 
 import { CatalogNav } from "@/components/buyer/catalog-nav";
+import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { ProductBuyPanel } from "@/components/buyer/product-buy-panel";
 import { ProductCard } from "@/components/buyer/product-card";
 import { Reveal } from "@/components/shared/reveal";
@@ -66,7 +65,7 @@ export default async function ProductDetailPage({
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
-      <TopBar />
+      <CatalogTopNav />
       <CatalogNav />
 
       {/* Breadcrumb */}
@@ -343,57 +342,6 @@ export default async function ProductDetailPage({
         )}
       </main>
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// TopBar
-// ─────────────────────────────────────────────────────────────
-
-function TopBar() {
-  return (
-    <header className="sticky top-0 z-30 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-6 md:px-12">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
-            <Stethoscope className="h-4 w-4" />
-          </span>
-          <span className="hidden text-base font-semibold tracking-tight sm:inline">
-            MedPlace
-          </span>
-        </Link>
-
-        <form action="/search" method="get" className="flex flex-1 items-center gap-2">
-          <div className="relative flex flex-1 items-center">
-            <SearchIcon
-              className="pointer-events-none absolute left-4 h-4 w-4 text-[var(--color-text-tertiary)]"
-              aria-hidden
-            />
-            <input
-              type="search"
-              name="q"
-              placeholder="장갑·거즈·소독제 검색"
-              className="h-11 w-full rounded-full border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] pl-11 pr-4 text-sm placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-accent)] focus:bg-[var(--color-bg-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/20"
-            />
-          </div>
-        </form>
-
-        <nav className="hidden items-center gap-1 text-sm md:flex">
-          <Link
-            href="/cart"
-            className="rounded-full px-4 py-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
-          >
-            장바구니
-          </Link>
-          <Link
-            href="/orders"
-            className="rounded-full px-4 py-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
-          >
-            주문 이력
-          </Link>
-        </nav>
-      </div>
-    </header>
   );
 }
 

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Package, Search as SearchIcon, Stethoscope } from "lucide-react";
+import { Package } from "lucide-react";
 
 import { BenefitSection } from "@/components/buyer/benefit-card";
 import { CatalogNav } from "@/components/buyer/catalog-nav";
+import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { CategoryHeroSection } from "@/components/buyer/category-hero-card";
 import { FeaturedProductSection } from "@/components/buyer/featured-product";
 import { HeroBanner } from "@/components/buyer/hero-banner";
@@ -54,7 +55,7 @@ export default async function SearchPage({
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
-      <TopBar initialQ={q} />
+      <CatalogTopNav initialQ={q} />
       <CatalogNav />
 
       {/* 검색·필터 모드면 hero 등 생략 */}
@@ -145,60 +146,3 @@ export default async function SearchPage({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// TopBar — sticky 검색바
-// ─────────────────────────────────────────────────────────────
-
-function TopBar({ initialQ }: { initialQ: string }) {
-  return (
-    <header className="sticky top-0 z-30 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-6 md:px-12">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
-            <Stethoscope className="h-4 w-4" />
-          </span>
-          <span className="hidden text-base font-semibold tracking-tight sm:inline">
-            MedPlace
-          </span>
-        </Link>
-
-        <form action="/search" method="get" className="flex flex-1 items-center gap-2">
-          <div className="relative flex flex-1 items-center">
-            <SearchIcon
-              className="pointer-events-none absolute left-4 h-4 w-4 text-[var(--color-text-tertiary)]"
-              aria-hidden
-            />
-            <input
-              type="search"
-              name="q"
-              defaultValue={initialQ}
-              placeholder="장갑·거즈·소독제 검색"
-              className="h-11 w-full rounded-full border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] pl-11 pr-4 text-sm placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-accent)] focus:bg-[var(--color-bg-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/20"
-            />
-          </div>
-          <button
-            type="submit"
-            className="inline-flex h-11 shrink-0 items-center rounded-full bg-[var(--color-accent)] px-5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-accent-hover)]"
-          >
-            검색
-          </button>
-        </form>
-
-        <nav className="hidden items-center gap-1 text-sm md:flex">
-          <Link
-            href="/cart"
-            className="rounded-full px-4 py-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
-          >
-            장바구니
-          </Link>
-          <Link
-            href="/orders"
-            className="rounded-full px-4 py-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
-          >
-            주문 이력
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
