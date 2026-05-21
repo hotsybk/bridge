@@ -87,7 +87,7 @@ export function StatCard({
           <span className={`tabular-nums font-medium ${deltaColor}`}>
             {delta.direction === "flat"
               ? "변화 없음"
-              : `${delta.value}${unit && unit !== "%" ? unit : delta.direction === "flat" ? "" : ""}`}
+              : `${delta.value}${unit && unit !== "%" ? unit : ""}`}
           </span>
           {delta.baselineLabel && (
             <span className="text-[var(--color-text-tertiary)]">
