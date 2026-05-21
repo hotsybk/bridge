@@ -40,7 +40,7 @@ export function CatalogNav() {
       className="sticky top-14 z-20 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/90 backdrop-blur-md"
     >
       <div className="mx-auto max-w-7xl px-4 md:px-12">
-        <ul className="flex h-16 items-stretch gap-0 overflow-x-auto md:gap-2 [&::-webkit-scrollbar]:hidden">
+        <ul className="flex h-16 items-stretch gap-0 overflow-x-auto md:justify-center md:gap-2 [&::-webkit-scrollbar]:hidden">
           {ITEMS.map((item) => {
             const active =
               (item.id === null && !currentCategoryId) ||
