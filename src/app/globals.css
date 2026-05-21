@@ -364,6 +364,41 @@
   100% { offset-distance: 100%; opacity: 0; }
 }
 
+/* Bottom CTA — 풀블리드 mesh slow morph (Hero mesh 와 다른 주기) */
+@keyframes landingCtaMesh1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(40px, -30px) scale(1.15) rotate(15deg); }
+}
+@keyframes landingCtaMesh2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(-50px, 20px) scale(0.9) rotate(-10deg); }
+}
+.landing-cta-mesh-1 { animation: landingCtaMesh1 24s ease-in-out infinite; }
+.landing-cta-mesh-2 { animation: landingCtaMesh2 28s ease-in-out infinite; }
+
+/* Bottom CTA — 큰 버튼 강화 */
+.landing-cta-hero {
+  transition: box-shadow 320ms ease, transform 220ms ease;
+  position: relative;
+}
+.landing-cta-hero:hover {
+  box-shadow:
+    0 0 0 6px rgba(255, 255, 255, 0.15),
+    0 0 48px rgba(0, 102, 204, 0.45),
+    0 12px 32px rgba(0, 0, 0, 0.18);
+  transform: translateY(-2px) scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-cta-mesh-1,
+  .landing-cta-mesh-2 {
+    animation: none !important;
+  }
+  .landing-cta-hero:hover {
+    transform: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-mesh-1,
   .landing-mesh-2 {

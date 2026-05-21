@@ -673,99 +673,233 @@ function Steps() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Bottom CTA — 글래스 카드
+// Bottom CTA — 풀블리드 mesh + 큰 타이포 + 신뢰 mini stats
 // ─────────────────────────────────────────────────────────────
+
+const TRUST_STATS = [
+  {
+    icon: ShieldCheck,
+    label: "안전",
+    desc: "사업자 인증과 의료기기 판매업 신고증 확인 후 입점",
+  },
+  {
+    icon: TrendingDown,
+    label: "투명",
+    desc: "공급업체 가격을 한 화면에서 비교, 숨겨진 마진 없음",
+  },
+  {
+    icon: Sparkles,
+    label: "자동",
+    desc: "정기 주문, 의료기기 사용 보고, 세금계산서 모두 자동",
+  },
+] as const;
 
 function BottomCTA() {
   return (
-    <section className="mx-auto max-w-5xl px-6 py-32 md:px-12 md:py-40">
-      <Reveal>
-        <GlassCard intensity="md" className="px-8 py-16 text-center md:px-16 md:py-20">
-          <h2 className="text-3xl font-semibold tracking-[-0.03em] md:text-6xl">
-            의료기기 구매의 새로운 기준.
+    <section className="relative overflow-hidden bg-[var(--color-accent)]">
+      {/* 풀블리드 mesh background */}
+      <CtaMeshBackground />
+
+      <div className="relative mx-auto max-w-6xl px-6 py-32 text-center md:px-12 md:py-48">
+        <Reveal>
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/70">
+            지금 시작하기
+          </p>
+          <h2 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-white md:text-7xl lg:text-8xl">
+            의료기기 구매의
+            <br />
+            새로운 기준.
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-[var(--color-text-secondary)] md:text-lg">
+          <p className="mx-auto mt-7 max-w-xl text-base text-white/80 md:text-lg">
             가입은 무료, 인증은 자동, 시작은 지금입니다.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/register"
-              className="landing-cta-glow inline-flex h-12 items-center gap-1.5 rounded-full bg-[var(--color-accent)] px-7 text-base font-medium text-white active:scale-[0.98]"
+              className="landing-cta-hero inline-flex h-14 items-center gap-2 rounded-full bg-white px-9 text-base font-semibold text-[var(--color-accent)] active:scale-[0.98]"
             >
               무료로 시작하기
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-5 w-5" />
             </Link>
             <Link
-              href="/login"
-              className="inline-flex h-12 items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-7 text-base font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
+              href="/about"
+              className="inline-flex h-14 items-center rounded-full border-2 border-white/40 bg-white/10 px-9 text-base font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20"
             >
-              로그인
+              회사 소개 보기
             </Link>
           </div>
-        </GlassCard>
-      </Reveal>
+
+          <p className="mt-8 text-xs text-white/60">
+            ⓘ 현재 Phase 1 베타 — 실 결제·실 거래는 진행되지 않습니다
+          </p>
+        </Reveal>
+
+        {/* 신뢰 mini stats 3개 */}
+        <div className="mt-20 grid gap-5 md:grid-cols-3">
+          {TRUST_STATS.map((s, i) => (
+            <Reveal key={s.label} delay={i * 150}>
+              <article className="h-full rounded-3xl border border-white/20 bg-white/10 p-7 text-left backdrop-blur-md">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/20 text-white">
+                  <s.icon className="h-5 w-5" aria-hidden />
+                </span>
+                <p className="mt-5 text-sm font-semibold uppercase tracking-wider text-white/90">
+                  {s.label}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-white/75">
+                  {s.desc}
+                </p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
 
+function CtaMeshBackground() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <svg
+        viewBox="0 0 1200 800"
+        className="absolute inset-0 h-full w-full"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <defs>
+          <radialGradient id="ctaMesh1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#5AC8FA" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#5AC8FA" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="ctaMesh2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="ctaMesh3" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#0A84FF" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#0A84FF" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="200" cy="200" r="320" fill="url(#ctaMesh1)" className="landing-cta-mesh-1" />
+        <circle cx="1000" cy="600" r="380" fill="url(#ctaMesh2)" className="landing-cta-mesh-2" />
+        <circle cx="700" cy="300" r="260" fill="url(#ctaMesh3)" className="landing-cta-mesh-1" />
+      </svg>
+      {/* 미세 grid 텍스처 — 깊이감 */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
-// Footer
+// Footer — 4-column 정돈 + 큰 워드마크
 // ─────────────────────────────────────────────────────────────
 
 function Footer() {
   return (
-    <footer className="border-t border-[var(--color-border-light)] bg-[var(--color-bg-primary)]">
-      <div className="mx-auto max-w-6xl px-6 py-14 md:px-12">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="landing-micro-spin grid h-7 w-7 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
-                <Stethoscope className="h-3.5 w-3.5" />
-              </span>
-              <span className="text-sm font-semibold tracking-tight">MedPlace</span>
-            </div>
-            <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
-              병원과 의료기기·소모품 공급업체를
-              <br />
-              바로 연결해주는 거래 플랫폼.
-            </p>
-            <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">
-              사업자등록 진행 중 · 통신판매업 신고 예정 · Phase 1 베타
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              시작하기
-            </p>
-            <ul className="mt-4 space-y-2 text-sm">
-              <FooterLink href="/register">회원가입</FooterLink>
-              <FooterLink href="/login">로그인</FooterLink>
-              <FooterLink href="/about">회사 소개</FooterLink>
-              <FooterLink href="/pricing">수수료</FooterLink>
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              운영
-            </p>
-            <ul className="mt-4 space-y-2 text-sm">
-              <FooterLink href="/admin/vendors">입점 심사</FooterLink>
-              <FooterLink href="/admin/debug/snapshot">실시간 디버그</FooterLink>
-            </ul>
-          </div>
+    <footer className="relative bg-[var(--color-bg-secondary)]">
+      <div className="mx-auto max-w-6xl px-6 pt-20 pb-10 md:px-12 md:pt-24">
+        {/* 큰 워드마크 — Footer 의 visual anchor */}
+        <div className="border-b border-[var(--color-border-light)] pb-10">
+          <Link href="/" className="inline-flex items-center gap-3">
+            <span className="landing-micro-spin grid h-12 w-12 place-items-center rounded-2xl bg-[var(--color-accent)] text-white">
+              <Stethoscope className="h-6 w-6" />
+            </span>
+            <span className="text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
+              MedPlace
+            </span>
+          </Link>
+          <p className="mt-5 max-w-md text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            병원과 의료기기·소모품 공급업체를 바로 연결해주는 거래 플랫폼.
+            <br />
+            중간 도매상 없이, 가격은 투명하게, 입금은 3일 만에.
+          </p>
         </div>
 
-        <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-[var(--color-border-light)] pt-6 text-xs text-[var(--color-text-tertiary)] md:flex-row md:items-center">
-          <span>© 2026 MedPlace. All rights reserved.</span>
-          <span>
-            본 화면은 Phase 1 개발 단계입니다. 실 결제·실 거래는 진행되지 않습니다.
-          </span>
+        {/* 4-column grid */}
+        <div className="grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
+          <FooterCol title="제품">
+            <FooterLink href="/about">회사 소개</FooterLink>
+            <FooterLink href="/pricing">수수료 정책</FooterLink>
+            <FooterLink href="#features">기능</FooterLink>
+            <FooterLink href="#flow">동작 방식</FooterLink>
+          </FooterCol>
+
+          <FooterCol title="시작하기">
+            <FooterLink href="/register">회원가입</FooterLink>
+            <FooterLink href="/login">로그인</FooterLink>
+            <FooterLink href="/onboarding/buyer">병원 온보딩</FooterLink>
+            <FooterLink href="/onboarding/vendor">공급업체 온보딩</FooterLink>
+          </FooterCol>
+
+          <FooterCol title="운영">
+            <FooterLink href="/admin/vendors">입점 심사</FooterLink>
+            <FooterLink href="/admin/debug/snapshot">실시간 디버그</FooterLink>
+          </FooterCol>
+
+          <FooterCol title="법적">
+            <FooterLinkPending>이용약관 (준비 중)</FooterLinkPending>
+            <FooterLinkPending>개인정보 처리방침 (준비 중)</FooterLinkPending>
+            <FooterLinkPending>통신판매업 신고 (준비 중)</FooterLinkPending>
+          </FooterCol>
+        </div>
+
+        {/* 사업자 정보 + copyright */}
+        <div className="border-t border-[var(--color-border-light)] pt-8">
+          <div className="grid gap-4 text-xs text-[var(--color-text-tertiary)] md:grid-cols-[1fr_auto] md:gap-8">
+            <div className="space-y-1.5">
+              <p>
+                <span className="text-[var(--color-text-secondary)]">사업자등록번호</span>{" "}
+                ··· 진행 중
+              </p>
+              <p>
+                <span className="text-[var(--color-text-secondary)]">통신판매업 신고</span>{" "}
+                ··· 예정
+              </p>
+              <p>
+                <span className="text-[var(--color-text-secondary)]">대표 이메일</span>{" "}
+                support@medplace.example.com
+              </p>
+              <p>
+                <span className="text-[var(--color-text-secondary)]">주소</span>{" "}
+                서울특별시 (Phase 1 베타 단계)
+              </p>
+            </div>
+            <div className="text-left md:text-right">
+              <p>© 2026 MedPlace. All rights reserved.</p>
+              <p className="mt-1.5">
+                본 화면은 Phase 1 개발 단계입니다.
+                <br />
+                실 결제·실 거래는 진행되지 않습니다.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterCol({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+        {title}
+      </p>
+      <ul className="mt-5 space-y-3 text-sm">{children}</ul>
+    </div>
   );
 }
 
@@ -774,10 +908,23 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link
         href={href}
-        className="text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+        className="text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-accent)]"
       >
         {children}
       </Link>
+    </li>
+  );
+}
+
+function FooterLinkPending({ children }: { children: React.ReactNode }) {
+  return (
+    <li>
+      <span
+        className="cursor-not-allowed text-[var(--color-text-tertiary)]"
+        title="Phase 1 후반에 추가 예정"
+      >
+        {children}
+      </span>
     </li>
   );
 }
