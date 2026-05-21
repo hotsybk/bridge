@@ -1,7 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authMiddleware, redirectToLogin } from "next-firebase-auth-edge";
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/about", "/pricing"];
+const PUBLIC_PATHS = ["/", "/login", "/register", "/about", "/pricing", "/search"];
+
+// /products/[id] 등 prefix 매칭 PUBLIC 경로 (비로그인 둘러보기 OK)
+const PUBLIC_PREFIXES = ["/products/", "/search?"];
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_PATHS.includes(pathname)) return true;
+  return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+}
 
 const BUYER_ROLES = new Set(["BUYER_OWNER", "BUYER_STAFF", "BUYER_VIEWER"]);
 const VENDOR_ROLES = new Set(["VENDOR_OWNER", "VENDOR_STAFF"]);
@@ -34,6 +42,11 @@ export async function proxy(request: NextRequest) {
       const hospitalId = decodedToken.hospitalId as string | undefined;
       const vendorId = decodedToken.vendorId as string | undefined;
       const { pathname } = request.nextUrl;
+
+      // PUBLIC 경로는 인증 사용자도 자유 접근
+      if (isPublicPath(pathname) && pathname !== "/login" && pathname !== "/register") {
+        return NextResponse.next({ request: { headers } });
+      }
 
       // 1) 로그인 사용자가 /login·/register 접근 → 홈으로
       if (pathname === "/login" || pathname === "/register") {
