@@ -1,8 +1,10 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  ArrowUpRight,
   Building2,
   Mail,
+  Package,
   Repeat,
   ShieldCheck,
   Sparkles,
@@ -15,7 +17,7 @@ import { GlassCard } from "@/components/shared/glass-card";
 import { Reveal } from "@/components/shared/reveal";
 
 // Server Component — 정적 prerender (AuthContext 는 layout.tsx 의 클라이언트 wrapper)
-// 메인 리뉴얼 명세: docs/landing-design-renewal-plan.md
+// 메인 리뉴얼 명세: docs/landing-design-renewal-plan.md + P0 시각 보강 4종
 
 export default function LandingPage() {
   return (
@@ -23,10 +25,10 @@ export default function LandingPage() {
       {/* 전역 radial gradient overlay — 화면 우상단·좌하단 미세 톤 */}
       <div className="landing-bg-overlay" aria-hidden />
 
-      {/* sticky 가 깨지지 않도록 page wrapper 에 overflow-hidden 사용 금지 */}
       <div className="relative z-10 min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
         <TopNav />
         <Hero />
+        <Flow />
         <Features />
         <Audience />
         <Steps />
@@ -38,7 +40,7 @@ export default function LandingPage() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// TopNav — 살짝 더 강한 글래스 효과
+// TopNav
 // ─────────────────────────────────────────────────────────────
 
 function TopNav() {
@@ -66,10 +68,10 @@ function TopNav() {
             수수료
           </Link>
           <Link
-            href="#features"
+            href="#flow"
             className="hidden rounded-full px-4 py-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)] md:inline-flex"
           >
-            기능
+            구조
           </Link>
           <Link
             href="/login"
@@ -90,31 +92,16 @@ function TopNav() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Hero — 큰 타이포 + stagger fade-up + 우측 글래스 floating card
+// Hero — 큰 타이포 + SVG mesh blob 배경 + 우측 카탈로그 mock-up
 // ─────────────────────────────────────────────────────────────
-
-const HERO_HIGHLIGHTS = [
-  {
-    icon: TrendingDown,
-    title: "투명한 가격",
-    desc: "공급업체 가격을 한눈에 비교",
-  },
-  {
-    icon: Repeat,
-    title: "자동 발주",
-    desc: "정기 품목은 자동으로",
-  },
-  {
-    icon: Users,
-    title: "공동구매",
-    desc: "함께 모이면 가격이 내려갑니다",
-  },
-] as const;
 
 function Hero() {
   return (
-    <section className="mx-auto max-w-6xl px-6 pt-20 pb-24 md:px-12 md:pt-28 md:pb-32">
-      <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
+    <section className="relative mx-auto max-w-6xl px-6 pt-20 pb-24 md:px-12 md:pt-28 md:pb-32">
+      {/* Hero 영역 한정 SVG mesh blob (배경, 카드 뒤에) */}
+      <HeroMeshBackground />
+
+      <div className="relative grid items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
         {/* Left — 텍스트 + CTA */}
         <div className="text-center lg:text-left">
           <div className="landing-fade-up" style={{ animationDelay: "0ms" }}>
@@ -158,10 +145,10 @@ function Hero() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="#features"
+              href="#flow"
               className="inline-flex h-12 items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-7 text-base font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
             >
-              더 알아보기
+              어떻게 동작하나
             </Link>
           </div>
 
@@ -173,42 +160,309 @@ function Hero() {
           </p>
         </div>
 
-        {/* Right — 글래스 floating card (G1) */}
+        {/* Right — 카탈로그 mock-up */}
         <div
           className="landing-fade-up relative mt-4 lg:mt-0"
           style={{ animationDelay: "900ms" }}
         >
-          <GlassCard intensity="md" className="p-7 md:p-8">
-            <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              MedPlace 가 제공하는 것
-            </p>
-            <ul className="mt-5 space-y-4">
-              {HERO_HIGHLIGHTS.map((h) => (
-                <li key={h.title} className="flex items-start gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--color-accent-light)] text-[var(--color-accent)]">
-                    <h.icon className="h-5 w-5" aria-hidden />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold">{h.title}</p>
-                    <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
-                      {h.desc}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 border-t border-[var(--color-border-light)] pt-4 text-xs text-[var(--color-text-tertiary)]">
-              모두 가입 직후 무료로 사용
-            </div>
-          </GlassCard>
+          <HeroCatalogMockup />
         </div>
       </div>
     </section>
   );
 }
 
+function HeroMeshBackground() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 -z-0 overflow-hidden"
+    >
+      <svg
+        viewBox="0 0 800 600"
+        className="absolute -right-20 -top-10 h-[600px] w-[800px] opacity-60"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <defs>
+          <radialGradient id="meshA" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#0066CC" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#0066CC" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="meshB" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#5AC8FA" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#5AC8FA" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="500" cy="200" r="200" fill="url(#meshA)" className="landing-mesh-1" />
+        <circle cx="650" cy="380" r="180" fill="url(#meshB)" className="landing-mesh-2" />
+      </svg>
+    </div>
+  );
+}
+
+const MOCK_PRODUCTS = [
+  {
+    name: "수술용 라텍스 장갑",
+    cat: "일회용 의료용품",
+    price: "8,900",
+    badge: "공동구매",
+    grade: 1,
+  },
+  {
+    name: "디지털 혈압계",
+    cat: "진단기기",
+    price: "127,000",
+    badge: "정기구독",
+    grade: 2,
+  },
+  {
+    name: "소독용 알코올 솜",
+    cat: "위생용품",
+    price: "12,500",
+    badge: "즉시배송",
+    grade: 1,
+  },
+] as const;
+
+const BADGE_TONES: Record<string, string> = {
+  공동구매: "bg-[var(--color-accent-light)] text-[var(--color-accent)]",
+  정기구독: "bg-[var(--color-success)]/15 text-[var(--color-success)]",
+  즉시배송: "bg-[var(--color-warning)]/15 text-[var(--color-warning)]",
+};
+
+function HeroCatalogMockup() {
+  return (
+    <div className="relative">
+      <GlassCard intensity="md" className="overflow-hidden p-5 md:p-6">
+        {/* Mock-up header */}
+        <div className="flex items-center justify-between gap-2 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
+              <Package className="h-3.5 w-3.5" aria-hidden />
+            </span>
+            <p className="text-xs font-semibold">카탈로그 미리보기</p>
+          </div>
+          <span className="rounded-full bg-[var(--color-bg-secondary)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-tertiary)]">
+            PREVIEW
+          </span>
+        </div>
+
+        {/* Mock search bar */}
+        <div className="flex items-center gap-2 rounded-xl bg-[var(--color-bg-primary)]/70 px-3 py-2 text-xs text-[var(--color-text-tertiary)] backdrop-blur-sm">
+          <span className="inline-flex h-2 w-2 rounded-full bg-[var(--color-text-tertiary)]/40" />
+          <span>장갑, 거즈, 소독제...</span>
+        </div>
+
+        {/* Mock product list */}
+        <ul className="mt-4 space-y-2.5">
+          {MOCK_PRODUCTS.map((p) => (
+            <li
+              key={p.name}
+              className="group flex items-center gap-3 rounded-xl bg-[var(--color-bg-primary)]/60 p-3 backdrop-blur-sm transition-colors hover:bg-[var(--color-bg-primary)]/90"
+            >
+              {/* Thumb placeholder */}
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--color-accent-light)]">
+                <span
+                  className={`grid h-5 w-5 place-items-center rounded text-[9px] font-bold ${
+                    p.grade === 1
+                      ? "bg-[var(--color-class-1)]/20 text-[var(--color-class-1)]"
+                      : "bg-[var(--color-class-2)]/20 text-[var(--color-class-2)]"
+                  }`}
+                >
+                  {p.grade}
+                </span>
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium">{p.name}</p>
+                <p className="truncate text-[10px] text-[var(--color-text-tertiary)]">
+                  {p.cat}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-xs font-semibold tabular-nums">
+                  {p.price}
+                  <span className="ml-0.5 text-[10px] font-normal text-[var(--color-text-tertiary)]">원</span>
+                </p>
+                <span
+                  className={`mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-medium ${BADGE_TONES[p.badge]}`}
+                >
+                  {p.badge}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border-light)] pt-3 text-[10px] text-[var(--color-text-tertiary)]">
+          <span>Phase 2 출시 예정</span>
+          <span className="inline-flex items-center gap-1 text-[var(--color-accent)]">
+            전체 보기
+            <ArrowUpRight className="h-3 w-3" />
+          </span>
+        </div>
+      </GlassCard>
+
+      {/* Floating tag — 우측 상단 */}
+      <span className="absolute -right-3 -top-3 inline-flex items-center gap-1 rounded-full bg-[var(--color-accent)] px-3 py-1 text-[10px] font-semibold text-white shadow-lg">
+        <Sparkles className="h-3 w-3" />
+        실시간 가격
+      </span>
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
-// Features — Reveal 로 stagger 등장
+// Flow — 공급망 다이어그램 (신규)
+// ─────────────────────────────────────────────────────────────
+
+function Flow() {
+  return (
+    <section
+      id="flow"
+      className="border-y border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] py-24 md:py-32 scroll-mt-24"
+    >
+      <div className="mx-auto max-w-5xl px-6 md:px-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            어떻게 동작하나
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] md:text-5xl">
+            간납사를 건너뛰는 직거래.
+          </h2>
+          <p className="mt-3 text-[var(--color-text-secondary)] md:text-lg">
+            병원과 공급업체가 직접. 가격은 투명하게, 정산은 4~6개월에서 D+3로.
+          </p>
+        </div>
+
+        <Reveal>
+          <FlowDiagram />
+        </Reveal>
+
+        {/* 절감 효과 비교 */}
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <Reveal delay={120}>
+            <article className="rounded-2xl bg-[var(--color-bg-primary)] p-6 text-center">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                기존 정산
+              </p>
+              <p className="mt-3 text-2xl font-semibold text-[var(--color-text-secondary)]">
+                4~6개월
+              </p>
+              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">간납사 결제 지연</p>
+            </article>
+          </Reveal>
+          <Reveal delay={240}>
+            <article className="rounded-2xl bg-[var(--color-accent)] p-6 text-center text-white">
+              <p className="text-xs font-medium uppercase tracking-wider text-white/70">
+                MedPlace 정산
+              </p>
+              <p className="mt-3 text-2xl font-semibold">D+3</p>
+              <p className="mt-1 text-xs text-white/70">배송 완료 후 영업일</p>
+            </article>
+          </Reveal>
+          <Reveal delay={360}>
+            <article className="rounded-2xl bg-[var(--color-bg-primary)] p-6 text-center">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                수수료
+              </p>
+              <p className="mt-3 text-2xl font-semibold">
+                <span className="text-[var(--color-accent)]">5</span>
+                <span className="text-[var(--color-text-secondary)]">%</span>
+              </p>
+              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">기본 요율 · 거래량별 할인</p>
+            </article>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FlowDiagram() {
+  return (
+    <div className="relative mt-14 overflow-hidden rounded-3xl bg-[var(--color-bg-primary)] p-8 md:p-12">
+      <div className="grid items-center gap-6 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+        {/* Node — 병원 */}
+        <FlowNode
+          icon={Stethoscope}
+          label="병원·의원"
+          sub="구매·결재·세금계산서"
+          tone="primary"
+        />
+        <FlowConnector />
+        {/* Node — MedPlace */}
+        <FlowNode
+          icon={Sparkles}
+          label="MedPlace"
+          sub="투명한 직거래 마켓플레이스"
+          tone="accent"
+        />
+        <FlowConnector />
+        {/* Node — 공급업체 */}
+        <FlowNode
+          icon={Building2}
+          label="공급업체"
+          sub="판매·제조·수입업"
+          tone="primary"
+        />
+      </div>
+
+      {/* 흐름 설명 — 모바일 가독성 */}
+      <div className="mt-8 grid gap-3 text-xs text-[var(--color-text-secondary)] md:grid-cols-3">
+        <p>
+          <span className="font-semibold text-[var(--color-text-primary)]">병원 →</span>{" "}
+          여러 공급업체 가격 비교 후 직접 주문
+        </p>
+        <p className="text-center">
+          <span className="font-semibold text-[var(--color-accent)]">자동화</span>{" "}
+          UDI 보고 · 세금계산서 · 정기 발주
+        </p>
+        <p className="md:text-right">
+          <span className="font-semibold text-[var(--color-text-primary)]">공급업체 ←</span>{" "}
+          D+3 빠른 정산 · 직접 노출
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function FlowNode({
+  icon: Icon,
+  label,
+  sub,
+  tone,
+}: {
+  icon: typeof Stethoscope;
+  label: string;
+  sub: string;
+  tone: "primary" | "accent";
+}) {
+  const isAccent = tone === "accent";
+  return (
+    <div className="flex flex-col items-center text-center">
+      <span
+        className={`grid h-16 w-16 place-items-center rounded-2xl ${
+          isAccent
+            ? "bg-[var(--color-accent)] text-white shadow-lg"
+            : "bg-[var(--color-bg-secondary)] text-[var(--color-accent)]"
+        }`}
+      >
+        <Icon className="h-7 w-7" aria-hidden />
+      </span>
+      <p className="mt-3 text-sm font-semibold">{label}</p>
+      <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">{sub}</p>
+    </div>
+  );
+}
+
+function FlowConnector() {
+  return (
+    <div className="hidden h-px w-full bg-gradient-to-r from-transparent via-[var(--color-accent)] to-transparent md:block" />
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Features — Reveal stagger + 3D tilt
 // ─────────────────────────────────────────────────────────────
 
 const FEATURES = [
@@ -250,7 +504,7 @@ function Features() {
       <div className="mt-14 grid gap-6 md:grid-cols-3">
         {FEATURES.map((f, i) => (
           <Reveal key={f.title} delay={i * 120}>
-            <article className="h-full rounded-3xl bg-[var(--color-bg-secondary)] p-8 transition-shadow duration-300 hover:shadow-md">
+            <article className="landing-tilt h-full rounded-3xl bg-[var(--color-bg-secondary)] p-8 shadow-sm">
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--color-accent-light)] text-[var(--color-accent)]">
                 <f.icon className="h-5 w-5" />
               </span>
@@ -267,7 +521,7 @@ function Features() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Audience — 글래스 카드 2개 (G3, G4)
+// Audience — 글래스 카드 + tilt
 // ─────────────────────────────────────────────────────────────
 
 function Audience() {
@@ -287,55 +541,57 @@ function Audience() {
 
       <div className="mt-14 grid gap-6 md:grid-cols-2">
         <Reveal delay={0}>
-          <GlassCard hover intensity="sm" as="article" className="h-full p-10">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--color-accent-light)] text-[var(--color-accent)] transition-colors duration-300 group-hover:bg-[var(--color-accent)] group-hover:text-white">
-              <Stethoscope className="h-6 w-6" />
-            </span>
-            <h3 className="mt-6 text-2xl font-semibold tracking-tight">
-              병원·의원
-            </h3>
-            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-              의원부터 종합병원까지. 구매·결재·세금계산서 한 흐름.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm">
-              <Bullet>여러 공급업체 가격을 한 화면에서 비교</Bullet>
-              <Bullet>정기구독 자동 발주로 재고 관리 부담 제거</Bullet>
-              <Bullet>다단계 결재 워크플로우 + 자동 세금계산서</Bullet>
-              <Bullet>대형 병원용 RFQ(견적 요청)와 UDI 자동 보고</Bullet>
-            </ul>
-            <Link
-              href="/register"
-              className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
-            >
-              병원으로 가입하기
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </GlassCard>
+          <div className="landing-tilt h-full">
+            <GlassCard hover intensity="sm" as="article" className="h-full p-10">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--color-accent-light)] text-[var(--color-accent)]">
+                <Stethoscope className="h-6 w-6" />
+              </span>
+              <h3 className="mt-6 text-2xl font-semibold tracking-tight">병원·의원</h3>
+              <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                의원부터 종합병원까지. 구매·결재·세금계산서 한 흐름.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm">
+                <Bullet>여러 공급업체 가격을 한 화면에서 비교</Bullet>
+                <Bullet>정기구독 자동 발주로 재고 관리 부담 제거</Bullet>
+                <Bullet>다단계 결재 워크플로우 + 자동 세금계산서</Bullet>
+                <Bullet>대형 병원용 RFQ(견적 요청)와 UDI 자동 보고</Bullet>
+              </ul>
+              <Link
+                href="/register"
+                className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
+              >
+                병원으로 가입하기
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </GlassCard>
+          </div>
         </Reveal>
 
         <Reveal delay={120}>
-          <GlassCard hover intensity="sm" as="article" className="h-full p-10">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--color-accent-light)] text-[var(--color-accent)]">
-              <Building2 className="h-6 w-6" />
-            </span>
-            <h3 className="mt-6 text-2xl font-semibold tracking-tight">공급업체</h3>
-            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-              판매업·제조업·수입업. 간납사 없는 직접 거래.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm">
-              <Bullet>4~6개월 결제 지연 없이 D+3 빠른 정산</Bullet>
-              <Bullet>주문·발송·정산이 한 화면에서</Bullet>
-              <Bullet>UDI 보고 자동화로 행정 부담 절감</Bullet>
-              <Bullet>전국 의료기관에 즉시 노출되는 카탈로그</Bullet>
-            </ul>
-            <Link
-              href="/register"
-              className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
-            >
-              공급업체로 가입하기
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </GlassCard>
+          <div className="landing-tilt h-full">
+            <GlassCard hover intensity="sm" as="article" className="h-full p-10">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--color-accent-light)] text-[var(--color-accent)]">
+                <Building2 className="h-6 w-6" />
+              </span>
+              <h3 className="mt-6 text-2xl font-semibold tracking-tight">공급업체</h3>
+              <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                판매업·제조업·수입업. 간납사 없는 직접 거래.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm">
+                <Bullet>4~6개월 결제 지연 없이 D+3 빠른 정산</Bullet>
+                <Bullet>주문·발송·정산이 한 화면에서</Bullet>
+                <Bullet>UDI 보고 자동화로 행정 부담 절감</Bullet>
+                <Bullet>전국 의료기관에 즉시 노출되는 카탈로그</Bullet>
+              </ul>
+              <Link
+                href="/register"
+                className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
+              >
+                공급업체로 가입하기
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </GlassCard>
+          </div>
         </Reveal>
       </div>
     </section>
@@ -355,7 +611,7 @@ function Bullet({ children }: { children: React.ReactNode }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Steps — connector dot + Reveal stagger
+// Steps — connector dot + tilt
 // ─────────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -378,10 +634,7 @@ const STEPS = [
 
 function Steps() {
   return (
-    <section
-      id="steps"
-      className="bg-[var(--color-bg-secondary)] py-32 md:py-40"
-    >
+    <section id="steps" className="bg-[var(--color-bg-secondary)] py-32 md:py-40">
       <div className="mx-auto max-w-6xl px-6 md:px-12">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
@@ -395,8 +648,7 @@ function Steps() {
         <ol className="mt-16 grid gap-6 md:grid-cols-3 md:gap-4">
           {STEPS.map((s, i) => (
             <Reveal key={s.title} delay={i * 120}>
-              <li className="relative h-full rounded-2xl bg-[var(--color-bg-primary)] p-8">
-                {/* connector dot — 모바일에선 숨김 */}
+              <li className="landing-tilt relative h-full rounded-2xl bg-[var(--color-bg-primary)] p-8 shadow-sm">
                 {i < STEPS.length - 1 && (
                   <span
                     aria-hidden
@@ -420,7 +672,7 @@ function Steps() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Bottom CTA — 큰 글래스 카드 (G2)
+// Bottom CTA — 글래스 카드
 // ─────────────────────────────────────────────────────────────
 
 function BottomCTA() {
@@ -457,7 +709,7 @@ function BottomCTA() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Footer — Stethoscope subtle rotation
+// Footer
 // ─────────────────────────────────────────────────────────────
 
 function Footer() {

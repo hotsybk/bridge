@@ -332,6 +332,48 @@
     0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
+/* SVG mesh blob — Hero 배경 morph animation */
+@keyframes landingMeshFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -15px) scale(1.05); }
+  66% { transform: translate(-15px, 20px) scale(0.97); }
+}
+@keyframes landingMeshFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-25px, -10px) scale(1.08); }
+}
+.landing-mesh-1 { animation: landingMeshFloat1 18s ease-in-out infinite; }
+.landing-mesh-2 { animation: landingMeshFloat2 22s ease-in-out infinite; }
+
+/* 3D tilt — card hover */
+.landing-tilt {
+  transform-style: preserve-3d;
+  transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 350ms ease;
+  will-change: transform;
+}
+.landing-tilt:hover {
+  transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-4px);
+}
+
+/* 공급망 다이어그램 — 흐름 점 애니메이션 */
+@keyframes landingFlowDot {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-mesh-1,
+  .landing-mesh-2 {
+    animation: none !important;
+  }
+  .landing-tilt:hover {
+    transform: translateY(-2px) !important;
+  }
+}
+
 /* Reveal — scroll-triggered (client component 가 .is-visible 토글) */
 .landing-reveal {
   opacity: 0;
