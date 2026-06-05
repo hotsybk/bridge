@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
 import { trpcServer } from "@/lib/trpc/server";
 
@@ -14,8 +15,6 @@ const PREVIEW_MODE = process.env.NODE_ENV !== "production";
  * tRPC `admin.dispute.list` + `admin.dispute.counts` 호출.
  * 실패 시 PREVIEW_MODE 면 mock 데이터 fallback.
  */
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 type Tab = "ALL" | "OPEN" | "IN_PROGRESS" | "NEEDS_ADMIN_RESPONSE" | "CLOSED";
 
@@ -268,38 +267,38 @@ export default async function AdminDisputesPage({
         분쟁 조정
       </h1>
       <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        병원-공급업체 분쟁을 검토하고 중재합니다.
+        분쟁 중재
       </p>
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell
+        <AdminKpiCell
           label="진행 중"
-          value={kpi.inProgress}
-          unit="건"
+          value={<CountUp value={kpi.inProgress} integer />}
+          sub="건"
           delta="OPEN + IN_PROGRESS"
+          deltaColor="neutral"
         />
-        <KpiCell
+        <AdminKpiCell
           label="운영자 응답 필요"
-          value={kpi.needsAdmin}
-          unit="건"
-          deltaTone="accent"
+          value={<CountUp value={kpi.needsAdmin} integer />}
+          sub="건"
           delta="중재 대기"
+          deltaColor="accent"
         />
-        <KpiCell
+        <AdminKpiCell
           label="마감 임박 (24h)"
-          value={kpi.slaCloseCount}
-          unit="건"
-          deltaTone="warning"
-          delta="SLA 이탈 위험"
+          value={<CountUp value={kpi.slaCloseCount} integer />}
+          sub="건"
+          delta="마감 이탈 위험"
+          deltaColor="warning"
         />
-        <KpiCell
+        <AdminKpiCell
           label="평균 처리 시간"
-          value={kpi.avgDays}
-          unit="일"
-          decimal
-          deltaTone="success"
+          value={<CountUp value={kpi.avgDays} />}
+          sub="일"
           delta="최근 해결 기준"
+          deltaColor="success"
         />
       </dl>
 
@@ -379,7 +378,7 @@ export default async function AdminDisputesPage({
           <span>Vendor</span>
           <span>유형</span>
           <span>발생일</span>
-          <span>SLA</span>
+          <span>마감</span>
           <span>상태</span>
           <span />
         </div>
@@ -544,57 +543,3 @@ function SlaChip({ hours, closed }: { hours: number | null; closed: boolean }) {
   );
 }
 
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  decimal,
-  mono,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  decimal?: boolean;
-  mono?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl ${
-          mono ? "font-mono" : ""
-        }`}
-      >
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

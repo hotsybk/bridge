@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -17,15 +17,16 @@ import { trpc } from "@/lib/trpc/client";
  */
 
 const ROLE_LABEL: Record<string, string> = {
-  BUYER_OWNER: "OWNER",
-  BUYER_STAFF: "STAFF",
-  BUYER_VIEWER: "VIEWER",
+  BUYER_OWNER: "소유자",
+  BUYER_ADMIN: "관리자",
+  BUYER_STAFF: "구매팀원",
+  BUYER_VIEWER: "조회 전용",
 };
 
 const ROLE_OPTIONS = [
-  { value: "BUYER_OWNER", label: "OWNER · 전체 권한" },
-  { value: "BUYER_STAFF", label: "STAFF · 주문·구독 운영" },
-  { value: "BUYER_VIEWER", label: "VIEWER · 조회만" },
+  { value: "BUYER_OWNER", label: "소유자 · 전체 권한" },
+  { value: "BUYER_STAFF", label: "구매팀원 · 주문·구독 운영" },
+  { value: "BUYER_VIEWER", label: "조회 전용 · 조회만" },
 ] as const;
 
 function tsToDateStr(ts: unknown): string {
@@ -184,9 +185,6 @@ export default function HospitalTeamPage() {
                 className="h-9 w-40 border-b border-[var(--color-border-light)] bg-transparent text-right font-mono tabular-nums outline-none transition-colors focus:border-[var(--color-accent)] disabled:opacity-40"
               />
               <span className="text-[var(--color-text-secondary)]">원 이상</span>
-              <span className="text-xs text-[var(--color-text-tertiary)]">
-                ({fmtKrw(approvalLimit)} KRW)
-              </span>
             </dd>
           </div>
           <div className="grid gap-3 py-5 md:grid-cols-[200px_1fr] md:items-start md:gap-6">
@@ -359,7 +357,7 @@ export default function HospitalTeamPage() {
                     <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">
                       {m.name || "—"}
                       {m.isApprover && (
-                        <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--color-accent)]">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--color-accent)]">
                           결재자
                         </span>
                       )}

@@ -135,7 +135,7 @@ export function CommandPalette() {
           {showRecent ? (
             recent.length > 0 ? (
               <>
-                <p className="px-5 pt-3 pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                <p className="px-5 pt-3 pb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                   최근 본 항목
                 </p>
                 {recent.map((r) => (
@@ -195,7 +195,7 @@ function ResultRow({
           {item.subtitle}
         </p>
       </div>
-      <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+      <span className="shrink-0 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
         {TYPE_LABEL[item.type] ?? item.type}
       </span>
     </button>

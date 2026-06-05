@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 type Props = {
   before?: Record<string, unknown> | null;
@@ -69,7 +69,7 @@ export function AuditDiffViewer({ before, after }: Props) {
             {r.kind === "changed" && (
               <div className="mt-1.5 grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                     before
                   </p>
                   <pre className="mt-1 overflow-x-auto rounded bg-[var(--color-error)]/5 p-2 font-mono text-[11px] text-[var(--color-error)]">
@@ -77,7 +77,7 @@ export function AuditDiffViewer({ before, after }: Props) {
                   </pre>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                     after
                   </p>
                   <pre className="mt-1 overflow-x-auto rounded bg-[var(--color-success)]/5 p-2 font-mono text-[11px] text-[var(--color-success)]">

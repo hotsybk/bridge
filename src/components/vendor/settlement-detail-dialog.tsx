@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Calendar, Download } from "lucide-react";
 
@@ -102,7 +102,7 @@ export function SettlementDetailDialog({
               >
                 <div className="min-w-0 flex-1">
                   <p className="tabular-nums font-medium">{b.orderNo}</p>
-                  <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+                  <p className="mt-0.5 text-[11px] text-[var(--color-text-tertiary)]">
                     {b.hospital}
                   </p>
                 </div>
@@ -110,7 +110,7 @@ export function SettlementDetailDialog({
                   <p className="tabular-nums font-medium">
                     ₩{b.gross.toLocaleString()}
                   </p>
-                  <p className="mt-0.5 tabular-nums text-[10px] text-[var(--color-text-tertiary)]">
+                  <p className="mt-0.5 tabular-nums text-[11px] text-[var(--color-text-tertiary)]">
                     수수료 −₩{b.fee.toLocaleString()}
                   </p>
                 </div>
@@ -158,7 +158,7 @@ function SummaryCol({
         : "text-sm font-medium";
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-tertiary)]">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--color-text-tertiary)]">
         {label}
       </p>
       <p className={`mt-1 tabular-nums ${valueClass}`}>

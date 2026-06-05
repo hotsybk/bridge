@@ -84,12 +84,12 @@ export default function VendorProfilePage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
       <PageHeader
-        label="Seller · Profile"
+        label="파트너센터 · 프로필"
         title="공급업체 프로필"
         description={
           isOwner
             ? "회사 기본정보를 한 곳에서 관리합니다. 신고증·사업자등록증 변경은 재심사 요청으로 진행됩니다."
-            : "이 페이지는 보기 전용입니다. 수정은 OWNER 권한이 필요합니다."
+            : "이 페이지는 보기 전용입니다. 수정은 소유자 권한이 필요합니다."
         }
       />
 
@@ -196,8 +196,7 @@ export default function VendorProfilePage() {
               link={v.bizRegImageUrl as string | undefined}
             />
             <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">
-              사업자등록번호와 등록증은 변경할 수 없습니다. 잘못된 정보일 경우 고객
-              지원으로 문의해주세요.
+              변경 불가 · 오류 시 고객지원 문의
             </p>
           </Section>
 
@@ -227,8 +226,7 @@ export default function VendorProfilePage() {
                   재심사 요청
                 </p>
                 <p className="mt-2 max-w-lg text-xs text-[var(--color-text-tertiary)]">
-                  신고증 정보가 변경되었거나 신규 첨부가 필요할 경우 사유를 작성해
-                  요청하세요. 운영자가 검토 후 안내드립니다.
+                  신고증 변경 사유를 작성하세요. 운영자가 검토합니다.
                 </p>
                 <textarea
                   rows={3}

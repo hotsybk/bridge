@@ -225,7 +225,7 @@ export default async function BuyerDisputeDetailPage({
                       : "text-[var(--color-text-tertiary)]"
                 }`}
               >
-                SLA {hoursLeft <= 0 ? "이탈" : `${hoursLeft}h 남음`}
+                마감 {hoursLeft <= 0 ? "이탈" : `${hoursLeft}h 남음`}
               </span>
             )}
             <span
@@ -322,8 +322,7 @@ export default async function BuyerDisputeDetailPage({
                 안내
               </p>
               <p className="mt-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
-                운영자는 48시간 이내 검토 후 양측에 결과를 통보합니다. 추가
-                자료가 필요한 경우 메시지로 요청드립니다.
+                운영자가 48시간 내 검토·통보. 추가 자료는 메시지로 요청.
               </p>
             </div>
           </aside>

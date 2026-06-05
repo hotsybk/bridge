@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -333,7 +333,7 @@ export default function SellerGroupbuysPage() {
                       <td className="px-6 py-4 text-[var(--color-text-secondary)]">
                         {r.daysLeft > 0 ? (
                           <span className="tabular-nums">
-                            D−{r.daysLeft} <span className="text-[10px] text-[var(--color-text-tertiary)]">({r.endsAt})</span>
+                            D−{r.daysLeft} <span className="text-[11px] text-[var(--color-text-tertiary)]">({r.endsAt})</span>
                           </span>
                         ) : (
                           <span className="text-[var(--color-text-tertiary)]">

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { SearchX } from "lucide-react";
 
@@ -124,7 +124,7 @@ export default async function SearchPage({
 
         {/* dev 전용 source 배지 — production 빌드에서는 숨김 */}
         {process.env.NODE_ENV !== "production" && useSearch && (
-          <div className="-mt-6 mb-2 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+          <div className="-mt-6 mb-2 text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
             검색 소스:{" "}
             <span className="font-semibold text-[var(--color-text-secondary)]">
               {searchSource === "algolia"

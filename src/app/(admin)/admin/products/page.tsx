@@ -1,7 +1,10 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ChevronDown, Search } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
+import { PreviewBadge } from "@/components/shared/preview-badge";
 import { formatDate } from "@/lib/format";
 import { trpcServer } from "@/lib/trpc/server";
 import type { Product } from "@/lib/types";
@@ -345,22 +348,34 @@ export default async function AdminProductsPage({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-        운영 · 상품 모더레이션
-      </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-        상품 모더레이션
-      </h1>
-      <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        신청된 상품을 검토하고 승인·수정요청·반려를 결정합니다.
-      </p>
+      <PageHeader
+        label="운영 · 상품 모더레이션"
+        title="상품 모더레이션"
+        description="승인·수정요청·반려 결정"
+      />
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="대기" value={counts.PENDING_REVIEW} unit="건" />
-        <KpiCell label="오늘 승인" value={counts.approvedToday} unit="건" />
-        <KpiCell label="오늘 반려" value={counts.rejectedToday} unit="건" />
-        <KpiCell label="수정 요청" value={counts.REVISION_REQUESTED} unit="건" />
+        <AdminKpiCell
+          label="대기"
+          value={<CountUp value={counts.PENDING_REVIEW} />}
+          sub="건"
+        />
+        <AdminKpiCell
+          label="오늘 승인"
+          value={<CountUp value={counts.approvedToday} />}
+          sub="건"
+        />
+        <AdminKpiCell
+          label="오늘 반려"
+          value={<CountUp value={counts.rejectedToday} />}
+          sub="건"
+        />
+        <AdminKpiCell
+          label="수정 요청"
+          value={<CountUp value={counts.REVISION_REQUESTED} />}
+          sub="건"
+        />
       </dl>
 
       {/* Segment Tabs */}
@@ -431,9 +446,9 @@ export default async function AdminProductsPage({
       </div>
 
       {isPreview && (
-        <p className="mt-4 text-[11px] text-[var(--color-text-tertiary)]">
-          PREVIEW · 비로그인 상태입니다. 실제 데이터가 아닙니다.
-        </p>
+        <div className="mt-4">
+          <PreviewBadge variant="banner" message="비로그인 상태입니다. 실제 데이터가 아닙니다." />
+        </div>
       )}
 
       {/* Bulk action bar — PENDING_REVIEW 에서만 활성화 */}
@@ -481,13 +496,13 @@ export default async function AdminProductsPage({
                           {p.vendorName}
                         </p>
                         <div className="mt-1.5 flex items-center gap-2">
-                          <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                             {classLabel(p.deviceClass)}
                           </span>
-                          <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] text-[var(--color-text-tertiary)]">
                             ·
                           </span>
-                          <span className="text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
                             {formatDate(p.moderation?.submittedAt ?? p.createdAt)}
                           </span>
                         </div>
@@ -512,13 +527,13 @@ export default async function AdminProductsPage({
                           {p.vendorName}
                         </p>
                         <div className="mt-1.5 flex items-center gap-2">
-                          <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                             {classLabel(p.deviceClass)}
                           </span>
-                          <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] text-[var(--color-text-tertiary)]">
                             ·
                           </span>
-                          <span className="text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
                             {formatDate(p.moderation?.submittedAt ?? p.createdAt)}
                           </span>
                         </div>
@@ -552,30 +567,6 @@ export default async function AdminProductsPage({
 // ─────────────────────────────────────────────────────────────
 // Subcomponents
 // ─────────────────────────────────────────────────────────────
-
-function KpiCell({
-  label,
-  value,
-  unit,
-}: {
-  label: string;
-  value: number;
-  unit: string;
-}) {
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} />
-        <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-          {unit}
-        </span>
-      </p>
-    </div>
-  );
-}
 
 function classLabel(c: string): string {
   switch (c) {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave V — _retryQueue 컬렉션 entry 관리.
 // 재시도 (status=PENDING 으로 되돌리기) / 취소 (status=CANCELLED).
@@ -142,7 +142,7 @@ export function RetryQueueClient() {
                   <p className="font-mono text-[11px] tabular-nums text-[var(--color-text-primary)]">
                     {e.id.slice(0, 16)}
                   </p>
-                  <p className="text-[10px] text-[var(--color-text-tertiary)]">
+                  <p className="text-[11px] text-[var(--color-text-tertiary)]">
                     {e.createdAt
                       ? new Date(e.createdAt).toLocaleString("ko-KR")
                       : "—"}
@@ -162,7 +162,7 @@ export function RetryQueueClient() {
                   type="button"
                   disabled={retryM.isPending}
                   onClick={() => retryM.mutate({ entryId: e.id })}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-[var(--color-border-light)] px-3 text-[10px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] disabled:opacity-50"
+                  className="inline-flex h-7 items-center gap-1 rounded-full border border-[var(--color-border-light)] px-3 text-[11px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] disabled:opacity-50"
                 >
                   <RotateCcw className="h-3 w-3" />
                   재시도
@@ -175,7 +175,7 @@ export function RetryQueueClient() {
                       cancelM.mutate({ entryId: e.id });
                     }
                   }}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-[var(--color-border-light)] px-3 text-[10px] font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-error)] disabled:opacity-50"
+                  className="inline-flex h-7 items-center gap-1 rounded-full border border-[var(--color-border-light)] px-3 text-[11px] font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-error)] disabled:opacity-50"
                 >
                   <X className="h-3 w-3" />
                   취소
@@ -202,7 +202,7 @@ function StatusBadge({ status }: { status?: string }) {
             : "border-[var(--color-border-light)] bg-transparent text-[var(--color-text-tertiary)]";
   return (
     <span
-      className={`inline-flex h-5 items-center justify-center rounded-full border px-2 text-[10px] font-medium ${colorClass}`}
+      className={`inline-flex h-5 items-center justify-center rounded-full border px-2 text-[11px] font-medium ${colorClass}`}
     >
       {status ?? "—"}
     </span>

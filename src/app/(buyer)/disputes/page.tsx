@@ -4,6 +4,8 @@ import { AlertCircle, ChevronRight } from "lucide-react";
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
+import { PreviewBadge } from "@/components/shared/preview-badge";
 import { formatDateTime, formatKRW, formatRelative } from "@/lib/format";
 import { trpcServer } from "@/lib/trpc/server";
 
@@ -169,22 +171,18 @@ export default async function BuyerDisputesPage({
         />
 
         {/* 헤더 */}
-        <header className="mt-6 border-b border-[var(--color-border-light)] pb-12">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            분쟁 · Disputes
-          </p>
-          <h1 className="mt-4 break-keep text-4xl font-semibold tracking-[-0.035em] md:text-5xl">
-            내 분쟁
-          </h1>
-          <p className="mt-4 max-w-xl text-sm text-[var(--color-text-secondary)]">
-            본인이 신청했거나 받은 분쟁입니다. 운영자가 48시간 이내 검토합니다.
-          </p>
+        <div className="mt-6 border-b border-[var(--color-border-light)] pb-12">
+          <PageHeader
+            label="분쟁 · Disputes"
+            title="내 분쟁"
+            description="내가 신청·받은 분쟁. 운영자 48시간 내 검토."
+          />
           {isPreview && (
-            <p className="mt-4 text-[11px] text-[var(--color-text-tertiary)]">
-              PREVIEW · 비로그인 상태입니다. 실제 데이터가 아닙니다.
-            </p>
+            <div className="mt-4">
+              <PreviewBadge message="비로그인 상태입니다. 실제 데이터가 아닙니다." />
+            </div>
           )}
-        </header>
+        </div>
 
         {/* 탭 */}
         <nav
@@ -325,7 +323,7 @@ function SlaChip({ hours }: { hours: number | null }) {
   if (hours === null) return null;
   if (hours <= 0) {
     return (
-      <span className="text-[var(--color-error)]">SLA 이탈</span>
+      <span className="text-[var(--color-error)]">마감 이탈</span>
     );
   }
   if (hours <= 6) {

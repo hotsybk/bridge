@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 
 export const metadata = {
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
           {/* 시행일 라인 */}
           <dl className="mt-10 grid grid-cols-2 gap-x-8 border-t border-[var(--color-border-light)] pt-6 text-xs text-[var(--color-text-tertiary)]">
             <div className="flex items-baseline gap-3">
-              <dt className="text-[10px] font-medium uppercase tracking-[0.18em]">
+              <dt className="text-[11px] font-medium uppercase tracking-[0.18em]">
                 시행일
               </dt>
               <dd className="tabular-nums text-[var(--color-text-secondary)]">
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
               </dd>
             </div>
             <div className="flex items-baseline gap-3">
-              <dt className="text-[10px] font-medium uppercase tracking-[0.18em]">
+              <dt className="text-[11px] font-medium uppercase tracking-[0.18em]">
                 최종 개정
               </dt>
               <dd className="tabular-nums text-[var(--color-text-secondary)]">
@@ -104,13 +104,13 @@ export default function PrivacyPage() {
               <table className="w-full border-collapse text-xs leading-relaxed">
                 <thead>
                   <tr className="border-y border-[var(--color-border-default)]">
-                    <th className="py-3 pr-4 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 pr-4 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       구분
                     </th>
-                    <th className="py-3 pr-4 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 pr-4 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       필수 항목
                     </th>
-                    <th className="py-3 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       선택 항목
                     </th>
                   </tr>
@@ -244,13 +244,13 @@ export default function PrivacyPage() {
               <table className="w-full border-collapse text-xs leading-relaxed">
                 <thead>
                   <tr className="border-y border-[var(--color-border-default)]">
-                    <th className="py-3 pr-4 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 pr-4 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       제공받는 자
                     </th>
-                    <th className="py-3 pr-4 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 pr-4 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       제공 항목
                     </th>
-                    <th className="py-3 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       목적
                     </th>
                   </tr>
@@ -328,10 +328,10 @@ export default function PrivacyPage() {
               <table className="w-full border-collapse text-xs leading-relaxed">
                 <thead>
                   <tr className="border-y border-[var(--color-border-default)]">
-                    <th className="py-3 pr-4 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 pr-4 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       수탁업체
                     </th>
-                    <th className="py-3 text-left text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+                    <th className="py-3 text-left text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       위탁 업무
                     </th>
                   </tr>
@@ -534,7 +534,7 @@ function Article({
       <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] md:text-3xl">
         {title}
       </h2>
-      <div className="mt-6 space-y-4 text-base leading-relaxed text-[var(--color-text-secondary)] md:text-sm">
+      <div className="mt-6 space-y-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
         {children}
       </div>
     </section>
@@ -561,13 +561,13 @@ function MobileTable3Col({
           </dt>
           <dd className="space-y-2 text-sm text-[var(--color-text-secondary)]">
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                 {cols[1]}
               </p>
               <p className="mt-1 leading-relaxed">{b}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                 {cols[2]}
               </p>
               <p className="mt-1 leading-relaxed">{c}</p>
@@ -594,7 +594,7 @@ function MobileTable2Col({
             {a}
           </dt>
           <dd>
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               {cols[1]}
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[var(--color-text-secondary)]">
@@ -627,7 +627,7 @@ function Ol({
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <li className="flex items-baseline gap-6 px-1 py-4">
-      <span className="w-20 shrink-0 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+      <span className="w-20 shrink-0 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
         {label}
       </span>
       <span className="text-sm leading-relaxed text-[var(--color-text-primary)]">
@@ -640,7 +640,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 function KvRow({ label, value }: { label: string; value: string }) {
   return (
     <li className="flex items-baseline gap-6 py-3">
-      <span className="w-16 shrink-0 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+      <span className="w-16 shrink-0 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
         {label}
       </span>
       <span className="text-sm text-[var(--color-text-primary)]">{value}</span>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave O / U — 시스템 설정 client island.
 // 6 tab: 일반 / 결제 / 알림 / 외부 통합 / 보안 / 기능 플래그.
@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { PageHeader } from "@/components/shared/page-header";
 import { app } from "@/lib/firebase/client";
 import { trpc } from "@/lib/trpc/client";
 
@@ -97,25 +98,17 @@ export function SettingsClient({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            시스템 · 설정
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            시스템 설정
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            플랫폼 운영 설정 통합 관리
-            {isPreview && (
-              <span className="ml-2 text-[11px] text-[var(--color-warning)]">
-                (PREVIEW — 로그인 후 실 데이터 노출)
-              </span>
-            )}
-          </p>
-        </div>
+      <PageHeader
+        label="시스템 · 설정"
+        title="시스템 설정"
+        description={
+          isPreview
+            ? "플랫폼 운영 설정 통합 관리 (PREVIEW — 로그인 후 실 데이터 노출)"
+            : "플랫폼 운영 설정 통합 관리"
+        }
+      >
         <BackupButton onMsg={handleMsg} />
-      </div>
+      </PageHeader>
 
       {(successMsg || errorMsg) && (
         <p
@@ -393,7 +386,7 @@ function FlagRowItem({
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           placeholder="설명"
-          className="mt-1 h-6 w-full bg-transparent text-[10px] text-[var(--color-text-tertiary)] focus:outline-none"
+          className="mt-1 h-6 w-full bg-transparent text-[11px] text-[var(--color-text-tertiary)] focus:outline-none"
         />
       </div>
       <label className="flex items-center gap-2 text-xs">
@@ -407,7 +400,7 @@ function FlagRowItem({
           {enabled ? "ON" : "OFF"}
         </span>
       </label>
-      <label className="flex items-center gap-2 text-[10px] text-[var(--color-text-tertiary)]">
+      <label className="flex items-center gap-2 text-[11px] text-[var(--color-text-tertiary)]">
         <input
           type="range"
           min={0}
@@ -444,7 +437,7 @@ function FlagRowItem({
             segment,
           })
         }
-        className="inline-flex h-7 items-center rounded-full bg-[var(--color-accent)] px-3 text-[10px] font-medium text-white hover:opacity-90 disabled:opacity-50"
+        className="inline-flex h-7 items-center rounded-full bg-[var(--color-accent)] px-3 text-[11px] font-medium text-white hover:opacity-90 disabled:opacity-50"
       >
         저장
       </button>
@@ -454,7 +447,7 @@ function FlagRowItem({
         onClick={() => {
           if (confirm(`정말 ${flag.id} 플래그를 삭제하시겠습니까?`)) onDelete();
         }}
-        className="inline-flex h-7 items-center rounded-full border border-[var(--color-border-light)] px-3 text-[10px] font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-error)] disabled:opacity-50"
+        className="inline-flex h-7 items-center rounded-full border border-[var(--color-border-light)] px-3 text-[11px] font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-error)] disabled:opacity-50"
       >
         삭제
       </button>
@@ -596,7 +589,7 @@ function PaymentTab({
         <dl className="mt-3 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
           <ReadOnlyMasked label="PortOne API Secret" value={apiSecretValue} />
         </dl>
-        <p className="mt-2 text-[10px] text-[var(--color-text-tertiary)]">
+        <p className="mt-2 text-[11px] text-[var(--color-text-tertiary)]">
           비밀 키는 .env.local 에서 관리합니다. 자동 마스킹됩니다.
         </p>
       </div>
@@ -764,7 +757,7 @@ function IntegrationTab({
             mono
           />
         </dl>
-        <p className="mt-2 text-[10px] text-[var(--color-text-tertiary)]">
+        <p className="mt-2 text-[11px] text-[var(--color-text-tertiary)]">
           API 키는 .env.local 에서 관리합니다.
         </p>
         <div className="mt-8 flex justify-end">

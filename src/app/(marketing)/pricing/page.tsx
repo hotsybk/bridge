@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -165,9 +165,9 @@ function HeroSection() {
           className="landing-fade-up mx-auto mt-7 max-w-2xl text-sm text-[var(--color-text-secondary)]"
           style={{ animationDelay: "500ms" }}
         >
-          거래액이 커질수록 수수료는 3.5% 까지 내려갑니다.
+          거래액이 커질수록 3.5%까지 내려갑니다.
           <br className="hidden md:block" />
-          가입비 0원 · 의무 약정 0원 · 최소 거래액 0원.
+          가입비·약정·최소거래 0원.
         </p>
       </div>
     </section>
@@ -287,7 +287,7 @@ function SavingsCalculatorSection() {
           <h2 className="mt-4 text-2xl font-semibold leading-[1.1] tracking-[-0.03em] md:text-3xl">
             얼마나 더 남는지,
             <br />
-            바로 계산해봅니다.
+            직접 계산해보세요.
           </h2>
         </div>
 
@@ -314,7 +314,7 @@ function SavingsCalculatorSection() {
                 className="w-full cursor-pointer accent-[var(--color-accent)]"
                 aria-label="월 거래액"
               />
-              <div className="mt-2 flex justify-between text-[10px] text-[var(--color-text-tertiary)] tabular-nums">
+              <div className="mt-2 flex justify-between text-[11px] text-[var(--color-text-tertiary)] tabular-nums">
                 <span>₩100만</span>
                 <span>₩5억</span>
                 <span>₩10억</span>
@@ -387,7 +387,7 @@ function SavingsCalculatorSection() {
         </div>
 
         <p className="mt-16 text-center text-xs text-[var(--color-text-tertiary)]">
-          슬라이더를 움직이면 실시간으로 계산됩니다 · 업계 평균 마진 22% 기준
+          움직이면 실시간 계산 · 업계 평균 22% 기준
         </p>
       </div>
     </section>
@@ -439,7 +439,7 @@ function ComparisonSection() {
           <span className="text-[var(--color-accent)]">1/4 가격.</span>
         </h2>
         <p className="mx-auto mt-5 max-w-xl text-sm text-[var(--color-text-secondary)]">
-          22% 의 도매상 마진을 5% 까지 낮춰, 17% 가 공급업체에게 돌아갑니다.
+          도매상 22% → MedPlace 5%. 차액 17%는 공급업체에.
         </p>
       </div>
 
@@ -553,7 +553,7 @@ function DonutCompare({
           {label}
         </p>
         {winner && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-light)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-light)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-accent)]">
             <Check className="h-2.5 w-2.5" strokeWidth={3} />
             우리
           </span>
@@ -628,8 +628,7 @@ function IncludedSection() {
             명확하게 구분합니다.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-sm text-[var(--color-text-secondary)]">
-            기본 수수료 5% 안에 핵심 운영 기능이 모두 포함됩니다.
-            그 외 항목은 처음부터 명시합니다.
+            5% 안에 핵심 운영 기능 모두 포함. 별도 항목은 처음부터 공개.
           </p>
         </div>
 

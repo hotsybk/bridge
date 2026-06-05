@@ -495,7 +495,7 @@ export default function SellerOrdersPage() {
       <PageHeader
         label="파트너센터 · 주문"
         title="주문 관리"
-        description="결제 완료된 주문을 처리하고 운송장을 등록합니다."
+        description="주문 처리 · 운송장 등록"
       >
         <button
           type="button"
@@ -503,7 +503,7 @@ export default function SellerOrdersPage() {
           className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[var(--color-border-light)] px-4 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-[var(--color-text-secondary)]"
         >
           <Download className="h-3.5 w-3.5" />
-          엑셀 내보내기
+          CSV 내보내기
         </button>
       </PageHeader>
 
@@ -740,7 +740,7 @@ export default function SellerOrdersPage() {
 
       {/* Footer note */}
       <p className="mt-12 border-t border-[var(--color-border-light)] pt-6 text-xs text-[var(--color-text-tertiary)]">
-        배송 완료 후 영업일 기준 3일 안에 등록 계좌로 자동 정산됩니다.{" "}
+        배송 완료 후 영업일 3일 자동 정산{" "}
         <a href="/seller/settlement" className="font-medium text-[var(--color-accent)] hover:underline">
           정산 내역 보기 →
         </a>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave M — /admin/settlement client island.
 // 서버 컴포넌트에서 fetch 한 tab/settlements/counts 를 받아 KPI + Tab nav + table + Dialog 렌더.
@@ -9,7 +9,9 @@ import {useRouter} from "next/navigation";
 import {ChevronDown} from "lucide-react";
 import {toast} from "sonner";
 
+import {AdminKpiCell} from "@/components/admin/admin-kpi-cell";
 import {CountUp} from "@/components/shared/count-up";
+import {PreviewBadge} from "@/components/shared/preview-badge";
 import {SettlementExportCsvButton} from "./export-csv-button";
 import {
   Dialog,
@@ -22,8 +24,6 @@ import {
 import {trpc} from "@/lib/trpc/client";
 import type {Settlement} from "@/lib/types";
 import {formatDate, formatDateTime} from "@/lib/utils/firestore-time";
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 type TabKey = "fast" | "scheduled" | "held" | "completed";
 
@@ -189,44 +189,50 @@ export function SettlementClient({
         정산 운영
       </h1>
       <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        PortOne 정산 캘린더 + 빠른정산 신청 승인.
-        {isPreview && (
-          <span className="ml-2 text-[11px] text-[var(--color-warning)]">
-            (PREVIEW — 로그인 후 실 데이터 노출)
-          </span>
-        )}
+        정산·빠른정산 승인
+        {isPreview && <PreviewBadge className="ml-2 align-middle" />}
       </p>
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell
+        <AdminKpiCell
           label="이번주 정산 예정"
-          value={counts.thisWeekScheduled}
-          unit="원"
-          mono
+          value={
+            <span className="font-mono">
+              <CountUp value={counts.thisWeekScheduled} />
+            </span>
+          }
+          sub="원"
           delta="향후 7일"
+          deltaColor="neutral"
         />
-        <KpiCell
-          label="빠른정산 신청 대기"
-          value={counts.fastPending}
-          unit="건"
-          deltaTone="accent"
+        <AdminKpiCell
+          label="빠른정산 대기"
+          value={<CountUp value={counts.fastPending} />}
+          sub="건"
           delta={counts.fastPending > 0 ? "승인 필요" : "없음"}
+          deltaColor="accent"
         />
-        <KpiCell
+        <AdminKpiCell
           label="보류금 (분쟁 중)"
-          value={counts.held}
-          unit="원"
-          mono
-          deltaTone={counts.held > 0 ? "error" : undefined}
+          value={
+            <span className="font-mono">
+              <CountUp value={counts.held} />
+            </span>
+          }
+          sub="원"
           delta={counts.held > 0 ? "검토 필요" : "없음"}
+          deltaColor={counts.held > 0 ? "error" : "neutral"}
         />
-        <KpiCell
-          label="이번달 수수료 수익"
-          value={counts.monthlyCommission}
-          unit="원"
-          mono
-          deltaTone="success"
+        <AdminKpiCell
+          label="이번달 수수료"
+          value={
+            <span className="font-mono">
+              <CountUp value={counts.monthlyCommission} />
+            </span>
+          }
+          sub="원"
+          deltaColor="success"
         />
       </dl>
 
@@ -508,7 +514,7 @@ export function SettlementClient({
           <DialogHeader>
             <DialogTitle>보류 해제</DialogTitle>
             <DialogDescription>
-              status=PENDING 으로 회귀합니다. 다음 정산 사이클에 처리됩니다.
+              정산 대기 상태로 회귀합니다. 다음 정산 사이클에 처리됩니다.
             </DialogDescription>
           </DialogHeader>
           {releaseTarget && (
@@ -556,8 +562,8 @@ export function SettlementClient({
           <DialogHeader>
             <DialogTitle>이체 완료 처리</DialogTitle>
             <DialogDescription>
-              실 송금 후 이체 ref 를 입력하세요. /payouts 신규 doc 생성 +
-              status=PAID 로 변경됩니다.
+              실 송금 후 이체 참조번호를 입력하세요. 지급 내역에 신규 기록이 추가되고
+              상태가 완료로 변경됩니다.
             </DialogDescription>
           </DialogHeader>
           {paidTarget && (
@@ -650,7 +656,7 @@ function FastTable({
                 <span className="block">
                   −₩{(r.fastSettlementFee ?? 0).toLocaleString()}
                 </span>
-                <span className="text-[10px]">
+                <span className="text-[11px]">
                   D {r.fastSettlementDays ?? 3}일 · 0.012%
                 </span>
               </span>
@@ -830,7 +836,7 @@ function ScheduledTable({
         ))}
       </ul>
       <p className="px-2 py-4 text-xs text-[var(--color-text-tertiary)]">
-        매일 03:00 KST settlement-daily Cloud Function 이 자동 생성합니다.
+        매일 새벽 3시 자동 정산
       </p>
     </div>
   );
@@ -999,59 +1005,6 @@ function CompletedTable({rows}: {rows: Settlement[]}) {
 // ─────────────────────────────────────────────────────────────
 // Shared
 // ─────────────────────────────────────────────────────────────
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  mono,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  mono?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl ${
-          mono ? "font-mono" : ""
-        }`}
-      >
-        <CountUp value={value} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}
 
 function Row({
   label,

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -244,7 +244,7 @@ export function DisputeThread({
               <p className="mt-2 text-xs text-[var(--color-error)]">{error}</p>
             )}
             <p className="mt-1.5 hidden text-xs text-[var(--color-text-tertiary)] lg:block">
-              Enter 전송 · Shift+Enter 줄바꿈. 운영자와 상대방이 함께 봅니다.
+              Enter 전송 · Shift+Enter 줄바꿈 · 양측·운영자 공유
             </p>
           </>
         )}
@@ -322,7 +322,7 @@ function AdminBubble({ message }: { message: ThreadMessage }) {
   );
   return (
     <div className="flex flex-col items-center gap-1">
-      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-warning)]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-warning)]">
         운영자 메시지
       </p>
       <div className="max-w-[88%] rounded-2xl border border-[var(--color-warning)]/40 bg-[var(--color-warning)]/5 px-4 py-2.5 text-center text-sm leading-relaxed text-[var(--color-text-primary)]">

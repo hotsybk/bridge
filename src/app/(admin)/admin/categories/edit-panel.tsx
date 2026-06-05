@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave G — 카테고리 트리 + 편집 패널 (client island).
 //
@@ -258,7 +258,7 @@ function TreeNode({
           >
             {node.name}
           </span>
-          <span className="font-mono text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+          <span className="font-mono text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
             L{node.depth}
           </span>
         </button>

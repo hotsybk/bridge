@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -527,7 +527,7 @@ export default function OnboardingVendorPage() {
                     <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                       영업 카테고리
                     </p>
-                    <span className="text-[10px] text-[var(--color-text-tertiary)]/70">
+                    <span className="text-[11px] text-[var(--color-text-tertiary)]/70">
                       최소 1개
                     </span>
                   </div>
@@ -856,7 +856,7 @@ function LineField({
           {label}
         </label>
         {hint && (
-          <span className="text-[10px] text-[var(--color-text-tertiary)]/70">
+          <span className="text-[11px] text-[var(--color-text-tertiary)]/70">
             {hint}
           </span>
         )}
@@ -915,7 +915,7 @@ function LineDropzone({
           {label}
         </p>
         {required && (
-          <span className="text-[10px] font-medium text-[var(--color-accent)]">
+          <span className="text-[11px] font-medium text-[var(--color-accent)]">
             필수
           </span>
         )}

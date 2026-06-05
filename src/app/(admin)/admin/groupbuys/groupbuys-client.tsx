@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave I — 공동구매 운영 client island.
 //
@@ -11,7 +11,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import {
   Dialog,
   DialogContent,
@@ -36,8 +38,8 @@ type Tab = "OPEN" | "TARGET_MET" | "FULFILLED" | "FAILED";
 
 const TABS: Array<{ value: Tab; label: string }> = [
   { value: "OPEN", label: "진행" },
-  { value: "TARGET_MET", label: "목표 달성" },
-  { value: "FULFILLED", label: "완료" },
+  { value: "TARGET_MET", label: "목표 도달" },
+  { value: "FULFILLED", label: "발주 완료" },
   { value: "FAILED", label: "미달 종료" },
 ];
 
@@ -137,15 +139,11 @@ export function GroupBuysClient({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-        카탈로그 · 공동구매
-      </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-        공동구매 운영
-      </h1>
-      <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        진행 캠페인 모니터링 · 강제 마감 / 취소
-      </p>
+      <PageHeader
+        label="카탈로그 · 공동구매"
+        title="공동구매 운영"
+        description="진행 캠페인 모니터링 · 강제 마감 / 취소"
+      />
 
       {readOnly && (
         <div className="mt-6 border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] px-4 py-3 text-xs text-[var(--color-text-secondary)]">
@@ -154,26 +152,30 @@ export function GroupBuysClient({
       )}
 
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="진행 중" value={initialCounts.open} unit="건" />
-        <KpiCell
+        <AdminKpiCell
+          label="진행 중"
+          value={<CountUp value={initialCounts.open} integer />}
+          sub="건"
+        />
+        <AdminKpiCell
           label="목표 도달"
-          value={initialCounts.targetMet}
-          unit="건"
-          deltaTone="success"
+          value={<CountUp value={initialCounts.targetMet} integer />}
+          sub="건"
           delta="capture 대기"
+          deltaColor="success"
         />
-        <KpiCell
+        <AdminKpiCell
           label="마감 임박 (24h)"
-          value={initialCounts.closingSoon}
-          unit="건"
-          deltaTone="warning"
+          value={<CountUp value={initialCounts.closingSoon} integer />}
+          sub="건"
           delta="모니터링"
+          deltaColor="warning"
         />
-        <KpiCell
+        <AdminKpiCell
           label="미달 종료"
-          value={initialCounts.failed}
-          unit="건"
-          deltaTone="error"
+          value={<CountUp value={initialCounts.failed} integer />}
+          sub="건"
+          deltaColor="error"
         />
       </dl>
 
@@ -274,7 +276,7 @@ export function GroupBuysClient({
                       <span className="font-mono text-xs tabular-nums">
                         {current.toLocaleString()} / {target.toLocaleString()}
                       </span>
-                      <span className="font-mono text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+                      <span className="font-mono text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
                         {pct}%
                       </span>
                     </div>
@@ -436,49 +438,6 @@ export function GroupBuysClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  decimal,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: "accent" | "warning" | "error" | "success";
-  decimal?: boolean;
-}) {
-  const deltaColor = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  } as const;
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p className={`mt-2 text-xs ${deltaTone ? deltaColor[deltaTone] : "text-[var(--color-text-tertiary)]"}`}>
-          {delta}
-        </p>
-      )}
     </div>
   );
 }

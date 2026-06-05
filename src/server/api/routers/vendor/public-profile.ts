@@ -50,7 +50,7 @@ export const vendorPublicProfileRouter = createTRPCRouter({
       if (!snap.exists) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "공급사를 찾을 수 없습니다.",
+          message: "공급업체를 찾을 수 없습니다.",
         });
       }
       const data = snap.data() as Partial<Vendor>;
@@ -61,7 +61,7 @@ export const vendorPublicProfileRouter = createTRPCRouter({
 
       return {
         id: snap.id,
-        companyName: data.companyName ?? "공급사",
+        companyName: data.companyName ?? "공급업체",
         vendorType: (data.vendorType ?? "DISTRIBUTOR") as Vendor["vendorType"],
         status: (data.status ?? "PENDING_REVIEW") as Vendor["status"],
         grade: data.grade,

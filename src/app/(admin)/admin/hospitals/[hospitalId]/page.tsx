@@ -77,7 +77,7 @@ const MOCK_ORDERS = [
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   PENDING_PAYMENT: "결제 대기",
-  PENDING_APPROVAL: "결재 대기",
+  PENDING_APPROVAL: "승인 대기",
   PAID: "준비 중",
   PARTIALLY_SHIPPED: "부분 배송",
   SHIPPED: "배송 중",

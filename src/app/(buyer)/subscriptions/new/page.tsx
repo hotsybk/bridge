@@ -212,7 +212,7 @@ function SubscriptionsNewInner() {
 
         <header className="mt-6">
           <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            새 정기 주문
+            새 정기구독
           </p>
           <h1 className="mt-3 break-keep text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
             구독 설정
@@ -436,7 +436,7 @@ function SubscriptionsNewInner() {
                   생성 중...
                 </>
               ) : (
-                <>정기 주문 시작</>
+                <>정기구독 시작</>
               )}
             </button>
           </div>

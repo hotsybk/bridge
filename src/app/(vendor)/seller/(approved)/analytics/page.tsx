@@ -235,7 +235,7 @@ export default function SellerAnalyticsPage() {
       </section>
 
       <p className="mt-16 border-t border-[var(--color-border-light)] pt-6 text-xs text-[var(--color-text-tertiary)]">
-        분석 데이터는 24시간 주기로 갱신됩니다. 6단계 정식 출시 후 실시간 스트림으로 전환됩니다.
+        24시간 주기 갱신 · Phase 6 실시간 전환 예정
       </p>
     </main>
   );

@@ -94,7 +94,7 @@ export function SubscriptionDetailActions({
     updateQtyM.isPending;
 
   const onCancel = () => {
-    if (!confirm("정기 주문을 해지하시겠어요? 다시 시작하려면 새 구독을 만들어야 합니다.")) return;
+    if (!confirm("정기구독을 해지하시겠어요? 다시 시작하려면 새 구독을 만들어야 합니다.")) return;
     cancelM.mutate({ subscriptionId });
   };
 

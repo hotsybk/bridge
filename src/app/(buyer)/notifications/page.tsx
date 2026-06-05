@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { NotificationsList } from "@/components/shared/notifications-list";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
   title: "알림 센터",
@@ -23,18 +24,13 @@ export default function BuyerNotificationsPage() {
       <CatalogTopNav />
 
       <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
-        <header className="border-b border-[var(--color-border-light)] pb-8 md:pb-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-            알림 센터
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.035em] md:text-5xl">
-            알림
-          </h1>
-          <p className="mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
-            주문 진행 · 분쟁 · 정산 · 정기구독 · 공동구매에서 발생한 모든 알림을 한 곳에서
-            확인합니다.
-          </p>
-        </header>
+        <div className="border-b border-[var(--color-border-light)] pb-8 md:pb-10">
+          <PageHeader
+            label="알림 센터"
+            title="알림"
+            description="주문·분쟁·정산·정기구독·공동구매 알림 한 곳에서."
+          />
+        </div>
 
         <div className="mt-10 md:mt-12">
           <NotificationsList audience="BUYER" />

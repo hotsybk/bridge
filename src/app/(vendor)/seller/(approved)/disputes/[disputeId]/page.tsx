@@ -202,7 +202,7 @@ export default async function VendorDisputeDetailPage({
                     : "text-[var(--color-text-tertiary)]"
               }`}
             >
-              SLA {hoursLeft <= 0 ? "이탈" : `${hoursLeft}h 남음`}
+              마감 {hoursLeft <= 0 ? "이탈" : `${hoursLeft}h 남음`}
             </span>
           )}
           <span
@@ -291,8 +291,7 @@ export default async function VendorDisputeDetailPage({
               안내
             </p>
             <p className="mt-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
-              마감 시각 이전에 응답하지 않으면 SLA 이탈로 기록됩니다. 응답은
-              병원·운영자 모두에게 공개됩니다.
+              마감 전 응답 필수 · 응답은 공개됩니다
             </p>
           </div>
         </aside>

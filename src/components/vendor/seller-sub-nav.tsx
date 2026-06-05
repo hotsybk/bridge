@@ -21,11 +21,11 @@ const ITEMS: Array<{
   label: string;
   matchPrefix?: string;
 }> = [
-  { href: "/seller/products", label: "카탈로그" },
-  { href: "/seller/orders", label: "주문 관리" },
-  { href: "/seller/subscriptions", label: "정기 구독" },
+  { href: "/seller/products", label: "상품" },
+  { href: "/seller/orders", label: "주문" },
+  { href: "/seller/subscriptions", label: "구독" },
   { href: "/seller/groupbuys", label: "공동구매" },
-  { href: "/seller/rfq", label: "견적 요청" },
+  { href: "/seller/rfq", label: "견적" },
   { href: "/seller/disputes", label: "분쟁" },
   { href: "/seller/settlement", label: "정산" },
   { href: "/seller/analytics", label: "분석" },

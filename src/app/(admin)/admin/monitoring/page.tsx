@@ -1,4 +1,6 @@
+﻿import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import { trpcServer } from "@/lib/trpc/server";
 
 import { SystemAlertsLedger, type AnomalyItem } from "./alerts-ledger";
@@ -16,8 +18,6 @@ const PREVIEW_MODE = process.env.NODE_ENV !== "production";
  * - 이상 감지 ledger : `_systemAlerts` (admin.monitoring.systemAlerts)
  * - PREVIEW_MODE 또는 데이터 없음 시 기존 mock 유지
  */
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 type ServiceHealthRow = {
   key: string;
@@ -167,59 +167,60 @@ export default async function AdminMonitoringPage() {
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            시스템 · 모니터링
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            시스템 모니터링
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            결제·알림·검색·Cloud Function 운영 메트릭 실시간
-          </p>
-        </div>
+      <PageHeader
+        label="시스템 · 모니터링"
+        title="시스템 모니터링"
+        description="운영 메트릭 실시간"
+      >
         <p className="font-mono text-xs tabular-nums text-[var(--color-text-tertiary)]">
           {useReal
             ? `최근 snapshot · ${metrics!.dau ? "정상" : "수집 중"}`
             : "현재 mock 데이터 (cron 미가동)"}
         </p>
-      </div>
+      </PageHeader>
 
       {/* KPI 6칸 — _metricsSnapshots 실데이터 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-3 lg:grid-cols-6">
-        <KpiCell label="DAU" value={kpi.dau} unit="명" delta="오늘" deltaTone="accent" />
-        <KpiCell label="MAU" value={kpi.mau} unit="명" delta="이번달" />
-        <KpiCell
+        <AdminKpiCell
+          label="DAU"
+          value={<CountUp value={kpi.dau} integer />}
+          sub="명"
+          delta="오늘"
+          deltaColor="accent"
+        />
+        <AdminKpiCell
+          label="MAU"
+          value={<CountUp value={kpi.mau} integer />}
+          sub="명"
+          delta="이번달"
+        />
+        <AdminKpiCell
           label="결제 성공률"
-          value={Math.round(kpi.paymentSuccessRate * 10) / 10}
-          unit="%"
-          decimal
-          deltaTone={kpi.paymentSuccessRate >= 97 ? "success" : "warning"}
+          value={<CountUp value={Math.round(kpi.paymentSuccessRate * 10) / 10} integer={false} />}
+          sub="%"
           delta={kpi.paymentSuccessRate >= 97 ? "목표 97% 상회" : "주의"}
+          deltaColor={kpi.paymentSuccessRate >= 97 ? "success" : "warning"}
         />
-        <KpiCell
+        <AdminKpiCell
           label="알림톡 성공률"
-          value={Math.round(kpi.alimtalkSuccessRate * 10) / 10}
-          unit="%"
-          decimal
-          deltaTone={kpi.alimtalkSuccessRate >= 98 ? "success" : "warning"}
+          value={<CountUp value={Math.round(kpi.alimtalkSuccessRate * 10) / 10} integer={false} />}
+          sub="%"
           delta={kpi.alimtalkSuccessRate >= 98 ? "정상" : "주의"}
+          deltaColor={kpi.alimtalkSuccessRate >= 98 ? "success" : "warning"}
         />
-        <KpiCell
+        <AdminKpiCell
           label="검색 p95"
-          value={kpi.searchLatencyP95}
-          unit="ms"
-          deltaTone="success"
+          value={<CountUp value={kpi.searchLatencyP95} integer />}
+          sub="ms"
           delta="정상"
+          deltaColor="success"
         />
-        <KpiCell
+        <AdminKpiCell
           label="Function 에러율"
-          value={Math.round(kpi.cloudFunctionErrorRate * 10) / 10}
-          unit="%"
-          decimal
-          deltaTone={kpi.cloudFunctionErrorRate <= 1 ? "success" : "error"}
+          value={<CountUp value={Math.round(kpi.cloudFunctionErrorRate * 10) / 10} integer={false} />}
+          sub="%"
           delta={kpi.cloudFunctionErrorRate <= 1 ? "임계 1% 이내" : "임계 초과"}
+          deltaColor={kpi.cloudFunctionErrorRate <= 1 ? "success" : "error"}
         />
       </dl>
 
@@ -341,57 +342,6 @@ function ServiceHealthCard({ service }: { service: ServiceHealthRow }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// KPI
-// ─────────────────────────────────────────────────────────────
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  decimal,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  decimal?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone ? deltaColor[deltaTone] : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 // Charts (inline SVG — mock 데이터)
 // ─────────────────────────────────────────────────────────────
 
@@ -489,7 +439,7 @@ function LineChart({
         />
         <circle cx={points[points.length - 1][0]} cy={points[points.length - 1][1]} r={3} fill={stroke} />
       </svg>
-      <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+      <div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
         <span>30일 전</span>
         <span>오늘</span>
       </div>
@@ -572,7 +522,7 @@ function BarChart({
           );
         })}
       </svg>
-      <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+      <div className="mt-2 flex justify-between text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
         <span>30일 전</span>
         <span>오늘</span>
       </div>

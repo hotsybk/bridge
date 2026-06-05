@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave Q3 — 운영자 정기구독 모니터링 client island.
 //
@@ -334,7 +334,7 @@ export function AdminSubscriptionsClient({
                         {r.vendorName ?? "—"}
                       </span>
                       <span className="truncate text-xs">{r.productName ?? "—"}</span>
-                      <span className="inline-flex h-5 w-fit items-center rounded-full border border-[var(--color-border-light)] px-2 text-[10px] text-[var(--color-text-secondary)]">
+                      <span className="inline-flex h-5 w-fit items-center rounded-full border border-[var(--color-border-light)] px-2 text-[11px] text-[var(--color-text-secondary)]">
                         {cadence}
                       </span>
                       <span className="font-mono text-xs tabular-nums text-[var(--color-text-secondary)]">
@@ -352,7 +352,7 @@ export function AdminSubscriptionsClient({
                         </span>
                         {typeof r.priceChangePercent === "number" &&
                           Math.abs(r.priceChangePercent) >= 5 && (
-                            <span className="font-mono text-[10px] tabular-nums text-[var(--color-warning)]">
+                            <span className="font-mono text-[11px] tabular-nums text-[var(--color-warning)]">
                               {r.priceChangePercent > 0 ? "+" : ""}
                               {r.priceChangePercent}%
                             </span>
@@ -410,7 +410,7 @@ export function AdminSubscriptionsClient({
                     className="flex items-center justify-between gap-2 px-2 py-3"
                   >
                     <span className="flex min-w-0 items-center gap-2.5">
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] font-mono text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] font-mono text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
                         {i + 1}
                       </span>
                       <span className="truncate text-xs font-medium">
@@ -419,7 +419,7 @@ export function AdminSubscriptionsClient({
                     </span>
                     <span className="font-mono text-xs tabular-nums text-[var(--color-text-secondary)]">
                       {v.count.toLocaleString()}
-                      <span className="ml-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+                      <span className="ml-0.5 text-[11px] text-[var(--color-text-tertiary)]">
                         건
                       </span>
                     </span>

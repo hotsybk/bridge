@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import {
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { CountUp } from "@/components/shared/count-up";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { calculateShippingTotal } from "@/lib/constants/shipping";
 import { trpc } from "@/lib/trpc/client";
 
@@ -160,29 +161,23 @@ export default function CartPage() {
         className="mx-auto max-w-6xl px-6 py-16 pb-32 md:px-12 md:py-24 md:pb-24"
       >
         {/* Header */}
-        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--color-border-light)] pb-10">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-              주문 · 장바구니
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-              장바구니
-            </h1>
-          </div>
-          {!isEmpty && (
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              상품{" "}
-              <span className="font-semibold text-[var(--color-text-primary)] tabular-nums">
-                {items.length}
-              </span>
-              개 · 공급업체{" "}
-              <span className="font-semibold text-[var(--color-text-primary)] tabular-nums">
-                {Object.keys(itemsByVendor).length}
-              </span>
-              곳
-            </p>
-          )}
-        </header>
+        <div className="border-b border-[var(--color-border-light)] pb-10">
+          <PageHeader label="주문 · 장바구니" title="장바구니">
+            {!isEmpty && (
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                상품{" "}
+                <span className="font-semibold text-[var(--color-text-primary)] tabular-nums">
+                  {items.length}
+                </span>
+                개 · 공급업체{" "}
+                <span className="font-semibold text-[var(--color-text-primary)] tabular-nums">
+                  {Object.keys(itemsByVendor).length}
+                </span>
+                곳
+              </p>
+            )}
+          </PageHeader>
+        </div>
 
         {isLoading ? (
           <CartSkeleton />
@@ -232,7 +227,7 @@ export default function CartPage() {
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                 결제 예정
               </p>
               <p className="text-base font-semibold tabular-nums tracking-tight">
@@ -279,7 +274,7 @@ function VendorGroup({
         <div className="flex items-center gap-2.5">
           <Building2 className="h-4 w-4 text-[var(--color-accent)]" />
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               공급업체
             </p>
             <p className="mt-0.5 text-sm font-semibold tracking-tight">
@@ -419,7 +414,7 @@ function QtyStepper({
       </button>
       <span className="min-w-[2.75rem] text-center text-sm font-medium tabular-nums">
         {qty}
-        <span className="ml-0.5 text-[10px] font-normal text-[var(--color-text-tertiary)]">
+        <span className="ml-0.5 text-[11px] font-normal text-[var(--color-text-tertiary)]">
           {unit(u)}
         </span>
       </span>
@@ -462,7 +457,7 @@ function SummaryCard({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
         주문 요약
       </p>
 
@@ -500,7 +495,7 @@ function SummaryCard({
           </div>
         ) : (
           <form onSubmit={onApplyCoupon} className="space-y-2">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               쿠폰 코드
             </p>
             <div className="flex gap-2">
@@ -530,7 +525,7 @@ function SummaryCard({
 
       {/* 결제 예정 */}
       <div className="mt-8">
-        <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
           결제 예정
         </p>
         <p className="mt-2 text-4xl font-semibold tracking-[-0.03em] tabular-nums md:text-5xl">
@@ -547,7 +542,7 @@ function SummaryCard({
       </Link>
 
       <p className="mt-5 text-center text-[11px] leading-relaxed text-[var(--color-text-tertiary)]">
-        베타 운영 중 — 결제는 mock 으로 처리됩니다 (PortOne 통합 전)
+        베타 — 결제는 테스트 모드로 처리됩니다.
       </p>
     </div>
   );
@@ -587,7 +582,7 @@ function Row({
           )}
         </span>
         {hint && (
-          <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+          <p className="mt-0.5 text-[11px] text-[var(--color-text-tertiary)]">
             {hint}
           </p>
         )}
@@ -602,7 +597,7 @@ function EmptyCart() {
       <EmptyState
         icon={ShoppingBag}
         title="장바구니가 비어 있습니다"
-        description="카탈로그에서 필요한 의료기기·소모품을 골라 담아보세요."
+        description="카탈로그에서 의료기기·소모품을 담아보세요."
         action={
           <Link
             href="/search"

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
   ArrowRight,
   Clock,
@@ -10,6 +10,7 @@ import {
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { LaunchAlertButton } from "@/components/shared/launch-alert-modal";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -95,29 +96,18 @@ export default function GroupBuysPage() {
       <CatalogTopNav />
 
       <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-              공동구매 · 곧 시작
-            </p>
-            <h1 className="mt-3 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-              지금 진행 중인
-              <br />
-              공동구매.
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-              여러 병원이 모이면 가격이 내려갑니다. 마감 시 자동으로 결제·발주가
-              진행됩니다.
-            </p>
-          </div>
-
+        <PageHeader
+          label="공동구매 · 곧 시작"
+          title="지금 진행 중인 공동구매."
+          description="병원이 모일수록 가격↓. 마감 시 자동 결제·발주."
+        >
           <LaunchAlertButton
             type="GROUPBUY_LAUNCH"
             title="공동구매 출시 알림"
             description="공동구매 정식 출시 시점을 가장 먼저 알려드려요. 모집 시작 캠페인에 우선 참여할 수 있는 안내도 함께 보내드립니다."
             buttonClassName="inline-flex h-12 items-center gap-1.5 rounded-full bg-[var(--color-text-primary)] px-6 text-sm font-medium text-white transition-opacity hover:opacity-90 active:scale-[0.98]"
           />
-        </header>
+        </PageHeader>
 
         {/* Stats banner — 라인 패턴 */}
         <section className="mt-10 grid grid-cols-1 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-3 md:divide-x md:divide-y-0">
@@ -153,7 +143,7 @@ export default function GroupBuysPage() {
 
         {/* Footer note */}
         <p className="mt-10 text-center text-xs text-[var(--color-text-tertiary)]">
-          위 공동구매는 디자인 미리보기입니다. 정식 출시 시 즉시 참여 가능합니다.
+          미리보기 — 정식 출시 시 즉시 참여 가능.
         </p>
       </main>
     </div>
@@ -225,7 +215,7 @@ function GroupBuyCard({ gb }: { gb: GroupBuy }) {
           </div>
         </div>
         <span
-          className={`inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-[10px] font-semibold ${statusTone.bg} ${statusTone.text}`}
+          className={`inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-[11px] font-semibold ${statusTone.bg} ${statusTone.text}`}
         >
           {statusTone.label}
         </span>

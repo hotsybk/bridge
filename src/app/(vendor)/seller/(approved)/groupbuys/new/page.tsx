@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -237,7 +237,7 @@ export default function SellerGroupbuyNewPage() {
                 className="flex items-end gap-3 border-b border-[var(--color-border-light)] pb-3 last:border-0"
               >
                 <div className="flex-1">
-                  <label className="block text-[10px] text-[var(--color-text-tertiary)]">
+                  <label className="block text-[11px] text-[var(--color-text-tertiary)]">
                     최소 수량
                   </label>
                   <input
@@ -250,7 +250,7 @@ export default function SellerGroupbuyNewPage() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-[10px] text-[var(--color-text-tertiary)]">
+                  <label className="block text-[11px] text-[var(--color-text-tertiary)]">
                     단가 (원)
                   </label>
                   <input

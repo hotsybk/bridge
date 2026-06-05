@@ -222,7 +222,7 @@ export default function SellerRfqDetailPage() {
             <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
               {hasMyQuote ? "내 견적 (수정)" : "견적 제출"}
             </p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight">
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.025em] md:text-3xl">
               {hasMyQuote ? "기존 견적 갱신" : "새 견적 작성"}
             </h2>
           </div>
@@ -253,7 +253,7 @@ export default function SellerRfqDetailPage() {
                 총액 ({((data as { qty?: number }).qty ?? 0).toLocaleString()}{" "}
                 {(data as { unit?: string }).unit ?? "EA"})
               </span>
-              <span className="text-lg font-semibold tabular-nums">
+              <span className="text-base font-semibold tabular-nums">
                 ₩{totalPrice.toLocaleString()}
               </span>
             </div>

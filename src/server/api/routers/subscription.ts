@@ -297,7 +297,7 @@ export const subscriptionRouter = createTRPCRouter({
         hospitalName: hospital.name ?? "병원",
         userId: uid,
         vendorId: product.vendorId ?? null,
-        vendorName: product.vendorName ?? "공급사",
+        vendorName: product.vendorName ?? "공급업체",
         productId: input.productId,
         productName: product.name ?? "상품",
         productImage: product.thumbnail ?? product.images?.[0] ?? null,

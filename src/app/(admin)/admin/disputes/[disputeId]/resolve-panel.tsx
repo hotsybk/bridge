@@ -489,7 +489,7 @@ function LineToggle({
           {label}
         </span>
         {hint && (
-          <span className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+          <span className="mt-0.5 text-[11px] text-[var(--color-text-tertiary)]">
             {hint}
           </span>
         )}

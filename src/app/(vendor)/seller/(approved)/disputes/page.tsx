@@ -3,6 +3,7 @@ import { AlertCircle, ChevronRight } from "lucide-react";
 
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { formatDateTime, formatKRW, formatRelative } from "@/lib/format";
 import { trpcServer } from "@/lib/trpc/server";
 
@@ -170,28 +171,24 @@ export default async function VendorDisputesPage({
       />
 
       {/* 헤더 */}
-      <header className="mt-6 border-b border-[var(--color-border-light)] pb-10">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-accent)]">
-          분쟁 관리
-        </p>
-        <h1 className="mt-3 break-keep text-3xl font-semibold tracking-[-0.035em] md:text-4xl">
-          분쟁
-        </h1>
-        <p className="mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
-          병원이 신청한 분쟁에 대응합니다. 응답이 필요한 항목이 우선 표시됩니다.
+      <div className="mt-6">
+        <PageHeader
+          label="파트너센터 · 분쟁"
+          title="분쟁"
+          description={
+            isPreview
+              ? "병원이 신청한 분쟁에 대응합니다. 응답이 필요한 항목이 우선 표시됩니다. · PREVIEW (비로그인)"
+              : "병원이 신청한 분쟁에 대응합니다. 응답이 필요한 항목이 우선 표시됩니다."
+          }
+        >
           {urgentCount > 0 && (
-            <span className="ml-2 inline-flex items-center gap-1 font-medium text-[var(--color-warning)]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-warning)]/10 px-3 py-1 text-xs font-medium text-[var(--color-warning)]">
               <AlertCircle className="h-3 w-3" aria-hidden />
               응답 필요 {urgentCount}건
             </span>
           )}
-        </p>
-        {isPreview && (
-          <p className="mt-4 text-[11px] text-[var(--color-text-tertiary)]">
-            PREVIEW · 비로그인 상태입니다. 실제 데이터가 아닙니다.
-          </p>
-        )}
-      </header>
+        </PageHeader>
+      </div>
 
       {/* 탭 */}
       <nav
@@ -321,7 +318,7 @@ function DisputeRowItem({ dispute }: { dispute: DisputeRow }) {
 function SlaChip({ hours }: { hours: number | null }) {
   if (hours === null) return null;
   if (hours <= 0) {
-    return <span className="text-[var(--color-error)]">SLA 이탈</span>;
+    return <span className="text-[var(--color-error)]">마감 이탈</span>;
   }
   if (hours <= 6) {
     return (

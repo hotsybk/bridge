@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave N — /admin/udi-reports client island.
 // timeline + KPI + Tab + Table + 즉시 보고 Cloud Function 호출.
@@ -7,7 +7,10 @@ import {useMemo, useState} from "react";
 import Link from "next/link";
 import {ChevronDown, Loader2} from "lucide-react";
 
+import {AdminKpiCell} from "@/components/admin/admin-kpi-cell";
 import {CountUp} from "@/components/shared/count-up";
+import {PageHeader} from "@/components/shared/page-header";
+import {PreviewBadge} from "@/components/shared/preview-badge";
 import {
   Dialog,
   DialogContent,
@@ -35,7 +38,6 @@ export type AdminUdiReportRow = {
   completedAt?: unknown;
 };
 
-type DeltaTone = "accent" | "warning" | "error" | "success";
 type Tab = "ALL" | "DONE" | "PARTIAL" | "PENDING";
 
 const TABS: Array<{value: Tab; label: string}> = [
@@ -187,23 +189,12 @@ export function UdiReportsClient({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            정산·재무 · UDI 보고
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            식약처 UDI 보고
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            월말 SubOrder UDI 데이터를 식약처 e-MEDI 에 자동 보고합니다
-          </p>
-          {isPreview && (
-            <p className="mt-2 text-[11px] text-[var(--color-warning)]">
-              미리보기 모드 — 로그인하면 실제 데이터가 표시됩니다
-            </p>
-          )}
-        </div>
+      <PageHeader
+        label="재무 · UDI 보고"
+        title="식약처 UDI 보고"
+        description="월말 e-MEDI 자동 보고"
+      >
+        {isPreview && <PreviewBadge />}
         <button
           type="button"
           onClick={() => setReportOpen(true)}
@@ -215,38 +206,37 @@ export function UdiReportsClient({
           ) : null}
           이번달 즉시 보고
         </button>
-      </div>
+      </PageHeader>
 
       {/* KPI 4 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell
+        <AdminKpiCell
           label="이번달 총 건수"
-          value={counts.totalCount}
-          unit="건"
-          deltaTone="accent"
+          value={<CountUp value={counts.totalCount} integer />}
+          sub="건"
           delta={`${currentPeriod}`}
+          deltaColor="accent"
         />
-        <KpiCell
+        <AdminKpiCell
           label="이번달 보고 완료"
-          value={counts.successCount}
-          unit="건"
-          deltaTone="success"
+          value={<CountUp value={counts.successCount} integer />}
+          sub="건"
           delta="누적"
+          deltaColor="success"
         />
-        <KpiCell
+        <AdminKpiCell
           label="식약처 응답 에러"
-          value={counts.failCount}
-          unit="건"
-          deltaTone="error"
+          value={<CountUp value={counts.failCount} integer />}
+          sub="건"
           delta="재시도 가능"
+          deltaColor="error"
         />
-        <KpiCell
+        <AdminKpiCell
           label="보고 성공률"
-          value={successRate}
-          unit="%"
-          decimal
-          deltaTone="success"
+          value={<CountUp value={successRate} integer={false} />}
+          sub="%"
           delta="목표 99% 상회"
+          deltaColor="success"
         />
       </dl>
 
@@ -270,7 +260,7 @@ export function UdiReportsClient({
                   aria-hidden
                   className={`mx-auto mt-2 block h-2 w-2 rounded-full ${statusDot(m.status)}`}
                 />
-                <span className="mt-1.5 block font-mono text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+                <span className="mt-1.5 block font-mono text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
                   {(m.totalCount ?? 0).toLocaleString()}
                 </span>
               </Link>
@@ -427,51 +417,6 @@ export function UdiReportsClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  decimal,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  decimal?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${deltaTone ? deltaColor[deltaTone] : "text-[var(--color-text-tertiary)]"}`}
-        >
-          {delta}
-        </p>
-      )}
     </div>
   );
 }

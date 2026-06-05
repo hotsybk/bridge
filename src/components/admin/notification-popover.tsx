@@ -160,7 +160,7 @@ export function NotificationPopover() {
                         {n.body}
                       </p>
                     )}
-                    <p className="mt-1 text-[10px] text-[var(--color-text-tertiary)]">
+                    <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">
                       {relativeTime(n.createdAt)}
                       {n.targetType && (
                         <span className="ml-1.5 font-medium uppercase tracking-wider">
@@ -253,7 +253,7 @@ export function NotificationPopover() {
                   </span>
                 )}
               </p>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                 Admin Queue
               </span>
             </header>

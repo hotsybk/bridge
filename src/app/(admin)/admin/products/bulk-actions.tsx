@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -102,7 +102,7 @@ export function ProductBulkBar({ productIds }: { productIds: string[] }) {
           {productIds.slice(0, 12).map((id) => (
             <label
               key={id}
-              className="inline-flex items-center gap-1 text-[10px] text-[var(--color-text-tertiary)]"
+              className="inline-flex items-center gap-1 text-[11px] text-[var(--color-text-tertiary)]"
             >
               <input
                 type="checkbox"

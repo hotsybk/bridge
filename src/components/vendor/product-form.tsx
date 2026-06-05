@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
@@ -507,7 +507,7 @@ export function ProductForm({
                     }`}
                   >
                     <span className="text-sm font-medium">{opt.label}</span>
-                    <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                    <span className="text-[11px] text-[var(--color-text-tertiary)]">
                       {opt.desc}
                     </span>
                   </button>
@@ -569,7 +569,7 @@ export function ProductForm({
                   className="object-cover"
                 />
                 {i === 0 && (
-                  <span className="absolute left-1 top-1 bg-[var(--color-text-primary)] px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  <span className="absolute left-1 top-1 bg-[var(--color-text-primary)] px-1.5 py-0.5 text-[11px] font-medium text-white">
                     대표
                   </span>
                 )}
@@ -799,7 +799,7 @@ export function ProductForm({
         {/* Section: 판매 옵션 */}
         <Section index="07" title="판매 옵션">
           <Toggle
-            label="정기 주문 가능"
+            label="정기구독 가능"
             desc="병원이 매달 자동 발주할 수 있게 합니다."
             checked={form.subscribable}
             onChange={(v) => set("subscribable", v)}
@@ -959,7 +959,7 @@ function Section({
         <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
           {index}
         </span>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
       </div>
       {subtitle && (
         <p className="mt-1 ml-10 text-xs text-[var(--color-text-tertiary)]">
@@ -992,7 +992,7 @@ function Field({
       </span>
       <div className="mt-1.5">{children}</div>
       {hint && (
-        <p className="mt-1 text-[10px] text-[var(--color-text-tertiary)]">
+        <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">
           {hint}
         </p>
       )}

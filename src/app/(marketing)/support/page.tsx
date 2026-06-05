@@ -74,9 +74,9 @@ function HeroSection() {
           도움이 필요하신가요?
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-          가장 빠른 길은 자주 묻는 질문에서 시작합니다.
+          FAQ로 가장 먼저 확인하세요.
           <br className="hidden md:block" />
-          해결되지 않으면 1:1 문의로 연결됩니다 — 영업일 기준 24시간 이내 답변.
+          안 풀리면 1:1 문의 — 영업일 24시간 내 답변.
         </p>
       </div>
     </section>
@@ -100,7 +100,7 @@ const CHANNELS: Array<{
   {
     eyebrow: "01",
     title: "자주 묻는 질문",
-    body: "계정·결제·정기구독·공동구매·입점까지 33개 이상의 답변을 카테고리별로 정리했습니다.",
+    body: "33개 답변 — 계정·결제·정기구독·공동구매·입점까지 카테고리별 정리.",
     href: "/support/faq",
     cta: "FAQ 보기",
     icon: HelpCircle,
@@ -108,7 +108,7 @@ const CHANNELS: Array<{
   {
     eyebrow: "02",
     title: "1:1 문의",
-    body: "FAQ 에서 답을 찾지 못했다면 문의 폼으로 직접 보내주세요. 영업일 기준 24시간 이내 회신.",
+    body: "FAQ에서 못 찾았다면 문의 폼으로. 영업일 24시간 내 회신.",
     href: "/support/contact",
     cta: "문의 보내기",
     icon: MessageSquare,

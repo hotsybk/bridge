@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -310,7 +310,10 @@ export default function SellerProductsPage() {
   const vendorLabel = vendor
     ? VENDOR_TYPE_LABEL[vendor.vendorType] ?? vendor.vendorType
     : "공급업체";
+  // vendorName 은 향후 sub-section 헤더에서 다시 사용될 수 있어 변수는 유지.
+  // 현재 사용처가 없어 lint 회피를 위해 void 처리.
   const vendorName = vendor?.companyName ?? "더미 의료기기 유한회사";
+  void vendorName;
   const approvedAt = vendor?.approvedAt
     ? new Date(
         (vendor.approvedAt as unknown as { _seconds?: number; seconds?: number })
@@ -382,7 +385,7 @@ export default function SellerProductsPage() {
       {/* Header */}
       <PageHeader
         label={`파트너센터 · ${vendorLabel}`}
-        title={`환영합니다, ${vendorName}`}
+        title="상품 카탈로그"
         description={`승인일 ${approvedAt} · 카탈로그·재고·노출을 한 곳에서 관리합니다.`}
       >
         <button
@@ -592,7 +595,7 @@ export default function SellerProductsPage() {
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-mono text-sm font-semibold tabular-nums">
                       ₩{p.basePrice.toLocaleString()}
-                      <span className="ml-0.5 text-[10px] font-normal text-[var(--color-text-tertiary)]">
+                      <span className="ml-0.5 text-[11px] font-normal text-[var(--color-text-tertiary)]">
                         /{unitLabel(p.unit)}
                       </span>
                     </span>
@@ -666,8 +669,8 @@ export default function SellerProductsPage() {
         <div className="mt-6 grid gap-8 md:grid-cols-3">
           <PromoItem
             phaseLabel="3단계 출시 예정"
-            title="정기 주문 자동화"
-            desc="정기 주문 가능 상품으로 등록하면 매달 자동 발주가 들어옵니다."
+            title="정기구독 자동화"
+            desc="정기구독 등록 → 매달 자동 발주"
           />
           <PromoItem
             phaseLabel="4단계 출시 예정"
@@ -785,7 +788,7 @@ function ProductRow({
       </td>
       <td className="px-6 py-4 text-right tabular-nums font-semibold">
         ₩{row.basePrice.toLocaleString()}
-        <span className="ml-0.5 text-[10px] font-normal text-[var(--color-text-tertiary)]">
+        <span className="ml-0.5 text-[11px] font-normal text-[var(--color-text-tertiary)]">
           /{unitLabel(row.unit)}
         </span>
       </td>
@@ -844,7 +847,7 @@ function PromoItem({
 }) {
   return (
     <article>
-      <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
+      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
         {phaseLabel}
       </span>
       <h3 className="mt-3 text-sm font-semibold tracking-tight">{title}</h3>

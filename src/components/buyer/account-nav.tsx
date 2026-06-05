@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -97,7 +97,7 @@ export function AccountNav() {
             <li key={item.label}>
               <span className="flex items-center justify-between py-2.5 pl-4 text-sm text-[var(--color-text-tertiary)]/70">
                 <span>{item.label}</span>
-                <span className="text-[10px] uppercase tracking-[0.15em]">
+                <span className="text-[11px] uppercase tracking-[0.15em]">
                   Phase 2+
                 </span>
               </span>

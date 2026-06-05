@@ -1,11 +1,14 @@
-// Phase ν-1 — /admin/payouts index (지급 이력 vendor 별 집계).
+﻿// Phase ν-1 — /admin/payouts index (지급 이력 vendor 별 집계).
 // 사이드바 '지급 이력' 진입 시 404 였던 페이지. 본 라우트에서 vendor 별 row 노출.
 // 각 row 클릭 → /admin/payouts/[vendorId] 단건 페이지.
 
 import Link from "next/link";
 import {ArrowUpRight, Coins} from "lucide-react";
 
+import {AdminKpiCell} from "@/components/admin/admin-kpi-cell";
 import {CountUp} from "@/components/shared/count-up";
+import {PageHeader} from "@/components/shared/page-header";
+import {PreviewBadge} from "@/components/shared/preview-badge";
 import {trpcServer} from "@/lib/trpc/server";
 
 export const dynamic = "force-dynamic";
@@ -130,23 +133,12 @@ export default async function AdminPayoutsIndexPage() {
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
       {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            Payout Ledger
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            지급 이력
-          </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
-            공급업체별 누적 지급액·이번 달 지급·미지급 잔액·보류 현황. 행을 클릭하면 vendor 단건 정산 페이지로 이동합니다.
-          </p>
-          {isPreview && (
-            <p className="mt-2 text-[11px] text-[var(--color-warning)]">
-              (PREVIEW — 로그인 후 실 데이터 노출)
-            </p>
-          )}
-        </div>
+      <PageHeader
+        label="재무 · 지급"
+        title="지급 이력"
+        description="vendor별 지급·잔액·보류"
+      >
+        {isPreview && <PreviewBadge />}
         <Link
           href="/admin/settlement"
           className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--color-border-light)] px-4 text-xs font-medium text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-text-primary)] hover:text-[var(--color-text-primary)]"
@@ -154,18 +146,38 @@ export default async function AdminPayoutsIndexPage() {
           정산 운영으로
           <ArrowUpRight className="h-3 w-3" />
         </Link>
-      </div>
+      </PageHeader>
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="이번 달 지급" value={counts.thisMonthPaid} unit="원" tone="accent" />
-        <KpiCell label="미지급 잔액" value={counts.unpaid} unit="원" tone={counts.unpaid > 0 ? "warning" : undefined} />
-        <KpiCell label="지급 완료" value={counts.paidCount} unit="건" tone="success" />
-        <KpiCell label="보류" value={counts.holdCount} unit="건" tone={counts.holdCount > 0 ? "error" : undefined} />
+        <AdminKpiCell
+          label="이번 달 지급"
+          value={<CountUp value={counts.thisMonthPaid} integer />}
+          sub="원"
+          deltaColor="accent"
+        />
+        <AdminKpiCell
+          label="미지급 잔액"
+          value={<CountUp value={counts.unpaid} integer />}
+          sub="원"
+          deltaColor={counts.unpaid > 0 ? "warning" : "neutral"}
+        />
+        <AdminKpiCell
+          label="지급 완료"
+          value={<CountUp value={counts.paidCount} integer />}
+          sub="건"
+          deltaColor="success"
+        />
+        <AdminKpiCell
+          label="보류"
+          value={<CountUp value={counts.holdCount} integer />}
+          sub="건"
+          deltaColor={counts.holdCount > 0 ? "error" : "neutral"}
+        />
       </dl>
 
       {/* Vendor 별 Line Table */}
-      <h2 className="mt-12 text-base font-semibold tracking-[-0.02em]">
+      <h2 className="mt-12 text-xl font-semibold tracking-[-0.02em]">
         공급업체별 지급 현황
       </h2>
       <div className="mt-3 border-y border-[var(--color-border-light)]">
@@ -205,7 +217,7 @@ export default async function AdminPayoutsIndexPage() {
                       <span className="block truncate font-medium text-[var(--color-text-primary)]">
                         {r.vendorName}
                       </span>
-                      <span className="block truncate font-mono text-[10px] text-[var(--color-text-tertiary)]">
+                      <span className="block truncate font-mono text-[11px] text-[var(--color-text-tertiary)]">
                         {r.vendorId}
                       </span>
                     </span>
@@ -296,46 +308,3 @@ export default async function AdminPayoutsIndexPage() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Subcomponents
-// ─────────────────────────────────────────────────────────────
-
-type Tone = "accent" | "warning" | "error" | "success";
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  tone,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  tone?: Tone;
-}) {
-  const toneColor: Record<Tone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p
-        className={`mt-3 font-mono text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl ${
-          tone ? toneColor[tone] : ""
-        }`}
-      >
-        <CountUp value={value} integer />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-    </div>
-  );
-}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -110,7 +110,7 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
       >
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
               단가 · {qty}
               {product.unit}
             </p>
@@ -303,7 +303,7 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
               className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[var(--color-success)]/12 text-sm font-medium text-[var(--color-success)] transition-colors hover:bg-[var(--color-success)]/20"
             >
               <Repeat className="h-3.5 w-3.5" />
-              정기 주문
+              정기구독
             </button>
           )}
           {product.groupBuyable && (

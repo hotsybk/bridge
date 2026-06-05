@@ -282,7 +282,7 @@ export default function SellerGroupbuyDetailPage() {
               </span>
             </p>
           </div>
-          <span className="text-3xl font-semibold tabular-nums">{pct}%</span>
+          <span className="text-2xl font-semibold tabular-nums md:text-3xl">{pct}%</span>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-[var(--color-border-light)]">
           <div
@@ -374,7 +374,7 @@ export default function SellerGroupbuyDetailPage() {
                     <td className="py-4 pr-6 font-medium">
                       {p.hospitalName ?? "—"}
                       {p.voidedAt ? (
-                        <span className="ml-2 text-[10px] text-[var(--color-error)]">
+                        <span className="ml-2 text-[11px] text-[var(--color-error)]">
                           취소
                         </span>
                       ) : null}
@@ -403,7 +403,7 @@ export default function SellerGroupbuyDetailPage() {
       {confirmOpen && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-            <h3 className="text-lg font-semibold tracking-tight">
+            <h3 className="text-base font-semibold tracking-tight">
               캠페인을 취소하시겠습니까?
             </h3>
             <p className="mt-2 text-sm text-[var(--color-text-secondary)]">

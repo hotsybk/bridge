@@ -130,7 +130,7 @@ function LoginInner() {
               반갑습니다.
             </h1>
             <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
-              계정에 로그인하고 이어서 진행하세요.
+              이어서 진행하세요.
             </p>
           </header>
 

@@ -183,7 +183,7 @@ export default async function ProductDetailPage({
               {product.subscribable && (
                 <FeatureChip
                   icon={Repeat}
-                  label="자동 정기 주문"
+                  label="자동 정기구독"
                   tone="success"
                 />
               )}
@@ -227,14 +227,14 @@ export default async function ProductDetailPage({
                   aria-hidden
                   className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"
                 />
-                영업일 기준 1~3일 발송 · 도서산간 추가 배송비 발생 가능
+                1~3 영업일 발송 · 도서산간 추가비
               </li>
               <li className="flex items-start gap-2">
                 <span
                   aria-hidden
                   className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"
                 />
-                배송 완료 후 영업일 3일 자동 정산
+                배송 완료 후 영업일 3일 정산
               </li>
               <li className="flex items-start gap-2">
                 <span
@@ -263,7 +263,7 @@ export default async function ProductDetailPage({
                   안전 · 인증
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-                  식약처가 검증한 상품.
+                  식약처가 검증한 상품
                 </h2>
               </div>
               <p className="max-w-xs text-sm text-[var(--color-text-secondary)]">
@@ -305,7 +305,7 @@ export default async function ProductDetailPage({
             상세 정보
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            상품 명세서.
+            상품 명세서
           </h2>
 
           <dl className="mt-12 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
@@ -347,7 +347,7 @@ export default async function ProductDetailPage({
                   같은 카테고리
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-                  비슷한 상품.
+                  비슷한 상품
                 </h2>
               </div>
               <Link

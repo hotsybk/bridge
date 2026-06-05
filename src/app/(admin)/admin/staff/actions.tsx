@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,6 +32,11 @@ export type StaffRow = {
 
 type ActionKind = "invite" | "updateRole" | "deactivate" | null;
 type Role = "ADMIN" | "SUPER_ADMIN";
+
+const ROLE_LABEL: Record<Role, string> = {
+  ADMIN: "운영자",
+  SUPER_ADMIN: "최고 운영자",
+};
 
 export function StaffInviteButton() {
   return (
@@ -189,13 +194,13 @@ export function StaffTable({
                   </span>
                   <span>
                     <span
-                      className={`inline-flex h-6 items-center rounded-full border px-2 text-[10px] font-medium uppercase tracking-[0.15em] ${
+                      className={`inline-flex h-6 items-center rounded-full border px-2 text-[11px] font-medium tracking-[0.05em] ${
                         s.role === "SUPER_ADMIN"
                           ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                           : "border-[var(--color-border-light)] text-[var(--color-text-secondary)]"
                       }`}
                     >
-                      {s.role}
+                      {ROLE_LABEL[s.role]}
                     </span>
                   </span>
                   <span className="font-mono text-xs tabular-nums text-[var(--color-text-tertiary)]">
@@ -203,7 +208,7 @@ export function StaffTable({
                   </span>
                   <span className="text-right">
                     <span
-                      className={`inline-flex h-6 items-center rounded-full border px-2 text-[10px] font-medium uppercase tracking-[0.15em] ${
+                      className={`inline-flex h-6 items-center rounded-full border px-2 text-[11px] font-medium uppercase tracking-[0.15em] ${
                         isDisabled
                           ? "border-[var(--color-error)] text-[var(--color-error)]"
                           : "border-[var(--color-border-light)] text-[var(--color-text-secondary)]"
@@ -241,7 +246,7 @@ export function StaffTable({
                           setActive("deactivate");
                         }}
                         disabled={isLastSuper}
-                        title={isLastSuper ? "최소 1명의 SUPER_ADMIN 을 유지해야 합니다" : undefined}
+                        title={isLastSuper ? "최소 1명의 최고 운영자를 유지해야 합니다" : undefined}
                         className="inline-flex h-7 items-center rounded-full border border-[var(--color-border-light)] px-3 text-xs font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/5 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         비활성화
@@ -294,8 +299,8 @@ export function StaffTable({
                 }
                 className="mt-1 block h-9 w-full border-b border-[var(--color-border-light)] bg-transparent text-sm focus:border-[var(--color-accent)] focus:outline-none"
               >
-                <option value="ADMIN">ADMIN</option>
-                <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                <option value="ADMIN">운영자</option>
+                <option value="SUPER_ADMIN">최고 운영자</option>
               </select>
             </label>
             <label className="block text-xs text-[var(--color-text-tertiary)]">
@@ -341,7 +346,7 @@ export function StaffTable({
           <DialogHeader>
             <DialogTitle>권한 변경</DialogTitle>
             <DialogDescription>
-              ADMIN ↔ SUPER_ADMIN 으로 권한을 변경합니다. 대상 사용자는 재로그인 후 새 권한이 반영됩니다.
+              운영자 ↔ 최고 운영자로 권한을 변경합니다. 대상 사용자는 재로그인 후 새 권한이 반영됩니다.
             </DialogDescription>
           </DialogHeader>
           {target && (
@@ -349,7 +354,7 @@ export function StaffTable({
               <dl className="divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
                 <Row label="대상" value={target.name ?? "—"} />
                 <Row label="이메일" value={target.email ?? "—"} mono />
-                <Row label="현재 역할" value={target.role} />
+                <Row label="현재 역할" value={ROLE_LABEL[target.role]} />
               </dl>
               <label className="block text-xs text-[var(--color-text-tertiary)]">
                 새 역할
@@ -358,8 +363,8 @@ export function StaffTable({
                   onChange={(e) => setNewRole(e.target.value as Role)}
                   className="mt-1 block h-9 w-full border-b border-[var(--color-border-light)] bg-transparent text-sm focus:border-[var(--color-accent)] focus:outline-none"
                 >
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                  <option value="ADMIN">운영자</option>
+                  <option value="SUPER_ADMIN">최고 운영자</option>
                 </select>
               </label>
               {error && <p className="text-xs text-[var(--color-error)]">{error}</p>}

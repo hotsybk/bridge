@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 
@@ -267,7 +267,7 @@ export default function AccountProfilePage() {
                 <p className="text-sm font-medium text-[var(--color-text-primary)]">
                   {item.label}
                   {item.vendorOnly && (
-                    <span className="ml-2 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+                    <span className="ml-2 text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                       Vendor only
                     </span>
                   )}

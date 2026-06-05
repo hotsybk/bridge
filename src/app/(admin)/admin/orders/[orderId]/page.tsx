@@ -20,7 +20,7 @@ const PREVIEW_MODE = process.env.NODE_ENV !== "production";
 const STATUS_LABEL: Record<string, string> = {
   PAID: "결제 완료",
   PENDING_PAYMENT: "결제 대기",
-  PENDING_APPROVAL: "결재 대기",
+  PENDING_APPROVAL: "승인 대기",
   PARTIALLY_SHIPPED: "부분 배송",
   SHIPPED: "배송 중",
   COMPLETED: "배송 완료",
@@ -509,7 +509,7 @@ function TimelineRow({
           )}
         </summary>
         {event.raw ? (
-          <pre className="mt-3 overflow-x-auto bg-[var(--color-bg-secondary)] p-3 font-mono text-[10px] text-[var(--color-text-secondary)]">
+          <pre className="mt-3 overflow-x-auto bg-[var(--color-bg-secondary)] p-3 font-mono text-[11px] text-[var(--color-text-secondary)]">
             {JSON.stringify(event.raw, null, 2)}
           </pre>
         ) : null}

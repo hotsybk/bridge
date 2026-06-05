@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import {
   ArrowRight,
   BadgeCheck,
-  Building2,
   CalendarDays,
   Factory,
   MapPin,
@@ -17,6 +16,7 @@ import {
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { ProductCard } from "@/components/buyer/product-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { trpcServer } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
 
@@ -92,11 +92,11 @@ export async function generateMetadata({
     const trpc = await trpcServer();
     const v = await trpc.vendor.publicProfile.getById({ vendorId });
     return {
-      title: `${v.companyName} 공급사 프로필`,
-      description: `${v.companyName} — ${VENDOR_TYPE_LABEL[v.vendorType] ?? ""} · MedPlace 공급사. 취급 카테고리·신뢰 신호·상품 카탈로그.`,
+      title: `${v.companyName} 공급업체 프로필`,
+      description: `${v.companyName} — ${VENDOR_TYPE_LABEL[v.vendorType] ?? ""} · MedPlace 공급업체. 취급 카테고리·신뢰 신호·상품 카탈로그.`,
     };
   } catch {
-    return { title: "공급사 프로필" };
+    return { title: "공급업체 프로필" };
   }
 }
 
@@ -140,7 +140,7 @@ export default async function VendorPublicProfilePage({
             카탈로그
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-[var(--color-text-secondary)]">공급사</span>
+          <span className="text-[var(--color-text-secondary)]">공급업체</span>
           <span className="mx-2">/</span>
           <span className="text-[var(--color-text-primary)]">{vendor.companyName}</span>
         </nav>
@@ -148,13 +148,10 @@ export default async function VendorPublicProfilePage({
         {/* Hero — 라인 only, 박스 없음 */}
         <header className="mt-6 grid gap-6 border-b border-[var(--color-border-light)] pb-10 md:grid-cols-[1fr_auto] md:items-end md:gap-10 md:pb-14">
           <div className="min-w-0">
-            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-accent)]">
-              <Building2 className="h-3.5 w-3.5" />
-              공급사 프로필
-            </p>
-            <h1 className="mt-3 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-              {vendor.companyName}
-            </h1>
+            <PageHeader
+              label="공급업체 프로필"
+              title={vendor.companyName}
+            />
 
             {/* 메타 라인 */}
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
@@ -210,7 +207,7 @@ export default async function VendorPublicProfilePage({
 
         {/* KPI grid — 라인 only, 박스 없음 */}
         <section
-          aria-label="공급사 신뢰 신호"
+          aria-label="공급업체 신뢰 신호"
           className="grid grid-cols-2 divide-y divide-[var(--color-border-light)] border-b border-[var(--color-border-light)] md:grid-cols-4 md:divide-x md:divide-y-0"
         >
           <KpiCell
@@ -277,7 +274,7 @@ export default async function VendorPublicProfilePage({
               <EmptyState
                 icon={Package}
                 title="아직 등록된 상품이 없어요"
-                description="이 공급사는 카탈로그를 준비 중입니다. 잠시 후 다시 확인해주세요."
+                description="이 공급업체는 카탈로그를 준비 중입니다. 잠시 후 다시 확인해주세요."
               />
             </div>
           ) : (
@@ -312,17 +309,11 @@ export default async function VendorPublicProfilePage({
           <ul className="mt-6 grid gap-4 text-sm text-[var(--color-text-secondary)] md:grid-cols-2">
             <li className="flex items-start gap-2">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-accent)]" />
-              <span>
-                모든 공급사는 의료기기 판매업 신고증 검증을 마친 뒤에만 상품을
-                노출합니다.
-              </span>
+              <span>판매업 신고증 검증 완료 공급업체만 노출.</span>
             </li>
             <li className="flex items-start gap-2">
               <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-accent)]" />
-              <span>
-                결제·정산은 MedPlace 가 중개하며, 영업일 3일 이내 자동 정산이
-                보장됩니다.
-              </span>
+              <span>결제·정산은 MedPlace 가 중개 · 영업일 3일 자동 정산.</span>
             </li>
           </ul>
         </section>

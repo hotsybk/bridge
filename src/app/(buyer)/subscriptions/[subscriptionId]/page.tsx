@@ -133,20 +133,20 @@ export default async function SubscriptionDetailPage({
           className="inline-flex items-center gap-1 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)]"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          정기 주문 목록으로
+          정기구독 목록으로
         </Link>
 
         {/* Header */}
         <header className="mt-6 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-              정기 주문 #{sub.id.slice(0, 8)}
+              정기구독 #{sub.id.slice(0, 8)}
             </p>
             <h1 className="mt-3 break-keep text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
               {sub.productName ?? "상품"}
             </h1>
             <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-              {sub.vendorName ?? "공급사"} · {cadenceLabel} · 회당 {sub.qty ?? 0}
+              {sub.vendorName ?? "공급업체"} · {cadenceLabel} · 회당 {sub.qty ?? 0}
               {sub.unit ?? "EA"}
             </p>
           </div>
@@ -324,7 +324,7 @@ function Cell({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold tabular-nums tracking-tight">
+      <p className="mt-2 text-base font-semibold tabular-nums tracking-tight">
         {value}
       </p>
     </div>

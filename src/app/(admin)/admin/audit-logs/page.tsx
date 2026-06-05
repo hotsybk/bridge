@@ -1,4 +1,6 @@
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import { trpcServer } from "@/lib/trpc/server";
 
 import { AuditLogDrawerList } from "./drawer-list";
@@ -190,30 +192,30 @@ export default async function AdminAuditLogsPage({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            시스템 · 감사
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            감사 로그
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            모든 운영자·시스템 액션의 변경 불가 기록
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        label="시스템 · 감사 로그"
+        title="감사 로그"
+        description="감사 트레일"
+      />
 
       {/* KPI 3 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-3">
-        <KpiCell label="오늘 이벤트" value={counts.todayTotal} unit="건" />
-        <KpiCell label="운영자 액션" value={counts.adminActions} unit="건" />
-        <KpiCell
+        <AdminKpiCell
+          label="오늘 이벤트"
+          value={<CountUp value={counts.todayTotal} integer />}
+          sub="건"
+        />
+        <AdminKpiCell
+          label="운영자 액션"
+          value={<CountUp value={counts.adminActions} integer />}
+          sub="건"
+        />
+        <AdminKpiCell
           label="거부된 시도"
-          value={counts.denied}
-          unit="건"
-          deltaTone="error"
+          value={<CountUp value={counts.denied} integer />}
+          sub="건"
           delta={counts.denied > 0 ? "모니터링 중" : "정상"}
+          deltaColor="error"
         />
       </dl>
 
@@ -305,53 +307,3 @@ function FilterSelect({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// KPI cell
-// ─────────────────────────────────────────────────────────────
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} integer />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone ? deltaColor[deltaTone] : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

@@ -340,7 +340,7 @@ export default function GroupBuyDetailPage({
                 >
                   <span
                     aria-hidden
-                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[10px] font-semibold tabular-nums transition-all ${
+                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold tabular-nums transition-all ${
                       achieved
                         ? "bg-[var(--color-accent)] text-white"
                         : "border border-[var(--color-border-default)] text-[var(--color-text-tertiary)]"
@@ -404,7 +404,7 @@ export default function GroupBuyDetailPage({
                   <p className="truncate text-xs font-medium">
                     {p.initial}**의원
                   </p>
-                  <p className="truncate text-[10px] text-[var(--color-text-tertiary)]">
+                  <p className="truncate text-[11px] text-[var(--color-text-tertiary)]">
                     {p.region} · {p.qty}
                     {unit(groupBuy.unit)}
                   </p>
@@ -523,7 +523,7 @@ export default function GroupBuyDetailPage({
       >
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
               예상 결제 · {qty}
               {unit(groupBuy.unit)}
             </p>
@@ -599,7 +599,7 @@ function TimeCell({
       >
         {String(value).padStart(2, "0")}
       </p>
-      <p className="mt-1 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+      <p className="mt-1 text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
         {label}
       </p>
     </div>

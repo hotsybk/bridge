@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   Building2,
+  Info,
   Mail,
   Package,
   Repeat,
@@ -120,8 +121,8 @@ function Hero() {
             className="landing-fade-up mx-auto mt-7 max-w-xl text-sm text-[var(--color-text-secondary)] lg:mx-0"
             style={{ animationDelay: "500ms" }}
           >
-            여러 공급업체 가격을 한 화면에. 클릭 한 번으로 발주,
-            매달 자동 반복. 의료 구매에 들이던 시간을 다시 환자에게.
+            여러 공급업체 가격을 한 화면에. 한 번 클릭, 매달 자동.
+            시간은 환자에게.
           </p>
 
           <div
@@ -264,7 +265,7 @@ function HeroCatalogMockup() {
                 {/* Thumb placeholder */}
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--color-accent-light)]">
                   <span
-                    className={`grid h-5 w-5 place-items-center rounded text-[9px] font-bold ${
+                    className={`grid h-5 w-5 place-items-center rounded text-[10px] font-bold ${
                       p.grade === 1
                         ? "bg-[var(--color-class-1)]/20 text-[var(--color-class-1)]"
                         : "bg-[var(--color-class-2)]/20 text-[var(--color-class-2)]"
@@ -285,7 +286,7 @@ function HeroCatalogMockup() {
                     <span className="ml-0.5 text-[10px] font-normal text-[var(--color-text-tertiary)]">원</span>
                   </p>
                   <span
-                    className={`mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-medium ${BADGE_TONES[p.badge]}`}
+                    className={`mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium ${BADGE_TONES[p.badge]}`}
                   >
                     {p.badge}
                   </span>
@@ -337,7 +338,7 @@ function Flow() {
             이제 3일.
           </h2>
           <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
-            병원과 공급업체가 직접 만나니까. 숨은 마진 0원, 입금은 3일.
+            병원과 공급업체가 직접 만납니다. 마진 0, 입금 3일.
           </p>
         </div>
 
@@ -481,7 +482,7 @@ const FEATURES = [
   {
     icon: Repeat,
     title: "한 번 설정, 매달 자동",
-    desc: "장갑·거즈·소독제처럼 매달 똑같이 쓰는 품목은 한 번만 설정하면 끝. 재고 떨어질 일도, 발주서 다시 쓸 일도 없습니다.",
+    desc: "매달 쓰는 품목, 한 번 설정으로 끝. 재고 떨어질 일도, 발주서 다시 쓸 일도 없습니다.",
   },
   {
     icon: Users,
@@ -710,7 +711,7 @@ const TRUST_STATS = [
   {
     icon: ShieldCheck,
     label: "안전",
-    desc: "사업자 인증과 의료기기 판매업 신고증을 모두 확인한 공급업체만 입점합니다.",
+    desc: "인증된 사업자 + 판매업 신고증 — 모두 확인합니다.",
   },
   {
     icon: TrendingDown,
@@ -720,7 +721,7 @@ const TRUST_STATS = [
   {
     icon: Sparkles,
     label: "자동",
-    desc: "정기 주문, 식약처 의료기기 보고, 세금계산서 발행이 모두 자동으로 처리됩니다.",
+    desc: "정기 주문·UDI 보고·세금계산서 — 모두 자동.",
   },
 ] as const;
 
@@ -769,8 +770,9 @@ function BottomCTA() {
             </Link>
           </div>
 
-          <p className="mt-8 text-xs text-white/60">
-            ⓘ 베타 운영 중 — 결제·거래는 정식 출시 후 시작됩니다
+          <p className="mt-8 inline-flex items-center gap-1.5 text-xs text-white/60">
+            <Info className="h-3 w-3" aria-hidden />
+            베타 운영 중 — 결제·거래는 정식 출시 후 시작됩니다
           </p>
         </Reveal>
 

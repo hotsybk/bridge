@@ -289,7 +289,7 @@ export default async function AdminDisputeDetailPage({
                   className="status-pulse-dot h-1.5 w-1.5 rounded-full bg-[var(--color-error)]"
                 />
               )}
-              SLA {hoursLeft <= 0 ? "이탈" : `${hoursLeft}h 남음`}
+              마감 {hoursLeft <= 0 ? "이탈" : `${hoursLeft}h 남음`}
             </span>
           )}
           <span
@@ -421,14 +421,14 @@ export default async function AdminDisputeDetailPage({
         >
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
                 중재 결정
               </p>
               <p className="mt-0.5 truncate text-xs text-[var(--color-text-secondary)]">
                 {hoursLeft !== null
                   ? hoursLeft <= 0
-                    ? "SLA 이탈"
-                    : `SLA ${hoursLeft}h 남음`
+                    ? "마감 이탈"
+                    : `마감 ${hoursLeft}h 남음`
                   : STATUS_LABEL[status] ?? status}
               </p>
             </div>

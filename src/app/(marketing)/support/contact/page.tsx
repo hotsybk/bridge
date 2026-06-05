@@ -126,8 +126,7 @@ function Header() {
           한 통의 문의로 시작합니다.
         </h1>
         <p className="mt-6 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-          어떤 질문이든 영업일 기준 24시간 이내 회신드립니다.
-          긴급 결제·계정 보안 사안은 우선 처리됩니다.
+          영업일 24시간 내 회신. 결제·계정 보안은 우선 처리합니다.
         </p>
       </div>
     </section>
@@ -150,12 +149,12 @@ function DirectItem({
   const valueNode = href ? (
     <a
       href={href}
-      className="text-base font-semibold tracking-[-0.015em] tabular-nums text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-accent)] md:text-lg"
+      className="text-base font-semibold tracking-[-0.015em] tabular-nums text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-accent)]"
     >
       {value}
     </a>
   ) : (
-    <span className="text-base font-semibold tracking-[-0.015em] tabular-nums text-[var(--color-text-primary)] md:text-lg">
+    <span className="text-base font-semibold tracking-[-0.015em] tabular-nums text-[var(--color-text-primary)]">
       {value}
     </span>
   );

@@ -8,6 +8,7 @@ import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { DisputeOpenButton } from "@/components/buyer/dispute-open-button";
 import { CountUp } from "@/components/shared/count-up";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 
 const PREVIEW_MODE = process.env.NODE_ENV !== "production";
 
@@ -219,18 +220,12 @@ export default function OrdersPage() {
         </div>
 
         {/* ─── 헤더 ─── */}
-        <header className="grid gap-10 border-b border-[var(--color-border-light)] pb-12 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-16">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-              주문 · 이력
-            </p>
-            <h1 className="mt-4 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-              주문 이력
-            </h1>
-            <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
-              모든 주문의 진행 상태와 배송 정보를 한 곳에서 확인합니다.
-            </p>
-          </div>
+        <div className="grid gap-10 border-b border-[var(--color-border-light)] pb-12 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-16">
+          <PageHeader
+            label="주문 · 이력"
+            title="주문 이력"
+            description="주문 진행·배송 정보 한 곳에서."
+          />
 
           {/* 통계 — 3 컬럼 */}
           <dl className="grid grid-cols-3 gap-2">
@@ -248,7 +243,7 @@ export default function OrdersPage() {
               hasDivider
             />
           </dl>
-        </header>
+        </div>
 
         {/* ─── 필터 탭 — 전체 폭 균등 underline ─── */}
         <nav
@@ -453,7 +448,7 @@ function EmptyOrders({
         description={
           hasFilter
             ? "필터를 초기화하거나 다른 상태를 선택해보세요."
-            : "첫 주문을 시작하면 여기에서 진행 상황을 확인할 수 있습니다."
+            : "첫 주문 후 진행 상황이 여기에 표시됩니다."
         }
         action={
           hasFilter ? (

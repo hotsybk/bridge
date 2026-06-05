@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -191,7 +191,7 @@ export function SystemAlertsLedger({ anomalies }: { anomalies: AnomalyItem[] }) 
                         {a.message}
                       </p>
                     )}
-                    <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-[var(--color-text-tertiary)]">
+                    <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-[var(--color-text-tertiary)]">
                       {isOpen ? "payload 숨기기" : "payload 보기"}
                       <ChevronDown
                         className={`h-3 w-3 transition-transform ${

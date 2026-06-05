@@ -177,7 +177,7 @@ function AdminUserMenu() {
           className="popover-slide-down absolute right-0 top-12 z-40 w-56 rounded-xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] py-1.5 shadow-lg"
         >
           <div className="border-b border-[var(--color-border-light)] px-4 pb-2.5 pt-2">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               현재 권한
             </p>
             <p className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold">

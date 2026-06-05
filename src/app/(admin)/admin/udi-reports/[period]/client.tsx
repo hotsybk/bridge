@@ -322,7 +322,7 @@ export function UdiReportDetailClient({
                   <span className="truncate font-medium">
                     {r.productName ?? "—"}
                   </span>
-                  <span className="truncate font-mono text-[10px] tabular-nums text-[var(--color-text-tertiary)]">
+                  <span className="truncate font-mono text-[11px] tabular-nums text-[var(--color-text-tertiary)]">
                     {r.udiCode ?? "—"}
                   </span>
                   <span className="font-mono text-xs tabular-nums text-[var(--color-text-secondary)]">
@@ -334,7 +334,7 @@ export function UdiReportDetailClient({
                   <span className={`text-xs font-medium ${stColor}`}>
                     {stLabel}
                     {failed && r.result?.resultCode && (
-                      <span className="ml-1 text-[10px] text-[var(--color-text-tertiary)]">
+                      <span className="ml-1 text-[11px] text-[var(--color-text-tertiary)]">
                         {r.result.resultCode}
                       </span>
                     )}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -180,7 +180,7 @@ export function NotificationPopover() {
                         {n.body}
                       </p>
                     )}
-                    <p className="mt-1 text-[10px] text-[var(--color-text-tertiary)]">
+                    <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">
                       {relativeTime(n.createdAt)}
                     </p>
                   </div>

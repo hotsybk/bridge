@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import Link from "next/link";
@@ -238,7 +238,7 @@ export default function SellerRfqPage() {
                     </td>
                     <td className="px-6 py-4 text-right tabular-nums">
                       {r.qty.toLocaleString()}
-                      <span className="ml-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+                      <span className="ml-0.5 text-[11px] text-[var(--color-text-tertiary)]">
                         {r.unit}
                       </span>
                     </td>
@@ -246,7 +246,7 @@ export default function SellerRfqPage() {
                       {r.daysLeft > 0 ? (
                         <span className="tabular-nums">
                           D−{r.daysLeft}{" "}
-                          <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                          <span className="text-[11px] text-[var(--color-text-tertiary)]">
                             ({r.deadline})
                           </span>
                         </span>

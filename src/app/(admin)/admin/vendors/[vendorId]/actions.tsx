@@ -516,7 +516,7 @@ export function VendorMemoPanel({ vendorId }: { vendorId: string }) {
             <p className="text-xs text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap">
               {m.body}
             </p>
-            <p className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+            <p className="mt-1.5 text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
               {formatMemoTime(m.createdAt)}
               <span className="mx-1.5">·</span>
               <span className="font-mono">{m.actorId.slice(0, 8)}</span>

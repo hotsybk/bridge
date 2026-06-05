@@ -36,8 +36,8 @@ export type ParticipationView = {
 
 const STATUS_LABEL: Record<GroupBuy["status"], string> = {
   OPEN: "진행 중",
-  TARGET_MET: "목표 달성",
-  FULFILLED: "완료",
+  TARGET_MET: "목표 도달",
+  FULFILLED: "발주 완료",
   PARTIAL_FULFILLED: "부분 완료",
   FAILED: "미달 종료",
 };

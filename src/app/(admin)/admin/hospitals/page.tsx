@@ -1,18 +1,19 @@
-// Wave J — 병원 회원 list. Firestore + tRPC 풀 연동 Server Component.
+﻿// Wave J — 병원 회원 list. Firestore + tRPC 풀 연동 Server Component.
 // PREVIEW (dev/unauth) 환경에서는 mock fallback.
 
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Search } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
+import { PreviewBadge } from "@/components/shared/preview-badge";
 import { trpcServer } from "@/lib/trpc/server";
 import { tsToMs, formatDate } from "@/lib/utils/firestore-time";
 
 export const dynamic = "force-dynamic";
 
 const PREVIEW_MODE = process.env.NODE_ENV !== "production";
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 type HospitalTypeValue =
   | "CLINIC"
@@ -208,47 +209,44 @@ export default async function AdminHospitalsPage({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-        회원 · 병원
-      </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-        병원 회원 관리
-      </h1>
-      <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        전체 등록 병원과 활동 현황.
-        {isPreview && (
-          <span className="ml-2 text-[11px] text-[var(--color-warning)]">
-            (PREVIEW — 로그인 후 실 데이터 노출)
-          </span>
-        )}
-      </p>
+      <PageHeader
+        label="회원 · 병원"
+        title="병원 회원 관리"
+        description="등록·활동 현황"
+      >
+        {isPreview && <PreviewBadge />}
+      </PageHeader>
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="총 병원" value={counts.total} unit="개" />
-        <KpiCell
+        <AdminKpiCell
+          label="총 병원"
+          value={<CountUp value={counts.total} />}
+          sub="개"
+        />
+        <AdminKpiCell
           label="활성 (30일)"
-          value={counts.active30d}
-          unit="개"
-          deltaTone="success"
+          value={<CountUp value={counts.active30d} />}
+          sub="개"
           delta={
             counts.total > 0
               ? `${Math.round((counts.active30d / counts.total) * 100)}% 활성률`
               : undefined
           }
+          deltaColor="success"
         />
-        <KpiCell
+        <AdminKpiCell
           label="신규 (이번달)"
-          value={counts.newThisMonth}
-          unit="개"
-          deltaTone="accent"
+          value={<CountUp value={counts.newThisMonth} />}
+          sub="개"
+          deltaColor="accent"
         />
-        <KpiCell
+        <AdminKpiCell
           label="이탈 위험 (90일+)"
-          value={counts.churnRisk}
-          unit="개"
-          deltaTone="error"
+          value={<CountUp value={counts.churnRisk} />}
+          sub="개"
           delta={counts.churnRisk > 0 ? "재활성 캠페인 권장" : undefined}
+          deltaColor="error"
         />
       </dl>
 
@@ -345,7 +343,7 @@ export default async function AdminHospitalsPage({
                   <span className="font-mono text-xs tabular-nums text-[var(--color-text-secondary)]">
                     {h.bizRegNo}
                   </span>
-                  <span className="inline-flex h-6 w-fit items-center rounded-full border border-[var(--color-border-light)] px-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-secondary)]">
+                  <span className="inline-flex h-6 w-fit items-center rounded-full border border-[var(--color-border-light)] px-2 text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-secondary)]">
                     {TYPE_LABEL[h.type] ?? h.type}
                   </span>
                   <span className="font-mono text-xs tabular-nums text-[var(--color-text-tertiary)]">
@@ -391,7 +389,7 @@ export default async function AdminHospitalsPage({
                     <span className="truncate text-sm font-medium">
                       {h.name}
                     </span>
-                    <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-[var(--color-border-light)] px-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--color-text-secondary)]">
+                    <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-[var(--color-border-light)] px-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-text-secondary)]">
                       {TYPE_LABEL[h.type] ?? h.type}
                     </span>
                   </div>
@@ -447,49 +445,3 @@ export default async function AdminHospitalsPage({
 // Subcomponents
 // ─────────────────────────────────────────────────────────────
 
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

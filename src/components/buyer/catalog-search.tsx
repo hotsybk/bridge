@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -151,7 +151,7 @@ export function CatalogSearch({ initialQ = "" }: { initialQ?: string }) {
                         onClick={() => submitQuery(s)}
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--color-bg-secondary)]/60"
                       >
-                        <span className="grid h-5 w-5 place-items-center text-[10px] font-semibold tabular-nums text-[var(--color-accent)]">
+                        <span className="grid h-5 w-5 place-items-center text-[11px] font-semibold tabular-nums text-[var(--color-accent)]">
                           {i + 1}
                         </span>
                         <span className="flex-1 text-left">
@@ -162,7 +162,7 @@ export function CatalogSearch({ initialQ = "" }: { initialQ?: string }) {
                     </li>
                   ))}
                 </ul>
-                <div className="border-t border-[var(--color-border-light)] px-4 py-2.5 text-[10px] text-[var(--color-text-tertiary)]">
+                <div className="border-t border-[var(--color-border-light)] px-4 py-2.5 text-[11px] text-[var(--color-text-tertiary)]">
                   Esc 로 닫기 · Enter 로 검색
                 </div>
               </>

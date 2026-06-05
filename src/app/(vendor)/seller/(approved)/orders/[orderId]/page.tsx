@@ -473,7 +473,7 @@ export default function SellerOrderDetailPage() {
               />
             </div>
             <p className="text-[11px] text-[var(--color-text-tertiary)]">
-              발송 처리 시 UDI 보고 큐에 자동 등록됩니다. LOT·유통기한은 등급 2 이상 의료기기에서 필수입니다.
+              발송 시 UDI 자동 보고 · 등급 2 이상은 LOT·유통기한 필수
             </p>
             <div className="flex justify-end gap-2 pt-2">
               {showCancelForm ? null : (

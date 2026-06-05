@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -751,7 +751,7 @@ function BarChart({
               >
                 {d.label}
               </p>
-              <p className="text-[10px] text-[var(--color-text-tertiary)] tabular-nums">
+              <p className="text-[11px] text-[var(--color-text-tertiary)] tabular-nums">
                 ₩{d.value.toLocaleString()}
               </p>
             </div>

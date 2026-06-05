@@ -1,6 +1,9 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
+import { PreviewBadge } from "@/components/shared/preview-badge";
 import { trpcServer } from "@/lib/trpc/server";
 import type { Vendor, VendorGrade, VendorType } from "@/lib/types";
 
@@ -186,43 +189,40 @@ export default async function AdminVendorsListPage({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-        회원 · 공급업체
-      </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-        공급업체 회원 관리
-      </h1>
-      <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        입점 승인된 공급업체의 회원·운영 현황
-        {isPreview && (
-          <span className="ml-2 inline-flex h-5 items-center rounded-full border border-[var(--color-warning)] bg-[var(--color-warning)]/10 px-2 text-[10px] font-medium text-[var(--color-warning)]">
-            PREVIEW
-          </span>
-        )}
-      </p>
+      <PageHeader
+        label="회원 · 공급업체"
+        title="공급업체 회원 관리"
+        description="승인 공급업체 현황"
+      >
+        {isPreview && <PreviewBadge />}
+      </PageHeader>
 
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="총 공급업체" value={counts.total} unit="곳" />
-        <KpiCell
+        <AdminKpiCell
+          label="총 공급업체"
+          value={<CountUp value={counts.total} integer />}
+          sub="곳"
+        />
+        <AdminKpiCell
           label="활성 (전체)"
-          value={counts.total}
-          unit="곳"
-          deltaTone="success"
+          value={<CountUp value={counts.total} integer />}
+          sub="곳"
           delta={`${counts.distributor + counts.manufacturer + counts.importer}곳 분류`}
+          deltaColor="success"
         />
-        <KpiCell
+        <AdminKpiCell
           label="신규 (이번달)"
-          value={counts.newThisMonth}
-          unit="곳"
-          deltaTone="accent"
+          value={<CountUp value={counts.newThisMonth} integer />}
+          sub="곳"
           delta={counts.newThisMonth > 0 ? "이번 달 신규" : "—"}
+          deltaColor="accent"
         />
-        <KpiCell
+        <AdminKpiCell
           label="정지 중"
-          value={counts.suspended}
-          unit="곳"
-          deltaTone={counts.suspended > 0 ? "error" : "success"}
+          value={<CountUp value={counts.suspended} integer />}
+          sub="곳"
           delta={counts.suspended > 0 ? "모니터링" : "정상"}
+          deltaColor={counts.suspended > 0 ? "error" : "success"}
         />
       </dl>
 
@@ -329,7 +329,7 @@ export default async function AdminVendorsListPage({
                     {VENDOR_TYPE_LABEL[v.vendorType] ?? v.vendorType}
                   </span>
                   <span
-                    className={`inline-flex h-5 w-fit items-center rounded-full border px-1.5 text-[10px] font-medium ${GRADE_TONE[grade]}`}
+                    className={`inline-flex h-5 w-fit items-center rounded-full border px-1.5 text-[11px] font-medium ${GRADE_TONE[grade]}`}
                     title={`등급: ${grade} · 수수료 ${(v.defaultCommissionRate * 100).toFixed(1)}%`}
                   >
                     {GRADE_LABEL[grade]}
@@ -357,7 +357,7 @@ export default async function AdminVendorsListPage({
                       {v.companyName}
                     </span>
                     <span
-                      className={`inline-flex h-5 shrink-0 items-center rounded-full border px-1.5 text-[10px] font-medium ${GRADE_TONE[grade]}`}
+                      className={`inline-flex h-5 shrink-0 items-center rounded-full border px-1.5 text-[11px] font-medium ${GRADE_TONE[grade]}`}
                     >
                       {GRADE_LABEL[grade]}
                     </span>
@@ -422,47 +422,3 @@ function formatJoinedAt(ts: unknown): string {
   return "—";
 }
 
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: "accent" | "warning" | "error" | "success";
-}) {
-  const deltaColor = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  } as const;
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} integer />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone ? deltaColor[deltaTone] : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

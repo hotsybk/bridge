@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -693,7 +693,7 @@ function FormStep({
         <ol className="mt-4 space-y-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
           {ROLE_META[role].nextSteps.map((s, i) => (
             <li key={s} className="flex items-start gap-2.5">
-              <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] text-[10px] font-semibold tabular-nums text-[var(--color-text-secondary)]">
+              <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] text-[11px] font-semibold tabular-nums text-[var(--color-text-secondary)]">
                 {i + 1}
               </span>
               {s}

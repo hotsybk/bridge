@@ -17,17 +17,17 @@ import { trpc } from "@/lib/trpc/client";
  */
 
 const ROLE_LABEL: Record<string, string> = {
-  VENDOR_OWNER: "OWNER",
-  VENDOR_ADMIN: "ADMIN",
-  VENDOR_STAFF: "STAFF",
-  VENDOR_VIEWER: "VIEWER",
+  VENDOR_OWNER: "소유자",
+  VENDOR_ADMIN: "관리자",
+  VENDOR_STAFF: "처리자",
+  VENDOR_VIEWER: "조회 전용",
 };
 
 const ROLE_OPTIONS = [
-  { value: "VENDOR_OWNER", label: "OWNER · 모든 권한" },
-  { value: "VENDOR_ADMIN", label: "ADMIN · 운영 권한 (정산 제외)" },
-  { value: "VENDOR_STAFF", label: "STAFF · 주문·상품 처리" },
-  { value: "VENDOR_VIEWER", label: "VIEWER · 조회만" },
+  { value: "VENDOR_OWNER", label: "소유자 · 모든 권한" },
+  { value: "VENDOR_ADMIN", label: "관리자 · 운영 권한 (정산 제외)" },
+  { value: "VENDOR_STAFF", label: "처리자 · 주문·상품 처리" },
+  { value: "VENDOR_VIEWER", label: "조회 전용 · 조회만" },
 ] as const;
 
 function tsToDateStr(ts: unknown): string {
@@ -97,12 +97,12 @@ export default function VendorStaffPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
       <PageHeader
-        label="Seller · Team"
+        label="파트너센터 · 팀원"
         title="팀원 관리"
         description={
           isOwner
             ? "공급업체 멤버를 초대하고 역할을 지정합니다."
-            : "이 페이지는 보기 전용입니다. 초대·역할 변경은 OWNER 권한이 필요합니다."
+            : "이 페이지는 보기 전용입니다. 초대·역할 변경은 소유자 권한이 필요합니다."
         }
       />
 

@@ -1,6 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +11,6 @@ export const dynamic = "force-dynamic";
  *
  * 매일 첫 화면. 긴급 처리 + KPI 6 + 오늘 할 일 4 + 차트 2 + 시스템 상태.
  */
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 type Urgent = {
   label: string;
@@ -46,7 +45,7 @@ export default function AdminDashboardPage() {
         오늘 {today}
       </h1>
       <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        오늘 처리해야 할 작업을 한눈에 확인하세요.
+        오늘 처리할 작업
       </p>
 
       {/* 긴급 처리 */}
@@ -80,48 +79,66 @@ export default function AdminDashboardPage() {
 
       {/* KPI Bar — 6칸 */}
       <dl className="mt-12 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-3 lg:grid-cols-6">
-        <KpiCell
-          label="신규 입점 신청"
-          value={12}
-          unit="건"
-          delta="+3"
-          deltaTone="accent"
+        <Link
           href="/admin/vendors"
-        />
-        <KpiCell
-          label="상품 모더레이션"
-          value={8}
-          unit="건"
+          className="block transition-colors hover:bg-[var(--color-bg-secondary)]/40"
+        >
+          <AdminKpiCell
+            label="신규 입점 신청"
+            value={<CountUp value={12} integer />}
+            sub="건"
+            delta="+3"
+            deltaColor="accent"
+          />
+        </Link>
+        <Link
           href="/admin/products"
-        />
-        <KpiCell
-          label="미배송"
-          value={23}
-          unit="건"
-          delta="영업일 1+"
-          deltaTone="warning"
+          className="block transition-colors hover:bg-[var(--color-bg-secondary)]/40"
+        >
+          <AdminKpiCell
+            label="상품 모더레이션"
+            value={<CountUp value={8} integer />}
+            sub="건"
+          />
+        </Link>
+        <Link
           href="/admin/orders"
-        />
-        <KpiCell
-          label="분쟁 진행 중"
-          value={4}
-          unit="건"
-          delta="1건 마감 임박"
-          deltaTone="error"
+          className="block transition-colors hover:bg-[var(--color-bg-secondary)]/40"
+        >
+          <AdminKpiCell
+            label="미배송"
+            value={<CountUp value={23} integer />}
+            sub="건"
+            delta="영업일 1+"
+            deltaColor="warning"
+          />
+        </Link>
+        <Link
           href="/admin/disputes"
-        />
-        <KpiCell
+          className="block transition-colors hover:bg-[var(--color-bg-secondary)]/40"
+        >
+          <AdminKpiCell
+            label="분쟁 진행 중"
+            value={<CountUp value={4} integer />}
+            sub="건"
+            delta="1건 마감 임박"
+            deltaColor="error"
+          />
+        </Link>
+        <AdminKpiCell
           label="이번주 정산"
-          value={48200000}
-          unit="원"
-          mono
+          value={
+            <span className="font-mono">
+              <CountUp value={48200000} integer />
+            </span>
+          }
+          sub="원"
         />
-        <KpiCell
+        <AdminKpiCell
           label="알림톡 실패율"
-          value={0.8}
-          unit="%"
-          deltaTone="success"
-          decimal
+          value={<CountUp value={0.8} />}
+          sub="%"
+          deltaColor="success"
         />
       </dl>
 
@@ -245,72 +262,6 @@ export default function AdminDashboardPage() {
 // ─────────────────────────────────────────────────────────────
 // Subcomponents
 // ─────────────────────────────────────────────────────────────
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  href,
-  mono,
-  decimal,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  href?: string;
-  mono?: boolean;
-  decimal?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-
-  const inner = (
-    <div className="group px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl ${
-          mono ? "font-mono" : ""
-        }`}
-      >
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone ? deltaColor[deltaTone] : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-
-  if (!href) return inner;
-  return (
-    <Link
-      href={href}
-      className="block transition-colors hover:bg-[var(--color-bg-secondary)]/40"
-    >
-      {inner}
-    </Link>
-  );
-}
 
 function TodoPanel({
   title,
@@ -464,7 +415,7 @@ function ChartPanel({
           fill={stroke}
         />
       </svg>
-      <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+      <div className="mt-2 flex justify-between text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
         {xLabels.map((l) => (
           <span key={l}>{l}</span>
         ))}

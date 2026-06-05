@@ -386,7 +386,7 @@ function LineSection({
   return (
     <section>
       <div className="flex items-baseline justify-between border-b border-[var(--color-border-light)] pb-4">
-        <h2 className="text-2xl font-semibold tracking-[-0.02em] md:text-3xl">{title}</h2>
+        <h2 className="text-lg font-semibold tracking-[-0.01em]">{title}</h2>
         {hint && (
           <p className="text-[11px] text-[var(--color-text-tertiary)]">{hint}</p>
         )}
@@ -502,7 +502,7 @@ function OcrCompareRow({
           mono ? "font-mono tabular-nums" : ""
         }`}
       >
-        <span className="block text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+        <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
           사용자 입력
         </span>
         <span className="mt-0.5 block">{user || "—"}</span>
@@ -514,7 +514,7 @@ function OcrCompareRow({
             : "text-[var(--color-warning)]"
         } ${mono ? "font-mono tabular-nums" : ""}`}
       >
-        <span className="block text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+        <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
           OCR 추출
         </span>
         <span className="mt-0.5 block">{ocr ?? "—"}</span>

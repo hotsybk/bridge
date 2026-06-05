@@ -1,6 +1,8 @@
 import { ShieldAlert } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import { trpcServer } from "@/lib/trpc/server";
 
 import { StaffTable, type StaffRow } from "./actions";
@@ -101,44 +103,45 @@ export default async function AdminStaffPage() {
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            회원 · 운영자
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            운영자 관리
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            운영자 추가·권한 변경·감사.
-          </p>
-          <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
-            <ShieldAlert className="h-3 w-3" />이 페이지는 SUPER_ADMIN 만 접근 가능합니다
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        label="회원 · 운영자"
+        title="운영자 관리"
+        description="운영자 추가·권한 변경·감사. 최고 운영자만 접근 가능."
+      >
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg-secondary)] px-3 py-1 text-xs text-[var(--color-text-tertiary)]">
+          <ShieldAlert className="h-3 w-3" />최고 운영자
+        </span>
+      </PageHeader>
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="총 운영자" value={counts.total} unit="명" />
-        <KpiCell
-          label="SUPER_ADMIN"
-          value={counts.superAdmin}
-          unit="명"
-          deltaTone="accent"
-          delta="최소 1명 유지"
+        <AdminKpiCell
+          label="총 운영자"
+          value={<CountUp value={counts.total} />}
+          sub="명"
         />
-        <KpiCell label="ADMIN" value={counts.admin} unit="명" />
-        <KpiCell
+        <AdminKpiCell
+          label="최고 운영자"
+          value={<CountUp value={counts.superAdmin} />}
+          sub="명"
+          delta="최소 1명 유지"
+          deltaColor="accent"
+        />
+        <AdminKpiCell
+          label="운영자"
+          value={<CountUp value={counts.admin} />}
+          sub="명"
+        />
+        <AdminKpiCell
           label="지난 7일 로그인"
-          value={counts.recentLogin}
-          unit="명"
-          deltaTone="success"
+          value={<CountUp value={counts.recentLogin} />}
+          sub="명"
           delta={
             counts.total > 0
               ? `${Math.round((counts.recentLogin / counts.total) * 100)}% 활성`
               : "—"
           }
+          deltaColor="success"
         />
       </dl>
 
@@ -148,7 +151,7 @@ export default async function AdminStaffPage() {
 
       <div className="mt-10 space-y-1.5">
         <p className="text-xs text-[var(--color-accent)]">
-          SUPER_ADMIN 은 최소 1명 활성 유지되어야 합니다
+          최고 운영자는 최소 1명 활성 유지되어야 합니다
         </p>
         <p className="text-xs text-[var(--color-text-tertiary)]">
           모든 운영자 액션(초대·권한 변경·비활성화)은 감사 로그에 자동 기록됩니다
@@ -161,55 +164,3 @@ export default async function AdminStaffPage() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Subcomponents
-// ─────────────────────────────────────────────────────────────
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

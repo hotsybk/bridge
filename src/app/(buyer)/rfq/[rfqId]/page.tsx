@@ -319,7 +319,7 @@ export default function RfqDetailPage({
                             <p className="flex items-center gap-2 truncate text-sm font-medium">
                               {q.vendorName}
                               {isLowest && (
-                                <span className="inline-flex h-5 items-center rounded-full bg-[var(--color-accent-light)] px-2 text-[10px] font-semibold text-[var(--color-accent)]">
+                                <span className="inline-flex h-5 items-center rounded-full bg-[var(--color-accent-light)] px-2 text-[11px] font-semibold text-[var(--color-accent)]">
                                   최저가
                                 </span>
                               )}
@@ -472,7 +472,7 @@ export default function RfqDetailPage({
       >
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
               {awardedQuote ? "채택" : "선택 대기"}
             </p>
             <p className="truncate text-sm font-semibold tracking-tight">

@@ -23,7 +23,7 @@ const DEMO = {
   orderNo: "MP-2026-06-01-0042",
   paymentId: "mock_pay_demo",
   total: 469800,
-  method: "신용카드 (mock)",
+  method: "신용카드 (테스트)",
   paidAt: "2026-06-01 14:32:08",
   eta: "2026-06-04 ~ 2026-06-08",
 };
@@ -284,13 +284,13 @@ function SummaryRow({
 function methodLabel(method: string): string {
   switch (method) {
     case "CARD":
-      return "신용·체크카드 (mock)";
+      return "신용·체크카드 (테스트)";
     case "BANK_TRANSFER":
-      return "세금계산서 · 계좌 입금 (mock)";
+      return "세금계산서 · 계좌 입금 (테스트)";
     case "NET_30":
-      return "후불 결제 (Net 30, mock)";
+      return "후불 결제 (Net 30, 테스트)";
     case "POINT":
-      return "포인트 결제 (mock)";
+      return "포인트 결제 (테스트)";
     default:
       return method;
   }

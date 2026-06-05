@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
   Calendar,
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
+import { PageHeader } from "@/components/shared/page-header";
 import { trpcServer } from "@/lib/trpc/server";
 
 export const dynamic = "force-dynamic";
@@ -103,22 +104,11 @@ export default async function SubscriptionsPage() {
       <CatalogTopNav />
 
       <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
-        {/* Header */}
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-              정기 주문
-            </p>
-            <h1 className="mt-3 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-              한 번 설정,
-              <br className="md:hidden" /> 매달 자동 발주.
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-              장갑·마스크·소독제처럼 매달 쓰는 품목을 한 번 설정해두면, 다음
-              발주일에 자동으로 주문됩니다.
-            </p>
-          </div>
-
+        <PageHeader
+          label="정기구독"
+          title="한 번 설정, 매달 자동 발주."
+          description="장갑·마스크·소독제 같은 매달 품목, 한 번 설정 후 자동 발주."
+        >
           <Link
             href="/search"
             className="inline-flex h-12 items-center gap-1.5 rounded-full bg-[var(--color-accent)] px-6 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)] active:scale-[0.98]"
@@ -126,7 +116,7 @@ export default async function SubscriptionsPage() {
             <Plus className="h-4 w-4" />
             새 구독 시작
           </Link>
-        </header>
+        </PageHeader>
 
         {/* KPI — 마케팅 라인 패턴 */}
         <section className="mt-12 grid grid-cols-1 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-3 md:divide-x md:divide-y-0">
@@ -134,7 +124,7 @@ export default async function SubscriptionsPage() {
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               활성 구독
             </p>
-            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em]">
+            <p className="mt-3 text-2xl font-semibold tabular-nums tracking-[-0.03em] md:text-3xl">
               {counts.active}
             </p>
           </article>
@@ -142,7 +132,7 @@ export default async function SubscriptionsPage() {
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               일시정지
             </p>
-            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em]">
+            <p className="mt-3 text-2xl font-semibold tabular-nums tracking-[-0.03em] md:text-3xl">
               {counts.paused}
             </p>
           </article>
@@ -150,7 +140,7 @@ export default async function SubscriptionsPage() {
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               다음 7일 발주 예정
             </p>
-            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em]">
+            <p className="mt-3 text-2xl font-semibold tabular-nums tracking-[-0.03em] md:text-3xl">
               {counts.next7Days}
             </p>
           </article>
@@ -160,7 +150,7 @@ export default async function SubscriptionsPage() {
         <section className="mt-12">
           <header className="flex items-center justify-between border-b border-[var(--color-border-light)] pb-4">
             <h2 className="text-xl font-semibold tracking-[-0.02em]">
-              내 정기 주문
+              내 정기구독
             </h2>
             <p className="text-xs text-[var(--color-text-tertiary)]">
               총 {subscriptions.length}건
@@ -188,7 +178,7 @@ export default async function SubscriptionsPage() {
                           {s.productName ?? "상품"}
                         </p>
                         <p className="mt-1 truncate text-xs text-[var(--color-text-tertiary)]">
-                          {s.vendorName ?? "공급사"} · {cadenceLabel} · 회당 {s.qty ?? 0}
+                          {s.vendorName ?? "공급업체"} · {cadenceLabel} · 회당 {s.qty ?? 0}
                           {s.unit ?? "EA"} · {won(s.unitPrice)} /
                           {s.unit ?? "EA"}
                         </p>
@@ -199,7 +189,7 @@ export default async function SubscriptionsPage() {
                         )}
                       </div>
                       <div className="hidden md:block text-right">
-                        <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                        <p className="text-[11px] uppercase tracking-wider text-[var(--color-text-tertiary)]">
                           다음 발주일
                         </p>
                         <p className="mt-0.5 text-sm font-semibold tabular-nums">
@@ -240,7 +230,7 @@ function EmptyState() {
     {
       icon: CheckCircle2,
       title: "가격 변동 보호",
-      desc: "단가가 5% 이상 변하면 자동 발주 대신 승인 요청 알림",
+      desc: "단가 5% 이상 변동 시 승인 요청",
     },
   ];
 
@@ -250,7 +240,7 @@ function EmptyState() {
         <Repeat className="h-6 w-6" strokeWidth={1.5} />
       </div>
       <h3 className="mt-6 text-xl font-semibold tracking-[-0.02em]">
-        아직 정기 주문이 없습니다
+        아직 정기구독이 없습니다
       </h3>
       <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
         상품 상세 페이지에서 정기구독을 시작하거나, 카탈로그를 둘러보세요.

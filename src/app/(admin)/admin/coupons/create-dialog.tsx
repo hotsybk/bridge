@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave H — 쿠폰 페이지 client island.
 //
@@ -11,7 +11,9 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, Plus, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import {
   Dialog,
   DialogContent,
@@ -73,8 +75,6 @@ function fmtDate(v: unknown): string {
   if (!d) return "—";
   return d.toISOString().slice(0, 10);
 }
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 export function CouponsClient({
   initialCoupons,
@@ -220,18 +220,11 @@ export function CouponsClient({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            카탈로그 · 쿠폰
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            쿠폰 관리
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            쿠폰을 발행·관리하고 사용 통계를 확인합니다.
-          </p>
-        </div>
+      <PageHeader
+        label="카탈로그 · 쿠폰"
+        title="쿠폰 관리"
+        description="쿠폰을 발행·관리하고 사용 통계를 확인합니다."
+      >
         <button
           type="button"
           disabled={readOnly}
@@ -243,7 +236,7 @@ export function CouponsClient({
         >
           <Plus className="h-3.5 w-3.5" />새 쿠폰
         </button>
-      </div>
+      </PageHeader>
 
       {readOnly && (
         <div className="mt-6 border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] px-4 py-3 text-xs text-[var(--color-text-secondary)]">
@@ -253,28 +246,27 @@ export function CouponsClient({
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell
+        <AdminKpiCell
           label="활성 쿠폰"
-          value={initialCounts.active}
-          unit="건"
+          value={<CountUp value={initialCounts.active} integer />}
+          sub="건"
         />
-        <KpiCell
+        <AdminKpiCell
           label="예정 쿠폰"
-          value={initialCounts.scheduled}
-          unit="건"
-          deltaTone="accent"
+          value={<CountUp value={initialCounts.scheduled} integer />}
+          sub="건"
+          deltaColor="accent"
         />
-        <KpiCell
+        <AdminKpiCell
           label="총 사용"
-          value={initialCounts.totalUsed}
-          unit="건"
-          deltaTone="success"
+          value={<CountUp value={initialCounts.totalUsed} integer />}
+          sub="건"
+          deltaColor="success"
         />
-        <KpiCell
+        <AdminKpiCell
           label="총 발행 한도"
-          value={initialCounts.totalIssued}
-          unit="건"
-          mono
+          value={<CountUp value={initialCounts.totalIssued} integer />}
+          sub="건"
         />
       </dl>
 
@@ -382,7 +374,7 @@ export function CouponsClient({
                     {c.code}
                   </span>
                   <span
-                    className={`inline-flex h-5 w-fit items-center rounded-full border px-2 text-[10px] font-medium ${
+                    className={`inline-flex h-5 w-fit items-center rounded-full border px-2 text-[11px] font-medium ${
                       c.discountType === "PERCENT"
                         ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                         : "border-[var(--color-border-default)] text-[var(--color-text-secondary)]"
@@ -407,7 +399,7 @@ export function CouponsClient({
                       {limit > 0 ? ` / ${limit.toLocaleString()}` : ""}
                     </span>
                     {limit > 0 && (
-                      <span className="mt-1 block text-[10px] text-[var(--color-text-tertiary)]">
+                      <span className="mt-1 block text-[11px] text-[var(--color-text-tertiary)]">
                         {pct}%
                       </span>
                     )}
@@ -654,57 +646,3 @@ function LineField({
   );
 }
 
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  decimal,
-  mono,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  decimal?: boolean;
-  mono?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl ${
-          mono ? "font-mono" : ""
-        }`}
-      >
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

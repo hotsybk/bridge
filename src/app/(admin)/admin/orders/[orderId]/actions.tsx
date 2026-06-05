@@ -311,7 +311,7 @@ export function OrderAdminActions({ orderId, defaultAmount, isPreview }: Props) 
                 placeholder="병원·vendor 양측에 전달됩니다. 사실관계와 운영자 판단을 명확히 적어주세요."
                 className="mt-2 w-full resize-none border border-[var(--color-border-light)] bg-transparent p-3 text-sm placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-accent)] focus:outline-none"
               />
-              <p className="mt-1 text-[10px] text-[var(--color-text-tertiary)]">
+              <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">
                 {disputeReason.length} / 2000
               </p>
             </div>

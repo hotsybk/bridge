@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import {
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import { calculateShippingTotal } from "@/lib/constants/shipping";
 import { trackCheckoutStart } from "@/lib/posthog/events";
 import { trpc } from "@/lib/trpc/client";
@@ -251,14 +252,9 @@ export default function CheckoutPage() {
           장바구니로
         </Link>
 
-        <header className="mt-6 border-b border-[var(--color-border-light)] pb-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-            주문 · 결제
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-            결제
-          </h1>
-        </header>
+        <div className="mt-6 border-b border-[var(--color-border-light)] pb-10">
+          <PageHeader label="주문 · 결제" title="결제" />
+        </div>
 
         <CheckoutSteps current={2} />
 
@@ -399,8 +395,7 @@ export default function CheckoutPage() {
                       세금계산서 발행 (사업자등록증 필요)
                     </p>
                     <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
-                      신용카드 결제 시에도 발행 가능. 배송 완료 후 영업일
-                      3일 내 발행됩니다.
+                      결제 수단 무관 발행. 배송 완료 후 영업일 3일.
                     </p>
                   </div>
                 </label>
@@ -546,10 +541,10 @@ export default function CheckoutPage() {
         >
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-3">
             <div className="min-w-0">
-              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                 최종 결제 금액
               </p>
-              <p className="mt-0.5 text-lg font-semibold tabular-nums tracking-[-0.02em]">
+              <p className="mt-0.5 text-base font-semibold tabular-nums tracking-[-0.02em]">
                 ₩{grandTotal.toLocaleString()}
               </p>
             </div>
@@ -599,7 +594,7 @@ function Section({
           <span className="text-[11px] font-semibold tabular-nums tracking-[0.18em] text-[var(--color-accent)]">
             {num}
           </span>
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+          <h2 className="text-xl font-semibold tracking-tight">
             {title}
           </h2>
         </div>
@@ -743,7 +738,7 @@ function PayPanel({
           </p>
         ) : (
           <p>
-            베타 운영 중 — 결제는 mock 으로 처리됩니다
+            베타 운영 중 — 결제는 테스트 모드로 처리됩니다
             <br />
             주문은 자동 PAID 상태로 생성됩니다
           </p>
@@ -767,7 +762,7 @@ function Row({ label, value }: { label: string; value: number }) {
 function EmptyCheckout() {
   return (
     <div className="mt-24 flex flex-col items-center text-center">
-      <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+      <h2 className="text-xl font-semibold tracking-tight">
         카트가 비어있습니다
       </h2>
       <p className="mt-3 max-w-sm text-sm text-[var(--color-text-secondary)]">

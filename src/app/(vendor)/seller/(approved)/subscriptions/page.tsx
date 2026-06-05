@@ -191,8 +191,8 @@ export default function SellerSubscriptionsPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
       <PageHeader
-        label="파트너센터 · 정기 구독"
-        title="정기 구독"
+        label="파트너센터 · 정기구독"
+        title="정기구독"
         description="병원이 등록한 정기 발주가 자동으로 들어옵니다. Phase 3 출시 후 본격 가동됩니다."
       />
 
@@ -215,7 +215,7 @@ export default function SellerSubscriptionsPage() {
         <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
           이번 주기 자동 매출
         </p>
-        <p className="mt-3 text-3xl font-semibold tabular-nums">
+        <p className="mt-3 text-2xl font-semibold tabular-nums md:text-3xl">
           ₩<CountUp value={totalMonthlyGmv} />
         </p>
         <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">

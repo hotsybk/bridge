@@ -122,8 +122,7 @@ function HeroSection() {
               className="landing-fade-up mt-7 max-w-xl text-sm text-[var(--color-text-secondary)]"
               style={{ animationDelay: "500ms" }}
             >
-              도매상 중심의 불투명한 거래에서, 병원과 공급업체가 직접 만나는
-              투명한 거래로. 의료 현장이 환자에게 시간을 쓸 수 있도록.
+              불투명한 도매에서, 직접 거래로. 환자에게 더 많은 시간을.
             </p>
             <div
               className="landing-fade-up mt-10 flex flex-wrap items-center gap-3"
@@ -293,9 +292,9 @@ function ProblemSection() {
 
       <Reveal delay={320}>
         <p className="mx-auto mt-20 max-w-2xl text-center text-sm font-semibold leading-relaxed tracking-tight text-[var(--color-text-primary)]">
-          이 모든 비효율은 결국{" "}
-          <span className="text-[var(--color-accent)]">환자가 받는 의료의 질과 가격</span>
-          에 반영됩니다.
+          이 비효율은 결국{" "}
+          <span className="text-[var(--color-accent)]">환자에게</span>
+          {" "}갑니다.
         </p>
       </Reveal>
     </section>
@@ -390,13 +389,13 @@ function StakeholderSplit() {
         <StakeholderCol
           icon={Building2}
           label="병원 입장"
-          body="의원·중소병원은 매번 다른 도매상에 전화해 가격을 비교하고, 정기 주문을 직접 챙기고, 세금계산서를 손으로 일일이 정리합니다."
+          body="병원은 매번 전화로 가격 비교, 발주, 세금계산서까지 손으로 처리합니다."
         />
         <div className="md:border-l md:border-[var(--color-border-light)] md:pl-12">
           <StakeholderCol
             icon={Stethoscope}
             label="공급업체 입장"
-            body="공급업체는 4~6개월씩 결제 지연을 견디며 중간 거래상을 거쳐야 하고, 서면 계약 없이 거래하며, 식약처 의료기기 보고도 일일이 손으로 처리합니다."
+            body="공급업체는 4~6개월 결제 지연, 서면 계약 없이, 식약처 보고는 수작업."
             noBorder
           />
         </div>

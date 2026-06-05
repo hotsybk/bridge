@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -42,7 +42,7 @@ export function MobileBottomTabBar() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-14 flex-col items-center justify-center gap-1 text-[10px] transition-colors ${
+                className={`flex h-14 flex-col items-center justify-center gap-1 text-[11px] transition-colors ${
                   active
                     ? "text-[var(--color-accent)]"
                     : "text-[var(--color-text-tertiary)]"

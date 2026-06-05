@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
 import { trpcServer } from "@/lib/trpc/server";
 
@@ -151,16 +152,23 @@ export default async function AdminVendorsPage({
         공급업체 입점을 심사합니다
       </h1>
       <p className="mt-4 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-        신청 서류를 검토하고 승인·반려·정지를 결정합니다.
+        승인·반려·정지 결정
       </p>
 
       {/* KPI — divider only */}
       <dl className="mt-14 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
         {STATUS_TABS.map((t) => (
-          <KpiCell
+          <AdminKpiCell
             key={t.value}
             label={t.label}
-            value={counts[t.value]}
+            value={
+              <>
+                <CountUp value={counts[t.value]} />
+                <span className="ml-1 text-sm font-normal text-[var(--color-text-tertiary)]">
+                  건
+                </span>
+              </>
+            }
             active={status === t.value}
           />
         ))}
@@ -214,36 +222,6 @@ export default async function AdminVendorsPage({
 // ─────────────────────────────────────────────────────────────
 // Subcomponents
 // ─────────────────────────────────────────────────────────────
-
-function KpiCell({
-  label,
-  value,
-  active,
-}: {
-  label: string;
-  value: number;
-  active: boolean;
-}) {
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p
-        className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${
-          active
-            ? "text-[var(--color-accent)]"
-            : "text-[var(--color-text-tertiary)]"
-        }`}
-      >
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} />
-        <span className="ml-1 text-sm font-normal text-[var(--color-text-tertiary)]">
-          건
-        </span>
-      </p>
-    </div>
-  );
-}
 
 function EmptyRow({ status }: { status: StatusValue }) {
   const label = STATUS_TABS.find((t) => t.value === status)?.label ?? "";

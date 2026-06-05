@@ -411,7 +411,7 @@ export function HospitalMemoList({ memos }: { memos: Memo[] }) {
             <p className="text-sm text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap">
               {m.body}
             </p>
-            <p className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+            <p className="mt-1.5 text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
               {formatTs(m.createdAt)}
               {m.actorId && (
                 <>

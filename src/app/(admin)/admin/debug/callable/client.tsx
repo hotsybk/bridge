@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave V — Cloud Function callable simulator.
 // 배포된 callable function 화이트리스트 + JSON input → 직접 호출 → 결과 표시.
@@ -160,7 +160,7 @@ export function CallableClient() {
                 >
                   {c.label}
                 </p>
-                <p className="mt-1 text-[10px] leading-relaxed text-[var(--color-text-tertiary)]">
+                <p className="mt-1 text-[11px] leading-relaxed text-[var(--color-text-tertiary)]">
                   {c.description}
                 </p>
               </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
@@ -173,7 +173,7 @@ function AddressRow({
             {addr.label}
           </p>
           {addr.isDefault && (
-            <span className="inline-flex items-center rounded-full bg-[var(--color-accent-light)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--color-accent)]">
+            <span className="inline-flex items-center rounded-full bg-[var(--color-accent-light)] px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-accent)]">
               기본
             </span>
           )}

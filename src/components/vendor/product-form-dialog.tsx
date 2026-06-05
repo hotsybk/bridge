@@ -188,7 +188,7 @@ export function ProductFormDialog({
 
           <div className="space-y-2 pt-2">
             <ToggleField
-              label="정기 주문 가능"
+              label="정기구독 가능"
               desc="병원이 매달 자동 발주할 수 있게 합니다"
               checked={value.subscribable}
               onChange={(checked) => setValue({ ...value, subscribable: checked })}

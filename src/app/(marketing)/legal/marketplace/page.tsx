@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 
 export const metadata = {
@@ -88,7 +88,7 @@ export default function MarketplaceInfoPage() {
           <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] md:text-3xl">
             국세청 사업자등록 조회
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-[var(--color-text-secondary)] md:text-sm">
+          <p className="mt-5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
             국세청 홈택스에서 본 사업자의 실제 등록 여부와 휴·폐업 상태를 확인할 수
             있습니다. 사업자등록번호를 입력하면 즉시 조회됩니다.
           </p>
@@ -113,7 +113,7 @@ export default function MarketplaceInfoPage() {
           <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] md:text-3xl">
             분쟁이 발생한 경우
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-[var(--color-text-secondary)] md:text-sm">
+          <p className="mt-5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
             서비스 이용 중 분쟁이 발생한 경우, 우선 회사 고객지원 창구로 문의해
             주시기 바랍니다. 회사와의 협의로 해결되지 않을 경우 아래 기관에 분쟁
             조정을 신청할 수 있습니다.
@@ -181,7 +181,7 @@ function InfoRow({
 }) {
   return (
     <div className="grid grid-cols-[110px_1fr] items-baseline gap-6 py-5 md:grid-cols-[160px_1fr]">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+      <dt className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
         {label}
       </dt>
       <dd>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -498,7 +498,7 @@ function ProductMemoPanel({
                 <p className="whitespace-pre-wrap text-xs leading-relaxed text-[var(--color-text-primary)]">
                   {m.body}
                 </p>
-                <p className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+                <p className="mt-1.5 text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
                   {formatMemoTime(m.createdAt)}
                   <span className="mx-1.5">·</span>
                   <span className="font-mono">{m.actorId.slice(0, 8)}</span>

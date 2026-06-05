@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
   ArrowRight,
   Building2,
@@ -12,6 +12,7 @@ import {
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { LaunchAlertButton } from "@/components/shared/launch-alert-modal";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -76,22 +77,11 @@ export default function RfqPage() {
       <CatalogTopNav />
 
       <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-              견적 요청 · 곧 시작
-            </p>
-            <h1 className="mt-3 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-              한 번의 요청,
-              <br />
-              여러 공급업체.
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-              카탈로그에 없는 품목·대량 단가·비표준 사양. 한 번의 요청으로 여러
-              공급업체의 견적을 받아보세요.
-            </p>
-          </div>
-
+        <PageHeader
+          label="견적 요청 · 곧 시작"
+          title="한 번의 요청, 여러 공급업체."
+          description="비카탈로그 품목·대량 단가·맞춤 사양. 한 번에 다중 견적."
+        >
           <LaunchAlertButton
             type="RFQ_LAUNCH"
             title="RFQ 출시 알림"
@@ -99,7 +89,7 @@ export default function RfqPage() {
             buttonClassName="inline-flex h-12 items-center gap-1.5 rounded-full bg-[var(--color-text-primary)] px-6 text-sm font-medium text-white transition-opacity hover:opacity-90 active:scale-[0.98]"
             buttonLabel="출시 알림 받기"
           />
-        </header>
+        </PageHeader>
 
         {/* Flow diagram — 라인 패턴 */}
         <section className="mt-12 border-y border-[var(--color-border-light)] py-12 md:py-14">
@@ -111,7 +101,7 @@ export default function RfqPage() {
               num={1}
               icon={FileText}
               title="요청서 작성"
-              desc="품목·수량·납기·사양 입력. 정형 양식이라 1분이면 작성 완료"
+              desc="품목·수량·납기·사양 입력. 1분 작성."
             />
             <FlowConnector />
             <FlowStep
@@ -125,7 +115,7 @@ export default function RfqPage() {
               num={3}
               icon={Quote}
               title="견적 비교·채택"
-              desc="도착 견적을 한 화면에서 비교. 채택 시 주문 자동 생성"
+              desc="한 화면에서 비교. 채택 시 주문 자동 생성."
             />
           </ol>
         </section>
@@ -159,7 +149,7 @@ export default function RfqPage() {
                         {r.title}
                       </h3>
                       <span
-                        className={`inline-flex h-6 items-center rounded-full px-2.5 text-[10px] font-semibold ${meta.bg} ${meta.tone}`}
+                        className={`inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold ${meta.bg} ${meta.tone}`}
                       >
                         {meta.label}
                       </span>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Download, X } from "lucide-react";
@@ -152,7 +152,7 @@ export function AuditLogDrawerList({ logs }: { logs: LogItem[] }) {
                         {l.actorName ?? l.actorId ?? "—"}
                       </span>
                       <span
-                        className={`inline-flex h-4 shrink-0 items-center rounded-full border px-1.5 text-[10px] ${roleColor(
+                        className={`inline-flex h-4 shrink-0 items-center rounded-full border px-1.5 text-[11px] ${roleColor(
                           l.actorRole,
                         )}`}
                       >
@@ -191,7 +191,7 @@ export function AuditLogDrawerList({ logs }: { logs: LogItem[] }) {
                         {l.actorName ?? l.actorId ?? "—"}
                       </span>
                       <span
-                        className={`inline-flex h-4 shrink-0 items-center rounded-full border px-1.5 text-[10px] ${roleColor(
+                        className={`inline-flex h-4 shrink-0 items-center rounded-full border px-1.5 text-[11px] ${roleColor(
                           l.actorRole,
                         )}`}
                       >

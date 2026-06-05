@@ -74,7 +74,7 @@ export function ProductCard({ product }: { product: Product }) {
           {product.subscribable && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-success)]/90 px-2 py-0.5 text-[10px] font-semibold text-white">
               <Repeat className="h-2.5 w-2.5" />
-              정기 주문
+              정기구독
             </span>
           )}
         </div>
@@ -104,7 +104,7 @@ export function ProductCard({ product }: { product: Product }) {
               / {product.unit}
             </span>
           </p>
-          <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+          <p className="mt-0.5 text-[11px] text-[var(--color-text-tertiary)]">
             최소 주문 {product.moq} {product.unit}
           </p>
         </div>

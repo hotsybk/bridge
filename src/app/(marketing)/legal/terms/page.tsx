@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 
 export const metadata = {
@@ -55,7 +55,7 @@ export default function TermsPage() {
           {/* 시행일 라인 */}
           <dl className="mt-10 grid grid-cols-2 gap-x-8 border-t border-[var(--color-border-light)] pt-6 text-xs text-[var(--color-text-tertiary)]">
             <div className="flex items-baseline gap-3">
-              <dt className="text-[10px] font-medium uppercase tracking-[0.18em]">
+              <dt className="text-[11px] font-medium uppercase tracking-[0.18em]">
                 시행일
               </dt>
               <dd className="tabular-nums text-[var(--color-text-secondary)]">
@@ -63,7 +63,7 @@ export default function TermsPage() {
               </dd>
             </div>
             <div className="flex items-baseline gap-3">
-              <dt className="text-[10px] font-medium uppercase tracking-[0.18em]">
+              <dt className="text-[11px] font-medium uppercase tracking-[0.18em]">
                 최종 개정
               </dt>
               <dd className="tabular-nums text-[var(--color-text-secondary)]">
@@ -440,7 +440,7 @@ function Article({
       <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] md:text-3xl">
         {title}
       </h2>
-      <div className="mt-6 space-y-4 text-base leading-relaxed text-[var(--color-text-secondary)] md:text-sm">
+      <div className="mt-6 space-y-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
         {children}
       </div>
     </section>

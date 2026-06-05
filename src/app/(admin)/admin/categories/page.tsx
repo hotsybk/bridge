@@ -3,6 +3,8 @@
 // 좌측: 재귀 트리 (depth 무관, sortOrder asc).
 // 우측 sticky: 선택된 카테고리 편집 패널 (client island).
 
+import { PageHeader } from "@/components/shared/page-header";
+import { PreviewBadge } from "@/components/shared/preview-badge";
 import { trpcServer } from "@/lib/trpc/server";
 import type { Category } from "@/lib/types";
 
@@ -91,23 +93,24 @@ export default async function AdminCategoriesPage() {
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-        카탈로그 · 카테고리
-      </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-        카테고리 관리
-      </h1>
-      <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-        카테고리 트리를 편집하고 수수료율을 설정합니다.
-      </p>
+      <PageHeader
+        label="카탈로그 · 카테고리"
+        title="카테고리 관리"
+        description="카테고리 트리를 편집하고 수수료율을 설정합니다."
+      />
 
       {usingMock && (
-        <div className="mt-6 border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] px-4 py-3 text-xs text-[var(--color-text-secondary)]">
-          미리보기 모드 — 시드 데이터가 표시됩니다.
-          <code className="ml-2 font-mono text-[var(--color-text-primary)]">
-            pnpm seed:categories
-          </code>
-          로 Firestore에 시드 후 실제 데이터로 전환됩니다.
+        <div className="mt-6 space-y-2">
+          <PreviewBadge
+            variant="banner"
+            message="시드 데이터가 표시됩니다. 실제 데이터는 시드 후 표시됩니다."
+          />
+          <p className="px-1 text-[11px] text-[var(--color-text-tertiary)]">
+            <code className="font-mono text-[var(--color-text-secondary)]">
+              pnpm seed:categories
+            </code>{" "}
+            로 Firestore에 시드 후 실제 데이터로 전환됩니다.
+          </p>
         </div>
       )}
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Wave O — 운영자 알림 발송 client island.
 // 발송 이력 + bulkSend + retry mutation.
@@ -6,7 +6,9 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, RefreshCcw } from "lucide-react";
 
+import { AdminKpiCell } from "@/components/admin/admin-kpi-cell";
 import { CountUp } from "@/components/shared/count-up";
+import { PageHeader } from "@/components/shared/page-header";
 import {
   Dialog,
   DialogContent,
@@ -167,23 +169,15 @@ export function NotificationsClient({
 
   return (
     <div className="px-8 py-10 md:px-12 md:py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            시스템 · 알림 발송
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            알림톡 발송
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            사전 심사된 템플릿으로 일괄 알림톡을 발송합니다
-            {isPreview && (
-              <span className="ml-2 text-[11px] text-[var(--color-warning)]">
-                (PREVIEW — 로그인 후 실 데이터 노출)
-              </span>
-            )}
-          </p>
-        </div>
+      <PageHeader
+        label="시스템 · 알림 발송"
+        title="알림톡 발송"
+        description={
+          isPreview
+            ? "사전 심사 템플릿 일괄 발송 (PREVIEW — 로그인 후 실 데이터 노출)"
+            : "사전 심사 템플릿 일괄 발송"
+        }
+      >
         <button
           type="button"
           onClick={() => setComposeOpen(true)}
@@ -191,7 +185,7 @@ export function NotificationsClient({
         >
           + 새 발송
         </button>
-      </div>
+      </PageHeader>
 
       {(successMsg || errorMsg) && (
         <p
@@ -207,26 +201,29 @@ export function NotificationsClient({
 
       {/* KPI 4 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell label="이번달 발송량" value={counts.monthlySent} unit="건" />
-        <KpiCell
+        <AdminKpiCell
+          label="이번달 발송량"
+          value={<CountUp value={counts.monthlySent} />}
+          sub="건"
+        />
+        <AdminKpiCell
           label="성공률"
-          value={counts.successRate}
-          unit="%"
-          decimal
-          deltaTone={counts.successRate >= 95 ? "success" : "warning"}
+          value={<CountUp value={counts.successRate} integer={false} />}
+          sub="%"
           delta={counts.successRate >= 95 ? "정상" : "주의"}
+          deltaColor={counts.successRate >= 95 ? "success" : "warning"}
         />
-        <KpiCell
+        <AdminKpiCell
           label="실패"
-          value={counts.failedCount}
-          unit="건"
-          deltaTone={counts.failedCount > 0 ? "error" : "success"}
+          value={<CountUp value={counts.failedCount} />}
+          sub="건"
           delta={counts.failedCount > 0 ? "재시도 권장" : "정상"}
+          deltaColor={counts.failedCount > 0 ? "error" : "success"}
         />
-        <KpiCell
+        <AdminKpiCell
           label="활성 템플릿"
-          value={counts.activeTemplates}
-          unit="개"
+          value={<CountUp value={counts.activeTemplates} />}
+          sub="개"
         />
       </dl>
 
@@ -289,7 +286,7 @@ export function NotificationsClient({
                           {n.targetType ?? "—"}
                           {n.isBulk && " · 일괄"}
                         </span>
-                        <span className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-text-tertiary)]">
+                        <span className="truncate font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-text-tertiary)]">
                           {n.type ?? "—"}
                         </span>
                         <span className={`text-xs font-medium ${statusColor}`}>
@@ -473,7 +470,7 @@ export function NotificationsClient({
                 placeholder="알림톡 본문을 입력하세요"
                 className="mt-1 w-full resize-none bg-transparent text-sm placeholder:text-[var(--color-text-tertiary)] focus:outline-none"
               />
-              <p className="mt-1 text-right text-[10px] text-[var(--color-text-tertiary)]">
+              <p className="mt-1 text-right text-[11px] text-[var(--color-text-tertiary)]">
                 {body.length}/1000
               </p>
             </div>
@@ -545,57 +542,6 @@ export function NotificationsClient({
 // ─────────────────────────────────────────────────────────────
 // subcomponents
 // ─────────────────────────────────────────────────────────────
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  decimal,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  decimal?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}
 
 function PanelRow({
   label,

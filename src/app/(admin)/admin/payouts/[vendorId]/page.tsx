@@ -5,7 +5,9 @@ import Link from "next/link";
 import {ArrowLeft, ChevronDown, Download} from "lucide-react";
 import type {Timestamp} from "firebase/firestore";
 
+import {AdminKpiCell} from "@/components/admin/admin-kpi-cell";
 import {CountUp} from "@/components/shared/count-up";
+import {PageHeader} from "@/components/shared/page-header";
 import {trpcServer} from "@/lib/trpc/server";
 import {adminDb} from "@/server/firebase/admin";
 import {COLLECTIONS} from "@/server/firebase/collections";
@@ -15,8 +17,6 @@ import {formatDate} from "@/lib/utils/firestore-time";
 export const dynamic = "force-dynamic";
 
 const PREVIEW_MODE = process.env.NODE_ENV !== "production";
-
-type DeltaTone = "accent" | "warning" | "error" | "success";
 
 type RowStatus = "FAST" | "SCHEDULED" | "HELD" | "DONE";
 
@@ -191,21 +191,16 @@ export default async function AdminPayoutsPage({
       </div>
 
       {/* Header */}
-      <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
-            Vendor Payouts
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-            {vendor.companyName ?? vendorId}
-          </h1>
-          {isPreview && (
-            <p className="mt-2 text-[11px] text-[var(--color-warning)]">
-              (PREVIEW — 로그인 후 실 데이터 노출)
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
+      <div className="mt-6">
+        <PageHeader
+          label="재무 · 공급업체 지급"
+          title={vendor.companyName ?? vendorId}
+          description={
+            isPreview
+              ? "(PREVIEW — 로그인 후 실 데이터 노출)"
+              : undefined
+          }
+        >
           {vendor.grade && (
             <span className="inline-flex h-7 items-center rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/5 px-3 text-xs font-medium text-[var(--color-accent)]">
               GRADE {vendor.grade}
@@ -216,38 +211,34 @@ export default async function AdminPayoutsPage({
               {vendor.bizRegNo}
             </span>
           )}
-        </div>
+        </PageHeader>
       </div>
 
       {/* KPI 4칸 */}
       <dl className="mt-10 grid grid-cols-2 divide-x divide-[var(--color-border-light)] border-y border-[var(--color-border-light)] md:grid-cols-4">
-        <KpiCell
+        <AdminKpiCell
           label="누적 정산액"
-          value={counts.totalPaid}
-          unit="원"
-          mono
+          value={<CountUp value={counts.totalPaid} integer />}
+          sub="원"
         />
-        <KpiCell
+        <AdminKpiCell
           label="이번달 정산"
-          value={counts.thisMonth}
-          unit="원"
-          mono
-          deltaTone={counts.thisMonth > 0 ? "accent" : undefined}
+          value={<CountUp value={counts.thisMonth} integer />}
+          sub="원"
+          deltaColor={counts.thisMonth > 0 ? "accent" : "neutral"}
         />
-        <KpiCell
+        <AdminKpiCell
           label="보류금"
-          value={counts.held}
-          unit="원"
-          mono
-          deltaTone={counts.held > 0 ? "error" : undefined}
+          value={<CountUp value={counts.held} integer />}
+          sub="원"
+          deltaColor={counts.held > 0 ? "error" : "neutral"}
         />
-        <KpiCell
-          label="평균 D+"
-          value={Math.round(counts.avgDelay * 10) / 10}
-          unit="일"
-          decimal
-          deltaTone={counts.avgDelay <= 7 ? "success" : "warning"}
+        <AdminKpiCell
+          label="평균 지연일"
+          value={<CountUp value={Math.round(counts.avgDelay * 10) / 10} integer={false} />}
+          sub="일"
           delta={counts.avgDelay <= 7 ? "목표 7일 이내" : "지연 발생"}
+          deltaColor={counts.avgDelay <= 7 ? "success" : "warning"}
         />
       </dl>
 
@@ -481,61 +472,3 @@ export default async function AdminPayoutsPage({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Subcomponents
-// ─────────────────────────────────────────────────────────────
-
-function KpiCell({
-  label,
-  value,
-  unit,
-  delta,
-  deltaTone,
-  mono,
-  decimal,
-}: {
-  label: string;
-  value: number;
-  unit?: string;
-  delta?: string;
-  deltaTone?: DeltaTone;
-  mono?: boolean;
-  decimal?: boolean;
-}) {
-  const deltaColor: Record<DeltaTone, string> = {
-    accent: "text-[var(--color-accent)]",
-    warning: "text-[var(--color-warning)]",
-    error: "text-[var(--color-error)]",
-    success: "text-[var(--color-success)]",
-  };
-  return (
-    <div className="px-4 py-6 md:px-6 md:py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl ${
-          mono ? "font-mono" : ""
-        }`}
-      >
-        <CountUp value={value} integer={!decimal} />
-        {unit && (
-          <span className="ml-1 text-xs font-normal text-[var(--color-text-tertiary)]">
-            {unit}
-          </span>
-        )}
-      </p>
-      {delta && (
-        <p
-          className={`mt-2 text-xs ${
-            deltaTone
-              ? deltaColor[deltaTone]
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          {delta}
-        </p>
-      )}
-    </div>
-  );
-}

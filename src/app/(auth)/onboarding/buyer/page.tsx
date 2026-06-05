@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -174,7 +174,7 @@ export default function OnboardingBuyerPage() {
             <StepHeader
               num="01"
               title="사업자등록증을 올려주세요"
-              description="자동으로 사업자 정보를 인식하고 채워드립니다 — 10초면 충분합니다"
+              description="자동 인식 + 채우기 — 10초면 끝납니다."
             >
               <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-stretch lg:gap-16">
                 {/* 좌측 — 자동 처리 안내 + 보안 안내 */}
@@ -503,8 +503,8 @@ export default function OnboardingBuyerPage() {
           {step === 3 && (
             <StepHeader
               num="03"
-              title="사업자 정보를 확인하고 있습니다"
-              description="OCR · 국세청 진위확인 · 등록을 자동으로 진행 중입니다"
+              title="사업자 정보 확인 중"
+              description="OCR · 국세청 진위확인 · 등록 자동 처리."
             >
               <div className="flex flex-col items-center gap-12 py-16">
                 {/* Glow ring + spinner */}
@@ -757,7 +757,7 @@ function LineField({
           {label}
         </label>
         {hint && (
-          <span className="text-[10px] text-[var(--color-text-tertiary)]/70">
+          <span className="text-[11px] text-[var(--color-text-tertiary)]/70">
             {hint}
           </span>
         )}
