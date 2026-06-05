@@ -7,8 +7,14 @@ if (typeof window !== "undefined") {
 
 import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getAuth as fbGetAuth, type Auth } from "firebase-admin/auth";
-import { getFirestore as fbGetFirestore, type Firestore } from "firebase-admin/firestore";
+import {
+  getFirestore as fbGetFirestore,
+  FieldValue,
+  type Firestore,
+} from "firebase-admin/firestore";
 import { getStorage as fbGetStorage, type Storage } from "firebase-admin/storage";
+
+import type { UserRole } from "@/lib/types";
 
 let _app: App | undefined;
 
@@ -82,4 +88,68 @@ export async function getStorageSignedUrl(
     expires: Date.now() + expiresInSec * 1000,
   });
   return url;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Wave L — Custom Claims & user lifecycle helpers
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Firebase Auth Custom Claims 에 role 을 설정하고 users 문서를 동기화한다.
+ * 호출자(tRPC procedure) 에서 SUPER_ADMIN 가드를 보장해야 한다 — 이 함수는 권한 검증을 하지 않는다.
+ *
+ * 변경된 사용자는 다음 ID 토큰 갱신(최대 1시간) 또는 강제 갱신 후에 새 role 이 반영된다.
+ */
+export async function setUserRole(uid: string, role: UserRole): Promise<void> {
+  const auth = adminAuth();
+  const user = await auth.getUser(uid);
+  const claims = { ...(user.customClaims ?? {}), role };
+  await auth.setCustomUserClaims(uid, claims);
+  await adminDb()
+    .collection("users")
+    .doc(uid)
+    .set(
+      { role, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true },
+    );
+}
+
+/**
+ * 사용자를 비활성화한다 — Firebase Auth disable + users.status = "DISABLED".
+ * 비활성화된 사용자는 즉시 로그인 차단되며 기존 세션 쿠키 검증 시도 시 거부된다.
+ */
+export async function deactivateUser(
+  uid: string,
+  reason?: string,
+): Promise<void> {
+  await adminAuth().updateUser(uid, { disabled: true });
+  await adminDb()
+    .collection("users")
+    .doc(uid)
+    .set(
+      {
+        status: "DISABLED",
+        statusReason: reason ?? null,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+}
+
+/**
+ * 비활성화된 사용자를 다시 활성화한다.
+ */
+export async function reactivateUser(uid: string): Promise<void> {
+  await adminAuth().updateUser(uid, { disabled: false });
+  await adminDb()
+    .collection("users")
+    .doc(uid)
+    .set(
+      {
+        status: "ACTIVE",
+        statusReason: null,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
 }

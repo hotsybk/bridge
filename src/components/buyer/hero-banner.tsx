@@ -11,14 +11,14 @@ const HERO_IMAGE =
 export function HeroBanner() {
   return (
     <section className="relative isolate overflow-hidden">
-      {/* 배경 이미지 */}
+      {/* 배경 이미지 — Ken Burns zoom-in */}
       <Image
         src={HERO_IMAGE}
         alt=""
         fill
         priority
         sizes="100vw"
-        className="object-cover"
+        className="ken-burns object-cover"
       />
       {/* gradient overlay */}
       <div
@@ -31,24 +31,24 @@ export function HeroBanner() {
         <div className="landing-fade-up" style={{ animationDelay: "0ms" }}>
           <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5" />
-            Phase 1 베타 — 무료 둘러보기
+            베타 운영 중 — 무료 둘러보기
           </span>
         </div>
 
         <h1
-          className="landing-fade-up mt-6 text-4xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-7xl"
+          className="landing-fade-up mt-6 text-5xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-6xl"
           style={{ animationDelay: "150ms" }}
         >
-          정품 인증,
+          식약처 인증 받은
           <br />
-          믿을 수 있는 의료 용품.
+          의료 용품만, 한 곳에서.
         </h1>
 
         <p
-          className="landing-fade-up mt-6 max-w-xl text-base text-white/85 md:text-lg"
+          className="landing-fade-up mt-6 max-w-xl text-sm text-white/85"
           style={{ animationDelay: "350ms" }}
         >
-          중간 도매상 없이, 병원과 공급업체가 직접 만나는 곳.
+          중간 마진 0원. 병원이 직접 받는 진짜 도매가.
         </p>
 
         <div
@@ -57,7 +57,7 @@ export function HeroBanner() {
         >
           <Link
             href="#featured"
-            className="landing-cta-hero inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-base font-semibold text-[var(--color-accent)] active:scale-[0.98]"
+            className="landing-cta-hero inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-sm font-semibold text-[var(--color-accent)] active:scale-[0.98]"
           >
             둘러보기
             <ArrowRight className="h-4 w-4" />

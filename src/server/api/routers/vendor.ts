@@ -10,7 +10,44 @@ import { verifyBusinessStatus } from "@/server/services/nts-verify";
 import { vendorOnboardSchema } from "@/lib/validators/vendor";
 import type { Vendor } from "@/lib/types";
 
+import { vendorProductRouter } from "./vendor/product";
+import { vendorOrderRouter } from "./vendor/order";
+import { vendorSettlementRouter } from "./vendor/settlement";
+import { vendorGroupbuyRouter } from "./vendor/groupbuy";
+import { vendorSubscriptionRouter } from "./vendor/subscription";
+import { vendorRfqRouter } from "./vendor/rfq";
+import { vendorProfileRouter } from "./vendor/profile";
+import { vendorStaffRouter } from "./vendor/staff";
+import { vendorPublicProfileRouter } from "./vendor/public-profile";
+
 export const vendorRouter = createTRPCRouter({
+  /** 본인 상품 관리 (Wave P1). list/counts/getById/create/update/submit/pause/resume/archive. */
+  product: vendorProductRouter,
+
+  /** 본인 주문(SubOrder) 처리 (Wave P2). list/counts/getById/accept/ship/markDelivered/cancel. */
+  order: vendorOrderRouter,
+
+  /** 본인 정산 조회·빠른정산 신청 (Wave P2). list/counts/payouts/requestFastSettlement. */
+  settlement: vendorSettlementRouter,
+
+  /** Wave Q2 — 본인 공동구매 캠페인 등록·관리. list/counts/getById/listParticipations/create/cancel. */
+  groupbuy: vendorGroupbuyRouter,
+
+  /** Wave Q2 — 본인 vendor 가 받는 정기구독 조회 (read-only). list/counts. */
+  subscription: vendorSubscriptionRouter,
+
+  /** Wave Q2 — 받은 RFQ 조회·견적 제출. list/getById/submitQuote. */
+  rfq: vendorRfqRouter,
+
+  /** Phase ν-3 — 본인 vendor 프로필 조회·수정. getMine/updateBasic/updateLogo/requestRecertification. */
+  profile: vendorProfileRouter,
+
+  /** Phase ν-3 — 본인 vendor 멤버 관리. list/invite/cancelInvite/updateRole/remove/acceptInvite. */
+  staff: vendorStaffRouter,
+
+  /** Phase ν-5 — buyer/public facing 공급사 프로필. getById. 민감 정보 제외 whitelist. */
+  publicProfile: vendorPublicProfileRouter,
+
   /**
    * 공급업체 온보딩 — Phase 1.7 vendor flow 의 핵심 mutation.
    *
@@ -34,35 +71,22 @@ export const vendorRouter = createTRPCRouter({
       const db = adminDb();
       const auth = adminAuth();
 
-      // 1) 이미 연결됨?
+      // 1) 이미 연결됨? (트랜잭션 진입 전 빠른 체크)
       const userRef = db.collection(COLLECTIONS.users).doc(uid);
-      const userSnap = await userRef.get();
-      const userData = userSnap.data() ?? {};
-      if (userData.vendorId) {
+      const userSnapPre = await userRef.get();
+      const userDataPre = userSnapPre.data() ?? {};
+      if (userDataPre.vendorId) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "이미 공급업체에 연결된 계정입니다.",
         });
       }
 
-      // 2) 사업자번호 중복
-      const dup = await db
-        .collection(COLLECTIONS.vendors)
-        .where("bizRegNo", "==", input.bizRegNo)
-        .limit(1)
-        .get();
-      if (!dup.empty) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "이미 등록된 사업자등록번호입니다.",
-        });
-      }
-
-      // 3) OCR mock
+      // 2) OCR mock (외부 API → 트랜잭션 밖)
       await extractBusinessRegNo({ imageUrl: input.bizRegImageUrl });
       // TODO 1.8+: 실제 OCR 활성화 시 입력값과 매칭 검증
 
-      // 4) NTS 진위확인
+      // 3) NTS 진위확인 (외부 API → 트랜잭션 밖)
       const nts = await verifyBusinessStatus(input.bizRegNo);
       if (!nts.isActive) {
         throw new TRPCError({
@@ -71,65 +95,121 @@ export const vendorRouter = createTRPCRouter({
         });
       }
 
-      // 5) /vendors/{id} 생성 — status: PENDING_REVIEW
+      // 4) Firestore 트랜잭션 — 중복검사 + vendor create + members + users update
+      //    Phase β-2: 8단계 순차 처리를 트랜잭션 1 + 백그라운드(customClaims) 1 로 분해.
       const vendorId = nanoid(12);
       const now = FieldValue.serverTimestamp();
-      await db.collection(COLLECTIONS.vendors).doc(vendorId).set({
-        id: vendorId,
-        bizRegNo: input.bizRegNo,
-        bizRegImageUrl: input.bizRegImageUrl,
-        bizVerifiedAt: now,
-        companyName: input.companyName,
-        ceoName: input.ceoName,
-        phone: input.phone,
-        email: input.email,
-        zipcode: input.zipcode,
-        address: input.address,
-        ...(input.addressDetail ? { addressDetail: input.addressDetail } : {}),
-        vendorType: input.vendorType,
-        ...(input.salesLicenseNo ? { salesLicenseNo: input.salesLicenseNo } : {}),
-        ...(input.salesLicenseImageUrl ? { salesLicenseImageUrl: input.salesLicenseImageUrl } : {}),
-        ...(input.manufactureLicenseUrl ? { manufactureLicenseUrl: input.manufactureLicenseUrl } : {}),
-        status: "PENDING_REVIEW",
-        defaultCommissionRate: 0.05,
-        fastSettlementEnabled: false,
-        categories: input.categories,
-        payoutBankCode: input.payoutBankCode,
-        payoutBankAccount: input.payoutBankAccount,
-        payoutAccountHolder: input.payoutAccountHolder,
-        productCount: 0,
-        totalGmv: 0,
-        reviewCount: 0,
-        createdAt: now,
-        updatedAt: now,
-      });
 
-      // 6) /vendors/{id}/members/{uid}
-      await db
-        .collection(SUB_COLLECTIONS.vendorMembers(vendorId))
-        .doc(uid)
-        .set({
-          userId: uid,
-          email: userData.email ?? input.email,
-          name: userData.name ?? input.ceoName,
-          role: "VENDOR_OWNER",
-          joinedAt: now,
+      try {
+        await db.runTransaction(async (tx) => {
+          // 4-1) 중복 사업자번호 검사 (트랜잭션 내부 read)
+          const dup = await tx.get(
+            db
+              .collection(COLLECTIONS.vendors)
+              .where("bizRegNo", "==", input.bizRegNo)
+              .limit(1),
+          );
+          if (!dup.empty) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "이미 등록된 사업자등록번호입니다.",
+            });
+          }
+
+          // 4-2) users doc 재검증 (race condition 대비)
+          const userSnap = await tx.get(userRef);
+          const userData = userSnap.data() ?? {};
+          if (userData.vendorId) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "이미 공급업체에 연결된 계정입니다.",
+            });
+          }
+
+          // 4-3) /vendors/{id} 생성 — status: PENDING_REVIEW
+          const vendorRef = db.collection(COLLECTIONS.vendors).doc(vendorId);
+          tx.set(vendorRef, {
+            id: vendorId,
+            bizRegNo: input.bizRegNo,
+            bizRegImageUrl: input.bizRegImageUrl,
+            bizVerifiedAt: now,
+            companyName: input.companyName,
+            ceoName: input.ceoName,
+            phone: input.phone,
+            email: input.email,
+            zipcode: input.zipcode,
+            address: input.address,
+            ...(input.addressDetail ? { addressDetail: input.addressDetail } : {}),
+            vendorType: input.vendorType,
+            ...(input.salesLicenseNo ? { salesLicenseNo: input.salesLicenseNo } : {}),
+            ...(input.salesLicenseImageUrl ? { salesLicenseImageUrl: input.salesLicenseImageUrl } : {}),
+            ...(input.manufactureLicenseUrl ? { manufactureLicenseUrl: input.manufactureLicenseUrl } : {}),
+            status: "PENDING_REVIEW",
+            defaultCommissionRate: 0.05,
+            fastSettlementEnabled: false,
+            categories: input.categories,
+            payoutBankCode: input.payoutBankCode,
+            payoutBankAccount: input.payoutBankAccount,
+            payoutAccountHolder: input.payoutAccountHolder,
+            productCount: 0,
+            totalGmv: 0,
+            reviewCount: 0,
+            createdAt: now,
+            updatedAt: now,
+          });
+
+          // 4-4) /vendors/{id}/members/{uid}
+          const memberRef = db
+            .collection(SUB_COLLECTIONS.vendorMembers(vendorId))
+            .doc(uid);
+          tx.set(memberRef, {
+            userId: uid,
+            email: userData.email ?? input.email,
+            name: userData.name ?? input.ceoName,
+            role: "VENDOR_OWNER",
+            joinedAt: now,
+          });
+
+          // 4-5) /users/{uid} 갱신
+          tx.update(userRef, {
+            vendorId,
+            vendorName: input.companyName,
+            updatedAt: now,
+          });
         });
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "공급업체 등록 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          cause: err,
+        });
+      }
 
-      // 7) /users/{uid} 갱신
-      await userRef.update({
-        vendorId,
-        vendorName: input.companyName,
-        updatedAt: now,
-      });
-
-      // 8) Custom Claims merge — 기존 role(VENDOR_OWNER) 보존 + vendorId 추가
-      const userRecord = await auth.getUser(uid);
-      const existingClaims = (userRecord.customClaims ?? {}) as Record<string, unknown>;
-      await auth.setCustomUserClaims(uid, {
-        ...existingClaims,
-        vendorId,
-      });
+      // 5) Custom Claims merge — best-effort + _retryQueue fallback.
+      try {
+        const userRecord = await auth.getUser(uid);
+        const existingClaims =
+          (userRecord.customClaims ?? {}) as Record<string, unknown>;
+        await auth.setCustomUserClaims(uid, {
+          ...existingClaims,
+          vendorId,
+        });
+      } catch (err) {
+        console.error("[vendor.onboard] setCustomUserClaims failed", err);
+        try {
+          await db.collection(COLLECTIONS.retryQueue).add({
+            type: "SET_CUSTOM_CLAIMS",
+            payload: { uid, claims: { vendorId } },
+            reason: err instanceof Error ? err.message : String(err),
+            attemptCount: 0,
+            status: "PENDING",
+            createdAt: FieldValue.serverTimestamp(),
+          });
+        } catch {
+          // best-effort
+        }
+      }
 
       return {
         ok: true,

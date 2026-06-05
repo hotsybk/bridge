@@ -17,7 +17,18 @@ export type VendorStatus =
 
 export type VendorType = "DISTRIBUTOR" | "MANUFACTURER" | "IMPORTER";
 
-export type ProductStatus = "DRAFT" | "PENDING_REVIEW" | "ACTIVE" | "PAUSED" | "ARCHIVED";
+// Vendor 등급 — 운영자가 수동 부여, 수수료율 차등 적용.
+// STANDARD=5%, PLUS=4.5%, PREMIUM=4%, DIRECT=3.5%
+export type VendorGrade = "STANDARD" | "PLUS" | "PREMIUM" | "DIRECT";
+
+export type ProductStatus =
+  | "DRAFT"                  // vendor 작성 중 (저장만)
+  | "PENDING_REVIEW"         // 운영자 모더레이션 대기
+  | "REVISION_REQUESTED"     // 운영자가 수정 요청
+  | "ACTIVE"                 // 승인 + 노출
+  | "REJECTED"               // 반려 (재신청 가능)
+  | "PAUSED"                 // vendor가 일시 중단
+  | "ARCHIVED";              // 종료
 export type DeviceClass = "CLASS_1" | "CLASS_2" | "CLASS_3" | "CLASS_4" | "NON_DEVICE";
 
 export type OrderStatus =
@@ -32,11 +43,25 @@ export type SubOrderStatus =
 export type SubscriptionStatus = "ACTIVE" | "PAUSED" | "CANCELLED" | "EXPIRED";
 export type SubscriptionCadence = "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "CUSTOM";
 
-export type GroupBuyStatus = "OPEN" | "TARGET_MET" | "FULFILLED" | "FAILED";
+// Phase β-2 — PARTIAL_FULFILLED 추가: 목표 달성 후 일부 participation 의 capture 실패 시.
+export type GroupBuyStatus =
+  | "OPEN"
+  | "TARGET_MET"
+  | "FULFILLED"
+  | "PARTIAL_FULFILLED"
+  | "FAILED";
 export type RFQStatus = "OPEN" | "CLOSED" | "AWARDED" | "CANCELLED";
 
 export type PaymentMethod = "CARD" | "BANK_TRANSFER" | "NET_30" | "POINT";
-export type SettlementStatus = "PENDING" | "REQUESTED" | "PAID" | "HOLD";
+// Wave M — 정산 lifecycle 확장. PENDING → REQUESTED(빠른정산 신청) → APPROVED → PAID
+// 또는 PENDING → HOLD(보류) → 해제 시 PENDING 회귀. FAILED 는 PortOne 이체 실패.
+export type SettlementStatus =
+  | "PENDING"
+  | "REQUESTED"
+  | "APPROVED"
+  | "HOLD"
+  | "PAID"
+  | "FAILED";
 export type ApprovalStatus = "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
 
 // ============ USER ============
@@ -96,6 +121,18 @@ export interface Hospital {
 
   // denormalize: 멤버 카운트
   memberCount: number;
+
+  // 운영 상태 (admin 이 일시 정지 시 SUSPENDED). 누락 시 ACTIVE 로 간주.
+  status?: "ACTIVE" | "SUSPENDED";
+  statusReason?: string;
+
+  // Wave J — 주문 KPI denormalize. Cloud Function (onOrderCreated) 이 갱신.
+  kpi?: {
+    orderCount: number;
+    orderAmount: number;
+    lastOrderAt?: Timestamp;
+    lastActiveAt?: Timestamp;
+  };
 
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -160,6 +197,12 @@ export interface Vendor {
   rating?: number;                      // 0~5
   reviewCount: number;
 
+  // 등급 (운영자가 수동 부여, 수수료율 차등 적용)
+  grade?: VendorGrade;
+  gradeUpdatedAt?: Timestamp;
+  gradeUpdatedById?: string;
+  gradeNote?: string;
+
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -217,6 +260,25 @@ export interface Product {
   spec?: Record<string, string>;
 
   status: ProductStatus;
+
+  // 모더레이션 (Wave C — 운영자 심사 큐 메타)
+  moderation?: {
+    status: ProductStatus;
+    statusReason?: string;
+    revisionFields?: string[];          // ["name", "udi", "categoryId", ...]
+    reviewedById?: string;
+    reviewedAt?: Timestamp;
+    submittedAt?: Timestamp;
+  };
+
+  // 자동 검증 결과 (Cloud Function 채움)
+  verification?: {
+    udiValid: boolean | null;            // GS1 체크섬
+    udiCheckedAt?: Timestamp;
+    licenseOcr?: { number: string; confidence: number };
+    licenseOcrAt?: Timestamp;
+    categoryMismatch?: boolean | null;   // AI 카테고리 정합성 (Phase 4+, 일단 null)
+  };
 
   // 구독·공동구매
   subscribable: boolean;
@@ -362,33 +424,67 @@ export interface SubOrderItem {
 
 // ============ SUBSCRIPTION ============
 // 컬렉션 path: /subscriptions/{subscriptionId}
+// Wave Y — Phase 3 자동 발주 시스템. 단일 product 기반 단순 모델.
 
 export interface Subscription {
   id: string;
+
+  // 소속 (denormalize)
   hospitalId: string;
   hospitalName: string;
+  userId: string;                       // 생성자
+  vendorId: string;
+  vendorName: string;
+  productId: string;
+  productName: string;
+  productImage?: string | null;
 
-  name: string;
-  status: SubscriptionStatus;
-
+  // 주기
   cadence: SubscriptionCadence;
-  cronExpression?: string;              // CUSTOM일 때
+  customSchedule?: string;              // "매월 5일", "매월 마지막 영업일" 등
+  cronExpression?: string;              // CUSTOM 일 때 (Phase 4+)
 
-  startsAt: Timestamp;
-  nextRunAt: Timestamp;
+  // 수량 / 가격 (스냅샷, 가격 변동 추적용)
+  qty: number;
+  unitPrice: number;
+  unit: string;
+
+  // 상태
+  status: SubscriptionStatus;
+  statusReason?: string;
+  pauseReason?: string;                 // 운영자 강제 정지 사유 (Wave Q3 기존)
+  pausedAt?: Timestamp;
+  pausedById?: string;
+  cancelledAt?: Timestamp;
+
+  // 스케줄
+  startsAt?: Timestamp;
+  nextRunAt: Timestamp;                 // 다음 자동 발주 예정일
   lastRunAt?: Timestamp;
   endsAt?: Timestamp;
 
-  autoApprove: boolean;
-  paymentMethod: PaymentMethod;
-  maxPriceChangePercent: number;        // 기본 5.0
+  // 가격 변동 5%+ 시 임시 보류
+  priceChangePercent?: number;
+  priceChangeRequiresApproval?: boolean;
 
-  items: Array<{                        // embedded — 자주 함께 조회
-    productId: string;
-    productName: string;
-    vendorId: string;
-    qty: number;
-  }>;
+  // 결제·승인 정책
+  autoApprove?: boolean;
+  paymentMethod?: PaymentMethod;
+  maxPriceChangePercent?: number;       // 기본 5.0
+
+  // 배송지
+  shippingAddressId?: string;
+  shippingAddress?: {
+    name: string;
+    phone: string;
+    zipcode: string;
+    address: string;
+    addressDetail?: string;
+  };
+
+  // 통계
+  totalRuns: number;
+  totalAmount: number;
 
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -397,10 +493,16 @@ export interface Subscription {
 // 서브컬렉션: /subscriptions/{subscriptionId}/runs/{runId}
 export interface SubscriptionRun {
   id: string;
-  runAt: Timestamp;
-  orderId?: string;
-  status: "SUCCESS" | "SKIPPED" | "FAILED" | "PENDING_APPROVAL";
+  subscriptionId: string;
+  scheduledAt: Timestamp;
+  status: "PENDING" | "SUCCESS" | "FAILED" | "SKIPPED" | "PRICE_HOLD" | "PENDING_APPROVAL";
+  orderId?: string;                     // 생성된 order 참조
+  errorReason?: string;
   failureReason?: string;
+  priceAtRun?: number;                  // 발주 시점 가격
+  skippedByUser?: string;
+  createdAt: Timestamp;
+  completedAt?: Timestamp;
 }
 
 // ============ GROUP BUY ============
@@ -509,7 +611,8 @@ export interface Quote {
 }
 
 // ============ SETTLEMENT ============
-// 컬렉션 path: /settlements/{settlementId}  (관리자만 접근)
+// 컬렉션 path: /settlements/{settlementId}  (관리자 + 본인 vendor)
+// Wave M — 풀 정산 lifecycle 데이터 모델.
 
 export interface Settlement {
   id: string;
@@ -519,21 +622,72 @@ export interface Settlement {
   periodStart: Timestamp;
   periodEnd: Timestamp;
 
+  // 매출·수수료·환불 분해
   grossAmount: number;
-  commissionAmount: number;
-  vatAmount: number;
-  refundAmount: number;
-  payoutAmount: number;
+  paymentFeeAmount: number;        // PortOne 결제수수료 (채널별)
+  paymentFeeVatAmount: number;
+  commissionAmount: number;        // 중개 수수료 (카테고리/등급 rate 반영)
+  commissionVatAmount: number;
+  refundDeductAmount: number;      // 분쟁/환불 차감
+  couponDeductAmount: number;      // 쿠폰 부담금
+  netPayout: number;               // gross - 모든 차감
 
+  // 빠른정산
   isFastSettlement: boolean;
-  fastFee: number;
+  fastSettlementDays: number;      // D+3 등
+  fastSettlementFee: number;       // netPayout * 일 0.012% * 단축일수
+  finalPayout: number;             // netPayout - fastSettlementFee
 
+  // 참조
+  subOrderRefs: Array<{ orderId: string; subOrderId: string; amount: number }>;
+
+  // 상태
   status: SettlementStatus;
+  statusReason?: string;
+  scheduledPayoutAt: Timestamp;
+
+  // 승인/지급
+  approvedById?: string;
+  approvedAt?: Timestamp;
   paidAt?: Timestamp;
+  payoutId?: string;               // /payouts/{id} 참조
 
-  // subOrderIds (참조)
-  subOrderRefs: Array<{ orderId: string; subOrderId: string }>;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
 
+// ============ PAYOUT ============
+// 컬렉션 path: /payouts/{payoutId}  (관리자 + 본인 vendor)
+// Wave M — 실 이체 이력. Settlement N개를 묶어 한 번에 송금하는 단위.
+
+export type PayoutMethod = "PORTONE" | "MANUAL_BANK" | "VIRTUAL_ACCOUNT";
+export type PayoutStatus = "REQUESTED" | "PROCESSING" | "PAID" | "FAILED";
+
+export interface Payout {
+  id: string;
+  vendorId: string;
+  vendorName: string;
+
+  // 묶인 settlement
+  settlementIds: string[];
+  totalAmount: number;
+
+  // 입금 계좌
+  bankCode: string;
+  bankAccount: string;
+  accountHolder: string;
+
+  // 처리 방식
+  method: PayoutMethod;
+  externalRef?: string;            // PortOne tx id 또는 수동 이체 ref
+
+  status: PayoutStatus;
+  errorReason?: string;
+
+  taxInvoiceId?: string;           // 세금계산서 발행 id
+
+  requestedAt: Timestamp;
+  completedAt?: Timestamp;
   createdAt: Timestamp;
 }
 
@@ -578,6 +732,151 @@ export interface AuditLog {
   createdAt: Timestamp;
 }
 
+// ============ DISPUTE ============
+// 컬렉션 path: /disputes/{disputeId}
+// Wave E — 분쟁 시스템 풀 구현.
+
+export type DisputeStatus =
+  | "OPEN"
+  | "IN_PROGRESS"
+  | "NEEDS_ADMIN_RESPONSE"
+  | "RESOLVED"
+  | "REJECTED";
+
+export type DisputeType =
+  | "REFUND"
+  | "RETURN"
+  | "NOT_DELIVERED"
+  | "QUALITY"
+  | "OTHER";
+
+export interface DisputeResolution {
+  type: "REFUND" | "PARTIAL_REFUND" | "REJECTED";
+  refundAmount: number;
+  refundPercent: number;
+  payoutAdjustment: number;
+  reason: string;
+  decidedById: string;
+  decidedAt: Timestamp;
+}
+
+export interface Dispute {
+  id: string;
+  orderId: string;
+  subOrderId?: string;
+
+  // 소속 (denormalize)
+  hospitalId: string;
+  hospitalName: string;
+  vendorId: string;
+  vendorName: string;
+
+  type: DisputeType;
+  amount: number;
+  reason: string; // 신청 시 hospital 작성
+
+  status: DisputeStatus;
+  resolution?: DisputeResolution;
+
+  openedAt: Timestamp;
+  deadlineAt: Timestamp; // SLA = openedAt + 48h
+  resolvedAt?: Timestamp;
+
+  // SLA 알림 중복 방지
+  slaNotifiedAt?: Timestamp;
+  slaEscalatedAt?: Timestamp;
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// 서브컬렉션 /disputes/{disputeId}/messages/{messageId}
+export interface DisputeMessage {
+  id: string;
+  authorRole: "BUYER" | "VENDOR" | "ADMIN" | "SYSTEM";
+  authorId: string;
+  authorName: string;
+  body: string;
+  attachments: Array<{ name: string; size: number; url: string; mime: string }>;
+  systemEvent?:
+    | "OPENED"
+    | "ADMIN_JOINED"
+    | "EVIDENCE_REQUESTED"
+    | "RESOLVED"
+    | "REJECTED";
+  createdAt: Timestamp;
+}
+
+// 서브컬렉션 /disputes/{disputeId}/activity/{activityId}
+export interface DisputeActivity {
+  id: string;
+  at: Timestamp;
+  actorId: string;
+  actorRole: "BUYER" | "VENDOR" | "ADMIN" | "SYSTEM";
+  action:
+    | "OPENED"
+    | "MESSAGE_SENT"
+    | "ATTACHMENT_UPLOADED"
+    | "STATUS_CHANGED"
+    | "RESOLVED"
+    | "REJECTED"
+    | "EVIDENCE_REQUESTED";
+  meta?: Record<string, unknown>;
+}
+
+// ============ COUPON ============
+// 컬렉션 path: /coupons/{couponId}  ← admin 만 write, ACTIVE 쿠폰은 모두 read
+// Wave H — 쿠폰 시스템 풀 구현.
+
+export type CouponDiscountType = "PERCENT" | "FIXED";
+export type CouponTargetType =
+  | "ALL"
+  | "CATEGORY"
+  | "VENDOR"
+  | "FIRST_PURCHASE";
+export type CouponStatus = "ACTIVE" | "SCHEDULED" | "EXPIRED" | "DISABLED";
+
+export interface Coupon {
+  id: string;
+  code: string;                          // unique, 영문 대문자 + 숫자
+  name: string;                          // 운영자 표시명
+  description?: string;
+
+  discountType: CouponDiscountType;
+  discountValue: number;                 // PERCENT: 1~100, FIXED: KRW
+  maxDiscountAmount?: number;            // % 쿠폰 최대 할인 한도 (안전장치)
+  minOrderAmount?: number;               // 최소 주문액
+
+  targetType: CouponTargetType;
+  targetIds?: string[];                  // CATEGORY → categoryId[], VENDOR → vendorId[]
+
+  startsAt: Timestamp;
+  expiresAt: Timestamp;
+
+  issueLimit?: number;                   // 전체 발행 한도 (null = 무제한)
+  perUserLimit?: number;                 // 1인당 사용 횟수 (default 1)
+
+  usedCount: number;                     // Cloud Function 이 갱신
+
+  status: CouponStatus;
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdById: string;
+}
+
+// 서브컬렉션: /coupons/{couponId}/redemptions/{redemptionId}
+export interface CouponRedemption {
+  id: string;
+  couponId: string;
+  couponCode: string;                    // denormalize for UI
+  hospitalId: string;
+  userId: string;
+  orderId: string;
+  discountAmount: number;
+  redeemedAt: Timestamp;
+}
+
 // ============ CATEGORY ============
 // 컬렉션 path: /categories/{categoryId}
 
@@ -595,4 +894,91 @@ export interface Category {
 
   // 트리 경로 (denormalize, 검색용)
   path: string[];                       // ["의료소모품", "일회용 의료용품", "장갑"]
+}
+
+// ============ FEATURE FLAG ============
+// 컬렉션 path: /featureFlags/{flagId}
+// Wave U — 운영자가 런타임에 ON/OFF 가능한 기능 토글.
+
+export type FeatureFlagSegment = "ALL" | "HOSPITALS" | "VENDORS" | "INTERNAL";
+
+export interface FeatureFlag {
+  id: string;                       // flag key (예: "group-buy-v2")
+  description: string;
+  enabled: boolean;
+  rolloutPercentage: number;        // 0~100
+  segment?: FeatureFlagSegment;
+  enabledByDefault?: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  updatedById: string;
+}
+
+// ============ UDI REPORT ============
+// 컬렉션 path: /udiReports/{period}  (period = "YYYY-MM")
+// Wave N — 식약처 의료기기통합정보시스템(e-MEDI) 월말 일괄 보고.
+
+export type UdiReportStatus =
+  | "PENDING"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "PARTIAL"
+  | "FAILED";
+
+export interface UdiReportResultMeta {
+  success: boolean;
+  resultCode?: string;
+  resultMessage?: string;
+  receiptNo?: string;
+  source: "mfds" | "mock";
+}
+
+export interface UdiReportMaster {
+  id: string;                  // "2026-05"
+  period: string;
+  periodStart: Timestamp;
+  periodEnd: Timestamp;
+
+  totalCount: number;
+  successCount: number;
+  failCount: number;
+
+  status: UdiReportStatus;
+
+  startedAt?: Timestamp;
+  completedAt?: Timestamp;
+  triggeredById?: string;      // 수동 트리거 시 운영자 uid
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// 서브컬렉션: /udiReports/{period}/items/{subOrderId}
+export interface UdiReportItem {
+  id: string;                  // subOrderId
+  subOrderId: string;
+  orderId: string;
+  vendorId: string;
+  vendorName: string;
+  vendorBizRegNo: string;
+
+  hospitalId: string;
+  hospitalName: string;
+  hospitalBizRegNo: string;
+
+  productId: string;
+  productName: string;
+  udiCode: string;
+  lotNo: string;
+  expiry: string;
+  mfdsLicenseNo?: string;
+
+  quantity: number;
+  unitPrice: number;
+  saleDate: string;
+
+  result?: UdiReportResultMeta;
+  retryCount: number;
+  reportedAt?: Timestamp;
+  createdAt: Timestamp;
 }

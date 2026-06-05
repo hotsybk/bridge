@@ -21,7 +21,7 @@ export function CatalogTopNav({
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
             <Stethoscope className="h-3.5 w-3.5" />
           </span>
-          <span className="text-sm font-semibold tracking-tight md:text-base">
+          <span className="text-sm font-semibold tracking-tight">
             MedPlace
           </span>
         </Link>
@@ -70,7 +70,7 @@ function NavLink({
     <li>
       <Link
         href={href}
-        className="inline-flex h-10 items-center rounded-full px-4 text-xs text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)] md:text-sm"
+        className="inline-flex h-10 items-center rounded-full px-4 text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
       >
         {children}
       </Link>

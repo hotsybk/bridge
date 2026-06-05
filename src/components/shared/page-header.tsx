@@ -47,13 +47,13 @@ export function PageHeader({
         )}
         <h1
           className={
-            "mt-2 text-3xl font-semibold tracking-tight md:text-4xl"
+            "mt-2 text-4xl font-semibold tracking-tight md:text-5xl"
           }
         >
           {title}
         </h1>
         {description && (
-          <p className="mt-3 text-sm text-[var(--color-text-secondary)] md:text-base">
+          <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
             {description}
           </p>
         )}

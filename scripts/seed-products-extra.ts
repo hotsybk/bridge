@@ -26,7 +26,7 @@ async function main() {
   // 1) 기존 3개 thumbnail 업데이트
   const updates: Array<{ id: string; photo: string }> = [
     { id: "product-seed-001", photo: "photo-1583912267550-bb6e1c7c4baa" }, // gloves
-    { id: "product-seed-002", photo: "photo-1559757175-5700dde675bc" }, // stethoscope/cuff
+    { id: "product-seed-002", photo: "photo-1631815589968-fdb09a223b1e" }, // medical supplies (cuff 대체)
     { id: "product-seed-003", photo: "photo-1584515933487-779824d29309" }, // gauze
   ];
   for (const u of updates) {
@@ -76,7 +76,7 @@ async function main() {
       shippingFee: 3000,
       subscribable: true,
       groupBuyable: true,
-      photo: "photo-1605845328644-43c1e95f8076",
+      photo: "photo-1584634731339-252c581abfc5",
       description: "KF94 인증 일회용 마스크 50매 박스. 식약처 허가.",
     },
     {
@@ -96,7 +96,7 @@ async function main() {
       shippingFee: 0,
       subscribable: false,
       groupBuyable: true,
-      photo: "photo-1559757175-5700dde675bc",
+      photo: "photo-1666214280165-c3e7c9b6f7a4",
       description: "블루투스 디지털 청진기. 노이즈 캔슬링 + 음성 녹음.",
     },
     {

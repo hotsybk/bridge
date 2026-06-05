@@ -8,10 +8,16 @@ export const COLLECTIONS = {
   groupBuys: "groupBuys",
   rfqs: "rfqs",
   settlements: "settlements",
+  payouts: "payouts",
   notifications: "notifications",
   auditLogs: "auditLogs",
   categories: "categories",
+  disputes: "disputes",
+  coupons: "coupons",
+  udiReports: "udiReports",
   retryQueue: "_retryQueue",
+  carts: "carts",
+  featureFlags: "featureFlags",
 } as const;
 
 export const SUB_COLLECTIONS = {
@@ -24,4 +30,8 @@ export const SUB_COLLECTIONS = {
   groupBuyParticipations: (gbId: string) => `groupBuys/${gbId}/participations`,
   groupBuyShards: (gbId: string) => `groupBuys/${gbId}/counterShards`,
   rfqQuotes: (rfqId: string) => `rfqs/${rfqId}/quotes`,
+  disputeMessages: (disputeId: string) => `disputes/${disputeId}/messages`,
+  disputeActivity: (disputeId: string) => `disputes/${disputeId}/activity`,
+  couponRedemptions: (couponId: string) =>
+    `coupons/${couponId}/redemptions`,
 } as const;

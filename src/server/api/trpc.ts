@@ -10,6 +10,7 @@ import { getServerTokens } from "@/server/firebase/auth";
 const BUYER_ROLES = ["BUYER_OWNER", "BUYER_STAFF", "BUYER_VIEWER"];
 const VENDOR_ROLES = ["VENDOR_OWNER", "VENDOR_STAFF"];
 const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN"];
+const SUPER_ADMIN_ROLE = "SUPER_ADMIN";
 
 export type Ctx = {
   uid?: string;
@@ -60,11 +61,23 @@ const enforceAuth = t.middleware(({ ctx, next }) => {
   return next({ ctx: { ...ctx, uid: ctx.uid } });
 });
 
+// Phase α-2 — PREVIEW bypass 격리.
+// dev 환경에서 디자인 미리보기를 위해 role 가드를 우회하려면 ENABLE_PREVIEW_BYPASS=true
+// 를 명시적으로 설정해야 한다. NODE_ENV !== "production" 만으로는 활성화되지 않음.
+// 운영/스테이징에서는 절대 활성화 금지.
+const PREVIEW_ROLE_BYPASS =
+  process.env.ENABLE_PREVIEW_BYPASS === "true" &&
+  process.env.NODE_ENV !== "production";
+
 const enforceRole = (allowed: string[], label: string) =>
   t.middleware(({ ctx, next }) => {
     if (!ctx.uid) throw new TRPCError({ code: "UNAUTHORIZED" });
     if (!allowed.includes(ctx.role ?? "")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: `${label} 권한이 필요합니다.` });
+      if (PREVIEW_ROLE_BYPASS) {
+        // 그냥 통과 — 인증은 되어 있고 dev 미리보기 단계
+      } else {
+        throw new TRPCError({ code: "FORBIDDEN", message: `${label} 권한이 필요합니다.` });
+      }
     }
     return next({ ctx: { ...ctx, uid: ctx.uid } });
   });
@@ -73,3 +86,19 @@ export const protectedProcedure = publicProcedure.use(enforceAuth);
 export const buyerProcedure = publicProcedure.use(enforceRole(BUYER_ROLES, "구매자"));
 export const vendorProcedure = publicProcedure.use(enforceRole(VENDOR_ROLES, "공급업체"));
 export const adminProcedure = publicProcedure.use(enforceRole(ADMIN_ROLES, "관리자"));
+
+// Wave L — SUPER_ADMIN 전용 middleware.
+// staff(운영자 관리) 같은 보안 critical 액션은 단순 ADMIN 으로 접근 불가.
+const enforceSuperAdmin = t.middleware(({ ctx, next }) => {
+  if (!ctx.uid) throw new TRPCError({ code: "UNAUTHORIZED" });
+  if (ctx.role !== SUPER_ADMIN_ROLE) {
+    if (PREVIEW_ROLE_BYPASS) {
+      // dev 미리보기 우회 — 운영에서는 정상 차단.
+    } else {
+      throw new TRPCError({ code: "FORBIDDEN", message: "SUPER_ADMIN 권한이 필요합니다." });
+    }
+  }
+  return next({ ctx: { ...ctx, uid: ctx.uid } });
+});
+
+export const superAdminProcedure = publicProcedure.use(enforceAuth).use(enforceSuperAdmin);

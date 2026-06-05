@@ -1,18 +1,26 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Building2,
-  ChevronLeft,
-  Eye,
-  FileText,
-} from "lucide-react";
+import { CheckCircle2, ChevronLeft, ExternalLink, FileText, AlertCircle } from "lucide-react";
 
 import { extractStoragePath, getStorageSignedUrl } from "@/server/firebase/admin";
 import { trpcServer } from "@/lib/trpc/server";
 
-import { VendorActions } from "./actions";
+import { VendorActions, VendorMemoPanel } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+const PREVIEW_MODE = process.env.NODE_ENV !== "production";
+
+/**
+ * Phase α-7 — 계좌번호 마스킹 (admin UI 전용).
+ * 마지막 4자리만 노출 — 전체 보기는 별도 reveal endpoint(SUPER_ADMIN) 필요.
+ */
+function maskBankAccount(account: string | undefined | null): string {
+  if (!account) return "—";
+  const s = String(account);
+  if (s.length <= 4) return s;
+  return s.slice(0, -4).replace(/[0-9]/g, "•") + s.slice(-4);
+}
 
 const VENDOR_TYPE_LABEL: Record<string, string> = {
   DISTRIBUTOR: "판매업자",
@@ -29,11 +37,87 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_TONE: Record<string, string> = {
-  PENDING_DOCS: "bg-[var(--color-warning)]/12 text-[var(--color-warning)]",
-  PENDING_REVIEW: "bg-[var(--color-accent-light)] text-[var(--color-accent)]",
-  APPROVED: "bg-[var(--color-success)]/12 text-[var(--color-success)]",
-  SUSPENDED: "bg-[var(--color-warning)]/12 text-[var(--color-warning)]",
-  REJECTED: "bg-[var(--color-error)]/12 text-[var(--color-error)]",
+  PENDING_DOCS:
+    "border-[var(--color-warning)] text-[var(--color-warning)] bg-[var(--color-warning)]/10",
+  PENDING_REVIEW:
+    "border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-light)]/60",
+  APPROVED:
+    "border-[var(--color-success)] text-[var(--color-success)] bg-[var(--color-success)]/10",
+  SUSPENDED:
+    "border-[var(--color-warning)] text-[var(--color-warning)] bg-[var(--color-warning)]/10",
+  REJECTED:
+    "border-[var(--color-error)] text-[var(--color-error)] bg-[var(--color-error)]/10",
+};
+
+type BizRegOcr = {
+  bizRegNo: string | null;
+  companyName: string | null;
+  ceoName: string | null;
+  confidence: number;
+};
+
+type BizRegVerification = {
+  isValid: boolean;
+  taxType: string | null;
+  startDate: string | null;
+};
+
+type VendorDoc = {
+  id: string;
+  companyName: string;
+  vendorType: string;
+  bizRegNo: string;
+  ceoName: string;
+  phone: string;
+  email: string;
+  zipcode: string;
+  address: string;
+  addressDetail?: string;
+  salesLicenseNo?: string;
+  payoutBankCode?: string;
+  payoutBankAccount?: string;
+  payoutAccountHolder?: string;
+  defaultCommissionRate: number;
+  categories?: string[];
+  status: string;
+  statusReason?: string;
+  grade?: "STANDARD" | "PLUS" | "PREMIUM" | "DIRECT";
+  bizRegImageUrl?: string;
+  salesLicenseImageUrl?: string;
+  manufactureLicenseUrl?: string;
+  bizRegOcr?: BizRegOcr | null;
+  bizRegVerification?: BizRegVerification | null;
+};
+
+const DEMO_VENDOR: VendorDoc = {
+  id: "demo-v1",
+  companyName: "(주)메디서플라이",
+  vendorType: "DISTRIBUTOR",
+  bizRegNo: "123-45-67890",
+  ceoName: "김민수",
+  phone: "02-1234-5678",
+  email: "contact@medsupply.example.com",
+  zipcode: "06236",
+  address: "서울특별시 강남구 테헤란로 123",
+  addressDetail: "5층 502호",
+  salesLicenseNo: "제2026-서울강남-001호",
+  payoutBankCode: "088",
+  payoutBankAccount: "123-456-789012",
+  payoutAccountHolder: "(주)메디서플라이",
+  defaultCommissionRate: 0.05,
+  categories: ["수술용 소모품", "감염 관리", "환자 모니터링"],
+  status: "PENDING_REVIEW",
+  bizRegOcr: {
+    bizRegNo: "123-45-67890",
+    companyName: "(주)메디서플라이",
+    ceoName: "김민수",
+    confidence: 0.94,
+  },
+  bizRegVerification: {
+    isValid: true,
+    taxType: "일반과세자",
+    startDate: "2024-03-15",
+  },
 };
 
 async function safeSignedUrl(downloadUrl: string | undefined): Promise<string | null> {
@@ -53,8 +137,17 @@ export default async function AdminVendorDetailPage({
   params: Promise<{ vendorId: string }>;
 }) {
   const { vendorId } = await params;
-  const trpc = await trpcServer();
-  const vendor = await trpc.admin.vendor.getById({ vendorId });
+  let vendor: VendorDoc | null = null;
+
+  try {
+    const trpc = await trpcServer();
+    vendor = (await trpc.admin.vendor.getById({ vendorId })) as VendorDoc;
+  } catch {
+    if (PREVIEW_MODE) {
+      vendor = { ...DEMO_VENDOR, id: vendorId };
+    }
+  }
+
   if (!vendor) notFound();
 
   const [bizRegUrl, salesLicenseUrl, manufactureLicenseUrl] = await Promise.all([
@@ -63,74 +156,83 @@ export default async function AdminVendorDetailPage({
     safeSignedUrl(vendor.manufactureLicenseUrl),
   ]);
 
-  const statusTone = STATUS_TONE[vendor.status] ?? "bg-[var(--color-bg-secondary)]";
+  const statusTone =
+    STATUS_TONE[vendor.status] ??
+    "border-[var(--color-border-default)] text-[var(--color-text-secondary)]";
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 md:px-12 md:py-14">
+    <main className="mx-auto max-w-6xl px-6 py-10 md:px-12 md:py-16">
       <Link
         href="/admin/vendors"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:underline"
+        className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)]"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft className="h-3.5 w-3.5" />
         심사 큐로
       </Link>
 
-      <header className="mt-6 flex flex-wrap items-end justify-between gap-4">
+      <header className="mt-8 flex flex-wrap items-start justify-between gap-6">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Vendor {vendor.id}
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
+            Vendor Review
           </p>
-          <h1 className="mt-2 truncate text-3xl font-semibold tracking-tight md:text-4xl">
+          <h1 className="mt-3 truncate text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
             {vendor.companyName}
           </h1>
-          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-            {VENDOR_TYPE_LABEL[vendor.vendorType] ?? vendor.vendorType} ·{" "}
-            <span className="font-mono">{vendor.bizRegNo}</span>
+          <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+            {VENDOR_TYPE_LABEL[vendor.vendorType] ?? vendor.vendorType}
+            <span className="mx-2 text-[var(--color-border-default)]">·</span>
+            <span className="font-mono tabular-nums">{vendor.bizRegNo}</span>
           </p>
         </div>
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium ${statusTone}`}
+          className={`inline-flex h-8 items-center rounded-full border px-4 text-xs font-medium ${statusTone}`}
         >
           {STATUS_LABEL[vendor.status] ?? vendor.status}
         </span>
       </header>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
-        {/* Left — 상세 정보 */}
-        <div className="space-y-6 min-w-0">
-          <Section title="회사 정보">
-            <Dl>
-              <Row k="대표자" v={vendor.ceoName} />
-              <Row k="전화" v={vendor.phone} />
-              <Row k="이메일" v={vendor.email} />
-              <Row
+      <div className="mt-16 grid gap-16 lg:grid-cols-[1fr_320px]">
+        {/* Left — details */}
+        <div className="min-w-0 space-y-16">
+          <LineSection title="회사 정보">
+            <DlGrid>
+              <DlRow k="대표자" v={vendor.ceoName} />
+              <DlRow k="전화" v={vendor.phone} />
+              <DlRow k="이메일" v={vendor.email} />
+              <DlRow
                 k="주소"
-                v={`(${vendor.zipcode}) ${vendor.address}${vendor.addressDetail ? ` ${vendor.addressDetail}` : ""}`}
+                v={`(${vendor.zipcode}) ${vendor.address}${
+                  vendor.addressDetail ? ` ${vendor.addressDetail}` : ""
+                }`}
               />
               {vendor.salesLicenseNo && (
-                <Row k="판매업 신고번호" v={vendor.salesLicenseNo} />
+                <DlRow k="판매업 신고번호" v={vendor.salesLicenseNo} />
               )}
-            </Dl>
-          </Section>
+            </DlGrid>
+          </LineSection>
 
-          <Section title="정산 계좌">
-            <Dl>
-              <Row k="은행 코드" v={vendor.payoutBankCode ?? "—"} />
-              <Row k="계좌번호" v={vendor.payoutBankAccount ?? "—"} />
-              <Row k="예금주" v={vendor.payoutAccountHolder ?? "—"} />
-              <Row
+          <LineSection title="정산 계좌">
+            <DlGrid>
+              <DlRow k="은행 코드" v={vendor.payoutBankCode ?? "—"} />
+              <DlRow
+                k="계좌번호"
+                v={maskBankAccount(vendor.payoutBankAccount)}
+                mono
+              />
+              <DlRow k="예금주" v={vendor.payoutAccountHolder ?? "—"} />
+              <DlRow
                 k="기본 수수료율"
                 v={`${(vendor.defaultCommissionRate * 100).toFixed(1)}%`}
               />
-            </Dl>
-          </Section>
+            </DlGrid>
+          </LineSection>
 
-          <Section title="영업 카테고리">
+          <LineSection title="영업 카테고리">
             <div className="flex flex-wrap gap-2">
-              {(vendor.categories ?? []).map((c: string) => (
+              {(vendor.categories ?? []).map((c) => (
                 <span
                   key={c}
-                  className="rounded-full bg-[var(--color-accent-light)] px-3 py-1 text-xs text-[var(--color-accent)]"
+                  className="inline-flex h-7 items-center rounded-full border border-[var(--color-border-light)] px-3 text-xs font-medium text-[var(--color-text-secondary)]"
                 >
                   {c}
                 </span>
@@ -141,20 +243,13 @@ export default async function AdminVendorDetailPage({
                 </span>
               )}
             </div>
-          </Section>
+          </LineSection>
 
-          <Section
-            title="제출 서류"
-            footer="서류 링크는 5분 후 만료됩니다."
-          >
-            <div className="space-y-3">
-              <DocCard
-                label="사업자등록증"
-                url={bizRegUrl}
-                kind="biz-reg"
-              />
+          <LineSection title="제출 서류" hint="서류 링크는 5분 후 만료됩니다">
+            <ul className="divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
+              <DocLineRow label="사업자등록증" url={bizRegUrl} kind="biz-reg" />
               {vendor.vendorType === "DISTRIBUTOR" && (
-                <DocCard
+                <DocLineRow
                   label="의료기기 판매업 신고증"
                   url={salesLicenseUrl}
                   kind="sales-license"
@@ -162,52 +257,111 @@ export default async function AdminVendorDetailPage({
               )}
               {(vendor.vendorType === "MANUFACTURER" ||
                 vendor.vendorType === "IMPORTER") && (
-                <DocCard
+                <DocLineRow
                   label="제조·수입업 허가증"
                   url={manufactureLicenseUrl}
                   kind="manufacture-license"
                 />
               )}
-            </div>
-          </Section>
+            </ul>
+          </LineSection>
+
+          {vendor.bizRegOcr && (
+            <LineSection
+              title="사업자등록증 OCR 결과"
+              hint={`신뢰도 ${(vendor.bizRegOcr.confidence * 100).toFixed(0)}%`}
+            >
+              <dl className="divide-y divide-[var(--color-border-light)]">
+                <OcrCompareRow
+                  k="사업자번호"
+                  user={vendor.bizRegNo}
+                  ocr={vendor.bizRegOcr.bizRegNo}
+                  mono
+                />
+                <OcrCompareRow
+                  k="상호"
+                  user={vendor.companyName}
+                  ocr={vendor.bizRegOcr.companyName}
+                />
+                <OcrCompareRow
+                  k="대표자"
+                  user={vendor.ceoName}
+                  ocr={vendor.bizRegOcr.ceoName}
+                />
+              </dl>
+            </LineSection>
+          )}
+
+          {vendor.bizRegVerification && (
+            <LineSection title="사업자 진위확인" hint="국세청 OpenAPI">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  {vendor.bizRegVerification.isValid ? (
+                    <>
+                      <CheckCircle2
+                        className="h-5 w-5 text-[var(--color-success)]"
+                        strokeWidth={2.2}
+                      />
+                      <span className="text-sm font-medium text-[var(--color-success)]">
+                        유효 사업자
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle
+                        className="h-5 w-5 text-[var(--color-error)]"
+                        strokeWidth={2.2}
+                      />
+                      <span className="text-sm font-medium text-[var(--color-error)]">
+                        휴·폐업 사업자
+                      </span>
+                    </>
+                  )}
+                </div>
+                <dl className="divide-y divide-[var(--color-border-light)] border-t border-[var(--color-border-light)] pt-2">
+                  <DlRow
+                    k="과세 유형"
+                    v={vendor.bizRegVerification.taxType ?? "—"}
+                  />
+                  <DlRow
+                    k="개업일"
+                    v={vendor.bizRegVerification.startDate ?? "—"}
+                  />
+                </dl>
+              </div>
+            </LineSection>
+          )}
         </div>
 
-        {/* Right — sticky 액션 패널 */}
-        <aside className="lg:sticky lg:top-8 lg:self-start space-y-5">
-          <VendorActions vendorId={vendor.id} currentStatus={vendor.status} />
+        {/* Right — sticky action panel */}
+        <aside className="space-y-10 lg:sticky lg:top-8 lg:self-start">
+          <VendorActions
+            vendorId={vendor.id}
+            currentStatus={vendor.status}
+            currentGrade={vendor.grade ?? null}
+          />
 
-          <div className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               메타 정보
             </p>
-            <dl className="mt-4 space-y-3 text-xs">
-              <div>
-                <dt className="text-[var(--color-text-tertiary)]">Vendor ID</dt>
-                <dd className="mt-0.5 break-all font-mono text-[var(--color-text-secondary)]">
-                  {vendor.id}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[var(--color-text-tertiary)]">현재 상태</dt>
-                <dd className="mt-0.5 font-mono">{vendor.status}</dd>
-              </div>
-              {(vendor as { statusReason?: string }).statusReason && (
-                <div>
-                  <dt className="text-[var(--color-text-tertiary)]">이전 사유</dt>
-                  <dd className="mt-0.5 text-[var(--color-text-secondary)]">
-                    {(vendor as { statusReason?: string }).statusReason}
-                  </dd>
-                </div>
+            <dl className="mt-4 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
+              <MetaRow label="Vendor ID" value={vendor.id} mono />
+              <MetaRow label="현재 상태" value={vendor.status} mono />
+              {vendor.statusReason && (
+                <MetaRow label="이전 사유" value={vendor.statusReason} />
               )}
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-dashed border-[var(--color-border-light)] p-5 text-xs text-[var(--color-text-tertiary)]">
-            <p className="font-medium text-[var(--color-text-secondary)]">
+          <VendorMemoPanel vendorId={vendor.id} />
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
               심사 이력
             </p>
-            <p className="mt-2">
-              Phase 2 백로그 — 상태 변경 이력은 추후 별도 패널에서 제공됩니다.
+            <p className="mt-3 text-xs leading-relaxed text-[var(--color-text-tertiary)]">
+              상태 변경 이력은 추후 별도 패널에서 제공됩니다.
             </p>
           </div>
         </aside>
@@ -217,47 +371,63 @@ export default async function AdminVendorDetailPage({
 }
 
 // ─────────────────────────────────────────────────────────────
-// 서브 컴포넌트
+// Subcomponents
 // ─────────────────────────────────────────────────────────────
 
-function Section({
+function LineSection({
   title,
-  footer,
+  hint,
   children,
 }: {
   title: string;
-  footer?: string;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] p-6">
-      <h2 className="text-base font-semibold">{title}</h2>
-      <div className="mt-4">{children}</div>
-      {footer && (
-        <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">{footer}</p>
-      )}
+    <section>
+      <div className="flex items-baseline justify-between border-b border-[var(--color-border-light)] pb-4">
+        <h2 className="text-2xl font-semibold tracking-[-0.02em] md:text-3xl">{title}</h2>
+        {hint && (
+          <p className="text-[11px] text-[var(--color-text-tertiary)]">{hint}</p>
+        )}
+      </div>
+      <div className="mt-6">{children}</div>
     </section>
   );
 }
 
-function Dl({ children }: { children: React.ReactNode }) {
+function DlGrid({ children }: { children: React.ReactNode }) {
   return (
-    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 text-sm">
-      {children}
-    </dl>
+    <dl className="divide-y divide-[var(--color-border-light)]">{children}</dl>
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+function DlRow({
+  k,
+  v,
+  mono = false,
+}: {
+  k: string;
+  v: string;
+  mono?: boolean;
+}) {
   return (
-    <>
-      <dt className="text-[var(--color-text-secondary)]">{k}</dt>
-      <dd className="break-all">{v}</dd>
-    </>
+    <div className="flex items-baseline justify-between gap-6 py-3.5">
+      <dt className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+        {k}
+      </dt>
+      <dd
+        className={`break-all text-right text-sm text-[var(--color-text-primary)] ${
+          mono ? "font-mono tabular-nums" : ""
+        }`}
+      >
+        {v}
+      </dd>
+    </div>
   );
 }
 
-function DocCard({
+function DocLineRow({
   label,
   url,
   kind,
@@ -268,24 +438,30 @@ function DocCard({
 }) {
   if (!url) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-dashed border-[var(--color-border-light)] p-3 text-sm text-[var(--color-text-tertiary)]">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--color-bg-secondary)]">
+      <li className="flex items-center gap-4 py-4">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-dashed border-[var(--color-border-default)] text-[var(--color-text-tertiary)]">
           <FileText className="h-4 w-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{label}</p>
-          <p className="text-xs">미제출 또는 URL 없음</p>
+          <p className="truncate text-sm font-medium text-[var(--color-text-tertiary)]">
+            {label}
+          </p>
+          <p className="text-xs text-[var(--color-text-tertiary)]">
+            미제출 또는 URL 없음
+          </p>
         </div>
-      </div>
+      </li>
     );
   }
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border-light)] p-3 transition-shadow hover:shadow-sm">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--color-accent-light)] text-[var(--color-accent)]">
+    <li className="flex items-center gap-4 py-4">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--color-accent-light)] text-[var(--color-accent)]">
         <FileText className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{label}</p>
+        <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">
+          {label}
+        </p>
         <p className="text-xs text-[var(--color-text-tertiary)]">
           {kind} · 5분 만료 signed URL
         </p>
@@ -294,13 +470,95 @@ function DocCard({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--color-bg-secondary)] px-3 text-xs font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-accent-light)]"
+        className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-[var(--color-border-default)] px-3 text-xs font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
       >
-        <Eye className="h-3 w-3" />새 탭
+        새 탭으로
+        <ExternalLink className="h-3 w-3" />
       </a>
+    </li>
+  );
+}
+
+function OcrCompareRow({
+  k,
+  user,
+  ocr,
+  mono = false,
+}: {
+  k: string;
+  user: string;
+  ocr: string | null;
+  mono?: boolean;
+}) {
+  const match =
+    !!ocr && ocr.replace(/\s/g, "") === user.replace(/\s/g, "");
+  return (
+    <div className="grid grid-cols-[110px_1fr_1fr_28px] items-baseline gap-4 py-3.5">
+      <dt className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+        {k}
+      </dt>
+      <dd
+        className={`break-all text-sm text-[var(--color-text-primary)] ${
+          mono ? "font-mono tabular-nums" : ""
+        }`}
+      >
+        <span className="block text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+          사용자 입력
+        </span>
+        <span className="mt-0.5 block">{user || "—"}</span>
+      </dd>
+      <dd
+        className={`break-all text-sm ${
+          match
+            ? "text-[var(--color-text-primary)]"
+            : "text-[var(--color-warning)]"
+        } ${mono ? "font-mono tabular-nums" : ""}`}
+      >
+        <span className="block text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+          OCR 추출
+        </span>
+        <span className="mt-0.5 block">{ocr ?? "—"}</span>
+      </dd>
+      <span aria-hidden className="flex justify-end self-center">
+        {ocr ? (
+          match ? (
+            <CheckCircle2
+              className="h-4 w-4 text-[var(--color-success)]"
+              strokeWidth={2.4}
+            />
+          ) : (
+            <AlertCircle
+              className="h-4 w-4 text-[var(--color-warning)]"
+              strokeWidth={2.4}
+            />
+          )
+        ) : null}
+      </span>
     </div>
   );
 }
 
-// Building2 used in dl/dt above potentially (no current usage) — keep import to avoid unused warning is unneeded since we use it nowhere; tree-shaken.
-void Building2;
+function MetaRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1 py-3">
+      <dt className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+        {label}
+      </dt>
+      <dd
+        className={`break-all text-xs text-[var(--color-text-primary)] ${
+          mono ? "font-mono" : ""
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}

@@ -34,10 +34,10 @@ const CATEGORIES = [
 export function CategoryHeroSection() {
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
-      <h2 className="text-3xl font-semibold tracking-[-0.04em] md:text-5xl">
+      <h2 className="text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
         알면 알수록, 의료 용품.
       </h2>
-      <p className="mt-3 text-base text-[var(--color-text-secondary)] md:text-lg">
+      <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
         카테고리별로 골라보세요.
       </p>
 

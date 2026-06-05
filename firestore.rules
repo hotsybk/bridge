@@ -51,7 +51,20 @@ service cloud.firestore {
 
       match /members/{memberId} {
         allow read: if isAdmin() || (isBuyer() && userHospital() == hospitalId);
-        allow write: if isAdmin();      // 멤버 관리는 Cloud Function only
+        allow write: if isAdmin();      // 멤버 관리는 tRPC (Admin SDK) only
+      }
+
+      // Phase ν-3 — 초대 토큰 collection.
+      // 토큰 자체가 보안 토큰이므로 클라이언트는 read 불가.
+      // 본인 OWNER 가 동일 hospital 의 invites list 만 read (tRPC 도 동일).
+      match /invites/{inviteId} {
+        allow read: if isAdmin() || (isBuyer() && userHospital() == hospitalId);
+        allow write: if false;          // tRPC (Admin SDK) only
+      }
+
+      // 운영자 메모 ledger — 관리자 전용. hospital 본인에게 노출되지 않음.
+      match /memos/{memoId} {
+        allow read, write: if isAdmin();
       }
     }
 
@@ -70,6 +83,17 @@ service cloud.firestore {
         allow read: if isAdmin() || (isVendor() && userVendor() == vendorId);
         allow write: if isAdmin();
       }
+
+      // Phase ν-3 — 초대 토큰 collection.
+      match /invites/{inviteId} {
+        allow read: if isAdmin() || (isVendor() && userVendor() == vendorId);
+        allow write: if false;          // tRPC (Admin SDK) only
+      }
+
+      // 운영자 메모 ledger — 관리자 전용. vendor 본인에게 노출되지 않음.
+      match /memos/{memoId} {
+        allow read, write: if isAdmin();
+      }
     }
 
     // ===== /products =====
@@ -77,11 +101,27 @@ service cloud.firestore {
       allow read: if resource.data.status == 'ACTIVE' ||
                      isAdmin() ||
                      (isVendor() && userVendor() == resource.data.vendorId);
-      allow create: if isVendor() && request.resource.data.vendorId == userVendor();
+      // Wave P1 — vendor 본인 + DRAFT 상태로만 생성 가능 (Cloud Function 자동 검증 hook 진입 보장)
+      allow create: if isVendor() &&
+                       request.resource.data.vendorId == userVendor() &&
+                       request.resource.data.moderation.status == 'DRAFT';
+      // admin은 자유, vendor는 본인 상품 + DRAFT/REVISION_REQUESTED/PENDING_REVIEW 상태에서만 수정 가능
+      // PENDING_REVIEW → submitForReview 후 클라이언트 직접 update 가 없도록 강제할 수 있지만,
+      // 현재 모든 update 는 Admin SDK (tRPC) 를 거치므로 vendor 직접 write 는 사실상 불가.
+      // 보수적으로 DRAFT / REVISION_REQUESTED 만 허용.
       allow update: if isAdmin() ||
                        (isVendor() && userVendor() == resource.data.vendorId &&
-                        request.resource.data.vendorId == resource.data.vendorId);
+                        request.resource.data.vendorId == resource.data.vendorId &&
+                        (
+                          (resource.data.moderation.status == 'DRAFT') ||
+                          (resource.data.moderation.status == 'REVISION_REQUESTED')
+                        ));
       allow delete: if false;           // archived만, hard delete 금지
+
+      // 운영자 메모 ledger — 관리자 전용
+      match /memos/{memoId} {
+        allow read, write: if isAdmin();
+      }
     }
 
     // ===== /orders =====
@@ -99,7 +139,13 @@ service cloud.firestore {
         allow read: if isAdmin() ||
                        (isBuyer() && userHospital() == resource.data.hospitalId) ||
                        (isVendor() && userVendor() == resource.data.vendorId);
-        allow write: if false;          // Cloud Function only
+        // vendor 본인의 SubOrder 에 한해 배송/추적/상태전이 필드 만 업데이트 허용. 그 외는 Cloud Function only.
+        // Wave P2: acceptedAt / cancelledAt / cancelReason 추가 (출고 준비·취소 흐름).
+        allow update: if isAdmin() ||
+                         (isVendor() && resource.data.vendorId == userVendor() &&
+                          request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['status','trackingNo','trackingCarrier','lotNo','expiry','acceptedAt','shippedAt','deliveredAt','cancelledAt','cancelReason','updatedAt']));
+        allow create, delete: if false;
 
         match /items/{itemId} {
           allow read: if isAdmin() ||
@@ -108,42 +154,67 @@ service cloud.firestore {
           allow write: if false;
         }
       }
+
+      // 운영자 메모 ledger — 관리자 전용
+      match /memos/{memoId} {
+        allow read, write: if isAdmin();
+      }
     }
 
     // ===== /subscriptions =====
+    // Wave Y — buyer (BUYER_OWNER + STAFF) 본인 구독에 한해 status/qty/unitPrice/nextRunAt
+    // 등 한정 필드만 직접 write 허용. 운영자 forcePause/Resume 은 tRPC adminProcedure 가 처리.
+    // vendor 본인은 read-only.
     match /subscriptions/{subId} {
       allow read: if isAdmin() ||
-                     (isBuyer() && userHospital() == resource.data.hospitalId);
+                     (isBuyer() && userHospital() == resource.data.hospitalId) ||
+                     (isVendor() && resource.data.vendorId == userVendor());
       allow create: if isBuyer() &&
                        request.resource.data.hospitalId == userHospital();
       allow update: if isAdmin() ||
                        (isBuyer() && userHospital() == resource.data.hospitalId &&
-                        role() == 'BUYER_OWNER');
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['status','qty','unitPrice','nextRunAt','lastRunAt',
+                                    'pausedAt','pausedById','pauseReason','cancelledAt',
+                                    'priceChangePercent','priceChangeRequiresApproval',
+                                    'shippingAddress','statusReason','updatedAt',
+                                    'totalRuns','totalAmount']));
       allow delete: if false;
 
       match /runs/{runId} {
         allow read: if isAdmin() ||
-                       (isBuyer() && userHospital() == get(/databases/$(database)/documents/subscriptions/$(subId)).data.hospitalId);
-        allow write: if false;          // Cloud Function only
+                       (isBuyer() && userHospital() == get(/databases/$(database)/documents/subscriptions/$(subId)).data.hospitalId) ||
+                       (isVendor() && userVendor() == get(/databases/$(database)/documents/subscriptions/$(subId)).data.vendorId);
+        allow write: if false;          // Cloud Function / Admin SDK only
       }
     }
 
-    // ===== /groupBuys =====
+    // ===== /groupBuys (Wave I) =====
     match /groupBuys/{gbId} {
       allow read: if true;              // 공개
-      allow write: if false;            // 생성/수정은 Cloud Function only
+      // vendor 본인 캠페인 생성 + 일부 필드 수정 허용. status·currentQty 등 핵심 필드는 Cloud Function / Admin SDK only.
+      allow create: if isVendor() &&
+                       request.resource.data.vendorId == userVendor();
+      allow update: if isAdmin() ||
+                       (isVendor() && resource.data.vendorId == userVendor() &&
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['title','description','updatedAt']));
+      allow delete: if false;
 
       match /participations/{pId} {
+        // admin · 본인 hospital · vendor 본인 캠페인 의 참여 정보 read 가능
         allow read: if isAdmin() ||
-                       (isBuyer() && resource.data.hospitalId == userHospital());
-        allow create: if isBuyer() &&
-                         request.resource.data.hospitalId == userHospital();
-        allow update, delete: if false; // Cloud Function only
+                       (isBuyer() && resource.data.hospitalId == userHospital()) ||
+                       (isVendor() && get(/databases/$(database)/documents/groupBuys/$(gbId)).data.vendorId == userVendor());
+        // 직접 create 금지 — tRPC mutation (Admin SDK) 만 가능 (pre-auth flow 필수)
+        allow create, update, delete: if false;
       }
 
+      // counterShards — Wave I 합산 read 허용 (currentQty 정확도).
+      // write 는 Cloud Function / Admin SDK only.
       match /counterShards/{shardId} {
-        allow read: if false;
-        allow write: if false;          // Cloud Function only
+        allow read: if true;
+        allow write: if false;
       }
     }
 
@@ -174,7 +245,53 @@ service cloud.firestore {
     match /settlements/{settlementId} {
       allow read: if isAdmin() ||
                      (isVendor() && resource.data.vendorId == userVendor());
-      allow write: if false;            // Cloud Function only
+      allow write: if false;            // Cloud Function + tRPC (Admin SDK) only
+    }
+
+    // ===== /payouts (관리자 + 본인 vendor만) — Wave M =====
+    match /payouts/{payoutId} {
+      allow read: if isAdmin() ||
+                     (isVendor() && resource.data.vendorId == userVendor());
+      allow write: if false;            // Cloud Function + tRPC (Admin SDK) only
+    }
+
+    // ===== /disputes (Wave E) =====
+    match /disputes/{disputeId} {
+      allow read: if isAdmin() ||
+                     (isBuyer() && resource.data.hospitalId == userHospital()) ||
+                     (isVendor() && resource.data.vendorId == userVendor());
+      // hospital 본인 만 분쟁 신청 (open)
+      allow create: if isBuyer() &&
+                       request.resource.data.hospitalId == userHospital();
+      // status/resolution 등 갱신은 모두 Cloud Function 또는 Admin SDK only
+      allow update: if isAdmin();
+      allow delete: if false;
+
+      // 메시지 — buyer/vendor/admin 본인 발언만 작성 가능, 수정/삭제 금지
+      match /messages/{messageId} {
+        allow read: if
+          isAdmin() ||
+          (isBuyer() && get(/databases/$(database)/documents/disputes/$(disputeId)).data.hospitalId == userHospital()) ||
+          (isVendor() && get(/databases/$(database)/documents/disputes/$(disputeId)).data.vendorId == userVendor());
+        allow create: if
+          (isAdmin() && request.resource.data.authorRole == 'ADMIN') ||
+          (isBuyer() &&
+            request.resource.data.authorRole == 'BUYER' &&
+            get(/databases/$(database)/documents/disputes/$(disputeId)).data.hospitalId == userHospital()) ||
+          (isVendor() &&
+            request.resource.data.authorRole == 'VENDOR' &&
+            get(/databases/$(database)/documents/disputes/$(disputeId)).data.vendorId == userVendor());
+        allow update, delete: if false;
+      }
+
+      // 활동 history — 읽기만 가능 (쓰기는 Cloud Function only)
+      match /activity/{activityId} {
+        allow read: if
+          isAdmin() ||
+          (isBuyer() && get(/databases/$(database)/documents/disputes/$(disputeId)).data.hospitalId == userHospital()) ||
+          (isVendor() && get(/databases/$(database)/documents/disputes/$(disputeId)).data.vendorId == userVendor());
+        allow write: if false;
+      }
     }
 
     // ===== /notifications =====
@@ -200,9 +317,109 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ===== /coupons (Wave H) =====
+    // admin 만 write. ACTIVE 쿠폰은 인증 사용자가 read (코드 검증용).
+    match /coupons/{couponId} {
+      allow read: if isAdmin() ||
+                     (isSignedIn() && resource.data.status == 'ACTIVE');
+      allow create, update, delete: if isAdmin();
+
+      // 사용 ledger — admin + 본인 redemption 만 read. write 는 Cloud Function only.
+      match /redemptions/{redemptionId} {
+        allow read: if isAdmin() ||
+                       (isSignedIn() && resource.data.userId == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
+    // ===== /carts (Wave Q1) =====
+    // hospital 단위 단일 doc. 본인 hospital 만 read/write.
+    match /carts/{hospitalId} {
+      allow read: if isBuyer() && userHospital() == hospitalId;
+      allow write: if isBuyer() && userHospital() == hospitalId;
+    }
+
     // ===== /_retryQueue =====
     match /_retryQueue/{retryId} {
       allow read, write: if false;     // Cloud Function only
+    }
+
+    // ===== /_portoneWebhooks (raw payload 적재 — admin 만 열람) =====
+    match /_portoneWebhooks/{webhookId} {
+      allow read: if isAdmin();
+      allow write: if false;           // server (webhook handler) only
+    }
+
+    // ===== /_systemAlerts (운영자 모니터링 페이지) =====
+    match /_systemAlerts/{alertId} {
+      allow read: if isAdmin();
+      allow write: if false;           // Cloud Function only
+    }
+
+    // ===== /_solapiWebhooks (Wave S — Solapi raw payload) =====
+    match /_solapiWebhooks/{webhookId} {
+      allow read: if isAdmin();
+      allow write: if false;           // server (webhook handler) only
+    }
+
+    // ===== /_metricsSnapshots (Wave T — hourly metrics 집계) =====
+    match /_metricsSnapshots/{snapshotId} {
+      allow read: if isAdmin();
+      allow write: if false;           // Cloud Function only
+    }
+
+    // ===== /_serviceHealth (Wave T — 외부 서비스 healthcheck) =====
+    match /_serviceHealth/{serviceKey} {
+      allow read: if isAdmin();
+      allow write: if false;           // Cloud Function only
+    }
+
+    // ===== /_udiReportQueue (Phase 6 UDI 보고 큐) =====
+    match /_udiReportQueue/{queueId} {
+      allow read: if isAdmin();
+      allow write: if false;           // Cloud Function only
+    }
+
+    // ===== /systemSettings (Wave O — 운영자 설정 5 section) =====
+    // 모든 admin이 read 가능. 보안·결제·알림·외부는 tRPC superAdminProcedure 에서 더 세밀하게 가드.
+    match /systemSettings/{section} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ===== /featureFlags (Wave U — 기능 토글) =====
+    // admin read, write 는 tRPC superAdminProcedure (Admin SDK) only.
+    match /featureFlags/{flagId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ===== /supportInquiries (Wave AA — 마케팅 /support/contact 문의 폼) =====
+    // 비로그인 사용자도 제출 가능. 읽기·관리는 admin only.
+    match /supportInquiries/{inquiryId} {
+      allow create: if true;            // public submission (tRPC publicProcedure 가 입력 검증)
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ===== /marketingSubscriptions (Phase ν-5 — 출시 알림 신청) =====
+    // 비로그인 사용자도 가입 가능. 읽기·갱신은 admin only. 삭제 금지(법적 동의 기록 유지).
+    // 실제 mutation 은 tRPC marketingSubscription.subscribe — rate limit + dedupe 처리.
+    match /marketingSubscriptions/{subId} {
+      allow create: if true;
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ===== /udiReports (Wave N — 월말 일괄 보고 master + items) =====
+    match /udiReports/{period} {
+      allow read: if isAdmin();
+      allow write: if false;           // Cloud Function only
+
+      match /items/{itemId} {
+        allow read: if isAdmin();
+        allow write: if false;         // Cloud Function only
+      }
     }
 
     // ===== Catch-all (보안 기본) =====

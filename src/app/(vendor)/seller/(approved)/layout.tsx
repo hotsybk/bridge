@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { SellerSubNav } from "@/components/vendor/seller-sub-nav";
 import { trpcServer } from "@/lib/trpc/server";
 
 // 모든 /seller/* (approved) 페이지는 인증 컨텍스트 의존 — 정적 prerender 불가.
@@ -24,15 +25,29 @@ export default async function SellerApprovedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const trpc = await trpcServer();
-  const vendor = await trpc.vendor.getCurrent();
+  // Phase α-2 — PREVIEW bypass 격리.
+  // ENABLE_PREVIEW_BYPASS=true 일 때만 vendor 가드 우회. 운영/스테이징 절대 금지.
+  // proxy.ts / trpc.ts 의 PREVIEW_MODE 와 함께 관리.
+  const PREVIEW_MODE =
+    process.env.ENABLE_PREVIEW_BYPASS === "true" &&
+    process.env.NODE_ENV !== "production";
 
-  if (!vendor) {
-    redirect("/onboarding/vendor");
-  }
-  if (vendor.status !== "APPROVED") {
-    redirect("/seller/pending");
+  if (!PREVIEW_MODE) {
+    const trpc = await trpcServer();
+    const vendor = await trpc.vendor.getCurrent();
+
+    if (!vendor) {
+      redirect("/onboarding/vendor");
+    }
+    if (vendor.status !== "APPROVED") {
+      redirect("/seller/pending");
+    }
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SellerSubNav />
+      {children}
+    </>
+  );
 }

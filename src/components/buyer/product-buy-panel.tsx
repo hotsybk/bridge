@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  Check,
   Minus,
   Plus,
   Repeat,
@@ -9,6 +11,9 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+
+import { trackCartAdd } from "@/lib/posthog/events";
+import { trpc } from "@/lib/trpc/client";
 
 /**
  * 상품 상세 우측 — 수량 + 가격 + CTA 패널 (client component).
@@ -28,11 +33,31 @@ type BuyPanelProduct = {
   shippingFee: number;
   subscribable?: boolean;
   groupBuyable?: boolean;
+  vendorId?: string;
 };
 
 export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
+  const router = useRouter();
   const [qty, setQty] = useState(product.moq);
   const [error, setError] = useState<string | null>(null);
+  const [addedFlash, setAddedFlash] = useState(false);
+
+  const addToCart = trpc.cart.add.useMutation({
+    onSuccess: () => {
+      setAddedFlash(true);
+      window.setTimeout(() => setAddedFlash(false), 1800);
+      // Phase ν-2 — PostHog cart_add.
+      trackCartAdd({
+        productId: product.id,
+        vendorId: product.vendorId ?? "",
+        qty,
+        unitPrice,
+      });
+    },
+    onError: (err) => {
+      setError(err.message);
+    },
+  });
 
   // 현재 수량 기준 단가 (priceTiers 적용)
   const tiers = product.priceTiers ?? [];
@@ -62,20 +87,60 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
   };
 
   function onAddToCart() {
-    // Phase 2 cart 작업 전 — alert mock
-    alert(
-      `장바구니에 담겼습니다 (mock)\n\n${product.name}\n수량: ${qty} ${product.unit}\n합계: ₩${totalPrice.toLocaleString()}\n\n* 실제 장바구니 연동은 Phase 2 에서 진행됩니다.`,
-    );
+    setError(null);
+    addToCart.mutate({ productId: product.id, qty });
   }
 
-  function onBuyNow() {
-    alert(
-      `바로 구매 (mock)\n\n${product.name}\n수량: ${qty} ${product.unit}\n합계: ₩${totalPrice.toLocaleString()}\n\n* 실제 결제는 Phase 2 에서 진행됩니다.`,
-    );
+  async function onBuyNow() {
+    setError(null);
+    try {
+      await addToCart.mutateAsync({ productId: product.id, qty });
+      router.push("/checkout");
+    } catch {
+      // 에러는 mutation onError 에서 표시됨
+    }
   }
 
   return (
     <div className="space-y-6">
+      {/* Phase ξ-1 — 모바일 sticky bottom CTA (bottom tab bar 위에 위치) */}
+      <div
+        className="fixed inset-x-0 bottom-14 z-20 border-t border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/95 backdrop-blur-md md:hidden"
+        style={{ paddingBottom: "max(0px, env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center justify-between gap-3 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
+              단가 · {qty}
+              {product.unit}
+            </p>
+            <p className="text-base font-semibold tabular-nums tracking-tight">
+              ₩{totalPrice.toLocaleString()}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onAddToCart}
+            disabled={addToCart.isPending}
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[var(--color-accent)] px-5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-60"
+          >
+            {addedFlash ? (
+              <>
+                <Check className="h-4 w-4" strokeWidth={2.5} />
+                담겼습니다
+              </>
+            ) : addToCart.isPending ? (
+              "처리 중"
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4" />
+                카트 담기
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* 가격 영역 */}
       <div>
         {tiers.length > 0 && unitPrice < product.basePrice && (
@@ -90,7 +155,7 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
         )}
         <p className="mt-1 text-4xl font-semibold tabular-nums tracking-tight md:text-5xl">
           ₩{unitPrice.toLocaleString()}
-          <span className="ml-2 text-base font-normal text-[var(--color-text-tertiary)]">
+          <span className="ml-2 text-sm font-normal text-[var(--color-text-tertiary)]">
             / {product.unit}
           </span>
         </p>
@@ -146,7 +211,7 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
             <button
               type="button"
               onClick={decrease}
-              className="grid h-10 w-10 place-items-center rounded-l-full hover:bg-[var(--color-bg-secondary)]"
+              className="grid h-11 w-11 place-items-center rounded-l-full hover:bg-[var(--color-bg-secondary)] md:h-10 md:w-10"
               aria-label="수량 감소"
             >
               <Minus className="h-4 w-4" />
@@ -157,12 +222,13 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
               max={product.stock}
               value={qty}
               onChange={(e) => onChange(e.target.value)}
-              className="h-10 w-16 border-x border-[var(--color-border-default)] bg-transparent text-center text-sm font-medium tabular-nums focus:outline-none"
+              inputMode="numeric"
+              className="h-11 w-16 border-x border-[var(--color-border-default)] bg-transparent text-center text-sm font-medium tabular-nums focus:outline-none md:h-10"
             />
             <button
               type="button"
               onClick={increase}
-              className="grid h-10 w-10 place-items-center rounded-r-full hover:bg-[var(--color-bg-secondary)]"
+              className="grid h-11 w-11 place-items-center rounded-r-full hover:bg-[var(--color-bg-secondary)] md:h-10 md:w-10"
               aria-label="수량 증가"
             >
               <Plus className="h-4 w-4" />
@@ -184,7 +250,7 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
           <span className="text-sm text-[var(--color-text-secondary)]">
             합계 ({qty} {product.unit})
           </span>
-          <span className="text-2xl font-semibold tabular-nums">
+          <span className="text-2xl font-semibold tabular-nums md:text-3xl">
             ₩{totalPrice.toLocaleString()}
           </span>
         </div>
@@ -200,17 +266,32 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
         <button
           type="button"
           onClick={onBuyNow}
-          className="landing-cta-glow inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-accent)] px-6 text-base font-semibold text-white"
+          disabled={addToCart.isPending}
+          className="landing-cta-glow inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-accent)] px-6 text-sm font-semibold text-white disabled:opacity-60"
         >
-          바로 구매
+          {addToCart.isPending ? "처리 중..." : "바로 구매"}
         </button>
         <button
           type="button"
           onClick={onAddToCart}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[var(--color-border-default)] bg-[var(--color-bg-primary)] px-6 text-base font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
+          disabled={addToCart.isPending}
+          className={`inline-flex h-12 items-center justify-center gap-2 rounded-full border bg-[var(--color-bg-primary)] px-6 text-sm font-medium transition-colors disabled:opacity-60 ${
+            addedFlash
+              ? "border-[var(--color-success)] text-[var(--color-success)]"
+              : "border-[var(--color-border-default)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]"
+          }`}
         >
-          <ShoppingCart className="h-4 w-4" />
-          장바구니에 담기
+          {addedFlash ? (
+            <>
+              <Check className="h-4 w-4" />
+              담겼습니다
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="h-4 w-4" />
+              장바구니에 담기
+            </>
+          )}
         </button>
 
         {/* 보조 옵션 */}
@@ -218,11 +299,7 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
           {product.subscribable && (
             <button
               type="button"
-              onClick={() =>
-                alert(
-                  `정기 주문 등록 (mock)\n\n${product.name} · ${qty}${product.unit}\n매달 자동 발주\n\n* Phase 3 정기구독에서 정식 출시`,
-                )
-              }
+              onClick={() => router.push(`/subscriptions/new?productId=${product.id}`)}
               className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[var(--color-success)]/12 text-sm font-medium text-[var(--color-success)] transition-colors hover:bg-[var(--color-success)]/20"
             >
               <Repeat className="h-3.5 w-3.5" />

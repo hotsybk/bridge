@@ -66,11 +66,11 @@ export function StatCard({
       </div>
 
       <div className="mt-4 flex items-baseline gap-1.5">
-        <span className="text-4xl font-semibold tabular-nums tracking-tight">
+        <span className="text-2xl font-semibold tabular-nums tracking-tight md:text-3xl">
           {value}
         </span>
         {unit && (
-          <span className="text-base text-[var(--color-text-secondary)]">
+          <span className="text-sm text-[var(--color-text-secondary)]">
             {unit}
           </span>
         )}

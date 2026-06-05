@@ -7,6 +7,19 @@ service firebase.storage {
     function isAdmin() { return isSignedIn() && role() in ['ADMIN', 'SUPER_ADMIN']; }
     function isVendor() { return isSignedIn() && role() in ['VENDOR_OWNER', 'VENDOR_STAFF']; }
     function userVendor() { return request.auth.token.vendorId; }
+    function userHospital() { return request.auth.token.hospitalId; }
+
+    // Phase β-3 작업 3 — dispute 당사자 여부 (Firestore 문서 조회).
+    // firestore.get 은 Storage Rules 에서 사용 가능하지만 latency·cost 가 있어 dispute 만 적용.
+    function isDisputeParty(disputeId) {
+      let dispute = firestore.get(
+        /databases/(default)/documents/disputes/$(disputeId)
+      );
+      return dispute != null && (
+        (userHospital() != null && dispute.data.hospitalId == userHospital()) ||
+        (userVendor() != null && dispute.data.vendorId == userVendor())
+      );
+    }
 
     // vendor 서류 (사업자증, 신고증, 통장 사본)
     // 온보딩 시점에는 vendorId가 token에 없음 — 본인 uid를 path segment로 쓸 때 임시 허용
@@ -40,6 +53,19 @@ service firebase.storage {
       allow write: if isVendor() &&
                      request.resource.size < 5 * 1024 * 1024 &&
                      request.resource.contentType.matches('image/.*');
+    }
+
+    // 분쟁 첨부 (Phase β-3 — admin 또는 dispute 당사자만 read·write)
+    // firestore.get 으로 disputeDoc 조회 후 hospitalId/vendorId 일치 검증.
+    match /disputes/{disputeId}/{allPaths=**} {
+      allow read: if isSignedIn() && (
+                     isAdmin() ||
+                     isDisputeParty(disputeId)
+                   );
+      allow write: if isSignedIn() &&
+                      (isAdmin() || isDisputeParty(disputeId)) &&
+                      request.resource.size < 10 * 1024 * 1024 &&
+                      request.resource.contentType.matches('image/.*|application/pdf');
     }
 
     // 세금계산서 PDF (Cloud Function이 생성, 본인만 다운로드)

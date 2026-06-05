@@ -29,6 +29,7 @@ export const productRouter = createTRPCRouter({
       z.object({
         search: z.string().optional(),
         categoryId: z.string().optional(),
+        vendorId: z.string().optional(),
         deviceClass: z.enum(DEVICE_CLASS_VALUES).optional(),
         subscribable: z.boolean().optional(),
         groupBuyable: z.boolean().optional(),
@@ -52,6 +53,11 @@ export const productRouter = createTRPCRouter({
       // 2) 추가 필터
       if (input.categoryId) {
         products = products.filter((p) => p.categoryId === input.categoryId);
+      }
+      if (input.vendorId) {
+        products = products.filter(
+          (p) => (p as { vendorId?: string }).vendorId === input.vendorId,
+        );
       }
       if (input.deviceClass) {
         products = products.filter((p) => p.deviceClass === input.deviceClass);
@@ -139,6 +145,124 @@ export const productRouter = createTRPCRouter({
         });
 
       return { id: snap.id, ...data } as Product;
+    }),
+
+  // ─────────────────────────────────────────────────────────
+  // search — Algolia 통합 검색 (Wave Z)
+  //
+  //   - env 키 설정 시 Algolia REST 호출
+  //   - 미설정 또는 호출 실패 시 Firestore fallback (list 와 유사한 in-memory 필터)
+  //   - 반환에 source 필드 포함 — 개발자가 어디서 응답이 왔는지 확인 가능
+  // ─────────────────────────────────────────────────────────
+  search: publicProcedure
+    .input(
+      z.object({
+        query: z.string().optional(),
+        categoryId: z.string().optional(),
+        vendorId: z.string().optional(),
+        page: z.number().int().nonnegative().default(0),
+        hitsPerPage: z.number().int().positive().max(60).default(24),
+        sort: z
+          .enum(["popularity", "newest", "price_asc", "price_desc"])
+          .default("popularity"),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { searchProducts, isAlgoliaConfigured } = await import(
+        "@/server/services/algolia"
+      );
+
+      // 1) Algolia 시도
+      if (isAlgoliaConfigured()) {
+        const result = await searchProducts(input);
+        if (result) {
+          return {
+            hits: result.hits,
+            nbHits: result.nbHits,
+            page: result.page,
+            nbPages: result.nbPages,
+            source: "algolia" as const,
+          };
+        }
+      }
+
+      // 2) Firestore fallback
+      const db = adminDb();
+      const snap = await db.collection(COLLECTIONS.products).get();
+      let products = snap.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as Product & {
+          objectID?: string;
+        },
+      );
+
+      // ACTIVE 필터
+      products = products.filter(
+        (p) => (p as { status?: string }).status === "ACTIVE",
+      );
+
+      if (input.categoryId) {
+        products = products.filter((p) => p.categoryId === input.categoryId);
+      }
+      if (input.vendorId) {
+        products = products.filter(
+          (p) => (p as { vendorId?: string }).vendorId === input.vendorId,
+        );
+      }
+      if (input.query) {
+        const needle = input.query.toLowerCase();
+        products = products.filter((p) => {
+          const haystack = [
+            p.name,
+            p.nameEn,
+            p.brand,
+            p.manufacturer,
+            p.vendorName,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(needle);
+        });
+      }
+
+      // 정렬
+      products.sort((a, b) => {
+        switch (input.sort) {
+          case "price_asc":
+            return a.basePrice - b.basePrice;
+          case "price_desc":
+            return b.basePrice - a.basePrice;
+          case "newest": {
+            const av =
+              (a as { createdAt?: { seconds?: number } }).createdAt
+                ?.seconds ?? 0;
+            const bv =
+              (b as { createdAt?: { seconds?: number } }).createdAt
+                ?.seconds ?? 0;
+            return bv - av;
+          }
+          case "popularity":
+          default:
+            return (
+              ((b as { orderCount?: number }).orderCount ?? 0) -
+              ((a as { orderCount?: number }).orderCount ?? 0)
+            );
+        }
+      });
+
+      const nbHits = products.length;
+      const nbPages = Math.max(1, Math.ceil(nbHits / input.hitsPerPage));
+      const start = input.page * input.hitsPerPage;
+      const paged = products.slice(start, start + input.hitsPerPage);
+      const hits = paged.map((p) => ({ objectID: p.id, ...p }));
+
+      return {
+        hits,
+        nbHits,
+        page: input.page,
+        nbPages,
+        source: "firestore-fallback" as const,
+      };
     }),
 
   // ─────────────────────────────────────────────────────────

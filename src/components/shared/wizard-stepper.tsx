@@ -96,7 +96,7 @@ export function WizardStepper({
               {/* 라벨 */}
               <div className={`pb-6 ${isLast ? "pb-0" : ""}`}>
                 <p
-                  className={`text-sm transition-colors ${
+                  className={`text-xs transition-colors ${
                     isActive
                       ? "font-semibold text-[var(--color-text-primary)]"
                       : isDone

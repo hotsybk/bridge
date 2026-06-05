@@ -36,7 +36,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/products/${product.id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl bg-[var(--color-bg-secondary)] transition-shadow duration-300 hover:shadow-md"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl bg-[var(--color-bg-tertiary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18)]"
     >
       {/* 이미지 */}
       <div className="relative aspect-square overflow-hidden bg-[var(--color-bg-primary)]">
@@ -93,7 +93,7 @@ export function ProductCard({ product }: { product: Product }) {
         </p>
 
         <div className="mt-auto pt-4">
-          <p className="text-base font-semibold tabular-nums">
+          <p className="text-2xl font-semibold tabular-nums md:text-3xl">
             {hasTier && (
               <span className="text-xs font-normal text-[var(--color-text-secondary)]">
                 from{" "}
