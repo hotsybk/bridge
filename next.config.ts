@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Vercel이 빌드 시 자동 주입하는 환경변수를 클라이언트에 노출 — 배포 알림용
+  env: {
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA:
+      process.env.VERCEL_GIT_COMMIT_SHA ?? "",
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_MESSAGE:
+      process.env.VERCEL_GIT_COMMIT_MESSAGE ?? "",
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },

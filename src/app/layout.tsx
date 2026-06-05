@@ -3,6 +3,7 @@ import { AuthProvider } from "@/lib/firebase/auth-context";
 import { pretendard } from "@/lib/fonts";
 import { TRPCProvider } from "@/lib/trpc/client";
 import { Toaster } from "@/components/ui/toaster";
+import { DeploymentNotice } from "@/components/shared/deployment-notice";
 import { PostHogProvider } from "@/lib/posthog/provider";
 import "./globals.css";
 
@@ -93,6 +94,7 @@ export default function RootLayout({
           </TRPCProvider>
         </AuthProvider>
         <Toaster />
+        <DeploymentNotice />
       </body>
     </html>
   );
