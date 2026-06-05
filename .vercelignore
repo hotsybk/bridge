@@ -1,0 +1,24 @@
+# Vercel 빌드 시 무시할 디렉토리 — Next.js 앱과 무관한 파일들
+
+# Firebase Cloud Functions — 별도 패키지, Firebase에 배포
+functions/
+
+# 시드/백테스트 스크립트 — tsx 로컬 실행, Vercel 빌드 불필요
+scripts/
+
+# Firebase CLI 캐시·로그
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Documentation
+docs/
+
+# IDE
+.claude/
+.vscode/
+.idea/
+
+# Local env (안전망 — 어차피 .gitignore 처리됨)
+.env.local
+firebase-admin-key*.json
