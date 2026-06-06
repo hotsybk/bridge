@@ -4,37 +4,83 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  Activity,
-  Cross,
+  Baby,
+  Bone,
+  Ear,
+  Eye,
   Grid3x3,
-  Leaf,
   Package,
-  Shield,
+  Scissors,
   Smile,
+  Sparkles,
   Stethoscope,
-  Heart,
+  Syringe,
+  type LucideIcon,
 } from "lucide-react";
 
-const ITEMS = [
-  { id: null, label: "전체", icon: Grid3x3 },
-  { id: "cat-medsupply", label: "의료소모품", icon: Package },
-  { id: "cat-meddevice", label: "의료기기", icon: Activity },
-  { id: "cat-medsupply-disposable", label: "일회용", icon: Shield },
-  { id: "cat-medsupply-dressing", label: "드레싱", icon: Cross },
-  { id: "cat-meddevice-diagnostic", label: "진단기기", icon: Stethoscope },
-  { id: "cat-meddevice-monitor", label: "모니터링", icon: Heart },
-  { id: "cat-etc-oriental", label: "한방", icon: Leaf },
-  { id: "cat-etc-dental", label: "치과", icon: Smile },
-] as const;
+// Wave 2 — 카테고리 doc 의 icon 필드("Sparkles" 등) → Lucide 컴포넌트 매핑.
+const ICON_MAP: Record<string, LucideIcon> = {
+  Sparkles,
+  Smile,
+  Stethoscope,
+  Bone,
+  Scissors,
+  Baby,
+  Eye,
+  Ear,
+  Syringe,
+  Package,
+};
+
+export interface CatalogNavCategory {
+  id: string;
+  name: string;
+  depth: number;
+  icon?: string;
+  parentId?: string | null;
+}
+
+interface NavItem {
+  id: string | null;
+  label: string;
+  icon: LucideIcon;
+}
 
 // useLayoutEffect 는 SSR 에서 경고. 환경별로 분기.
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-export function CatalogNav() {
+/**
+ * Wave 2 — 진료과 10 대분류 동적 nav.
+ *
+ * 서버 페이지에서 product.categories() 로 받은 전체 카테고리를 prop 으로 받아,
+ * 진료과 대분류(depth === 1 && icon 보유)만 노출한다. 구 cat-* / nanoid 카테고리는
+ * icon 이 없으므로 자동 제외된다.
+ *
+ * "전체" + 진료과 N개 탭. 가로 스크롤(모바일) + sliding ink-bar.
+ */
+export function CatalogNav({
+  categories = [],
+}: {
+  categories?: CatalogNavCategory[];
+}) {
   const pathname = usePathname();
   const sp = useSearchParams();
   const currentCategoryId = sp.get("categoryId");
+
+  // 진료과 대분류만 — depth 1 + icon 보유. sortOrder 는 서버에서 이미 정렬됨.
+  const depts = categories
+    .filter((c) => c.depth === 1 && Boolean(c.icon))
+    .map<NavItem>((c) => ({
+      id: c.id,
+      label: c.name,
+      icon: (c.icon && ICON_MAP[c.icon]) || Package,
+    }));
+
+  const items: NavItem[] = [
+    { id: null, label: "전체", icon: Grid3x3 },
+    ...depts,
+  ];
 
   const listRef = useRef<HTMLUListElement | null>(null);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
@@ -44,7 +90,7 @@ export function CatalogNav() {
     ready: boolean;
   }>({ left: 0, width: 0, ready: false });
 
-  const activeIdx = ITEMS.findIndex(
+  const activeIdx = items.findIndex(
     (item) =>
       (item.id === null && !currentCategoryId) || currentCategoryId === item.id,
   );
@@ -61,7 +107,7 @@ export function CatalogNav() {
       width: activeRect.width,
       ready: true,
     });
-  }, [activeIdx, pathname]);
+  }, [activeIdx, pathname, items.length]);
 
   // resize 시 재측정
   useEffect(() => {
@@ -89,12 +135,12 @@ export function CatalogNav() {
       aria-label="카테고리"
       className="sticky top-14 z-20 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/90 backdrop-blur-md"
     >
-      <div className="mx-auto max-w-7xl px-4 md:px-12">
+      <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
         <ul
           ref={listRef}
-          className="relative flex h-16 items-stretch gap-0 overflow-x-auto md:justify-center md:gap-2 [&::-webkit-scrollbar]:hidden"
+          className="relative flex h-14 items-stretch gap-0 overflow-x-auto md:justify-center md:gap-1 [&::-webkit-scrollbar]:hidden"
         >
-          {ITEMS.map((item, i) => {
+          {items.map((item, i) => {
             const active =
               (item.id === null && !currentCategoryId) ||
               currentCategoryId === item.id;
@@ -102,7 +148,7 @@ export function CatalogNav() {
             const Icon = item.icon;
             return (
               <li
-                key={item.label}
+                key={item.id ?? "all"}
                 ref={(el) => {
                   itemRefs.current[i] = el;
                 }}
@@ -110,14 +156,14 @@ export function CatalogNav() {
               >
                 <Link
                   href={href}
-                  className={`group flex h-full flex-col items-center justify-center gap-0.5 px-3 transition-colors md:gap-1 md:px-4 ${
+                  className={`group flex h-full flex-col items-center justify-center gap-0.5 px-3 transition-colors md:px-3.5 ${
                     active
                       ? "text-[var(--color-accent)]"
                       : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                   }`}
                 >
-                  <Icon className="h-4 w-4 md:h-4 md:w-4" aria-hidden />
-                  <span className="text-[11px] font-medium whitespace-nowrap md:text-sm">
+                  <Icon className="h-4 w-4" aria-hidden />
+                  <span className="whitespace-nowrap text-[11px] font-medium md:text-xs">
                     {item.label}
                   </span>
                 </Link>

@@ -102,15 +102,12 @@ export default async function SearchPage({
   // 인기 상품: 처음 3개
   const featured = isFiltered ? [] : products.slice(0, 3);
 
-  // 페이지 헤더용 통계
-  const vendorCount = new Set(products.map((p) => p.vendorName)).size;
-
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav initialQ={q} />
-      <CatalogNav />
+      <CatalogNav categories={categories} />
 
-      <main className="mx-auto max-w-7xl px-6 md:px-12">
+      <main className="mx-auto max-w-screen-2xl px-4 md:px-8">
         {/* ─── 미니멀 페이지 헤더 ─── */}
         <PageHeader
           isFiltered={isFiltered}
@@ -119,12 +116,11 @@ export default async function SearchPage({
           filterVendorName={filterVendorName}
           filterVendorId={vendorId ?? null}
           productCount={products.length}
-          vendorCount={vendorCount}
         />
 
         {/* dev 전용 source 배지 — production 빌드에서는 숨김 */}
         {process.env.NODE_ENV !== "production" && useSearch && (
-          <div className="-mt-6 mb-2 text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
+          <div className="-mt-3 mb-2 text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
             검색 소스:{" "}
             <span className="font-semibold text-[var(--color-text-secondary)]">
               {searchSource === "algolia"
@@ -136,9 +132,9 @@ export default async function SearchPage({
           </div>
         )}
 
-        {/* ─── Featured — 필터 안 걸렸을 때만 ─── */}
+        {/* ─── Featured — 필터 안 걸렸을 때만, 컴팩트 ─── */}
         {!isFiltered && featured.length > 0 && (
-          <div className="mt-20 md:mt-28">
+          <div className="mt-8 md:mt-10">
             <FeaturedProductSection products={featured} />
           </div>
         )}
@@ -146,26 +142,25 @@ export default async function SearchPage({
         {/* ─── 전체 상품 그리드 ─── */}
         <section
           id="all-products"
-          className="mt-20 border-t border-[var(--color-border-light)] pt-16 md:mt-28 md:pt-24"
+          className={`border-t border-[var(--color-border-light)] pt-8 md:pt-10 ${
+            isFiltered ? "mt-2" : "mt-10 md:mt-12"
+          }`}
         >
-          {/* 그리드 헤더 */}
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
-                {isFiltered ? "검색 결과" : "전체 카탈로그"}
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+          {/* 그리드 헤더 — 컴팩트 */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-baseline gap-2.5">
+              <h2 className="text-base font-semibold tracking-[-0.02em] md:text-lg">
                 {isFiltered
                   ? q
-                    ? `"${q}"`
+                    ? `"${q}" 검색 결과`
                     : (filterCategoryName ?? "모든 상품")
-                  : "모든 상품"}
+                  : "전체 상품"}
               </h2>
-              <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
-                <span className="font-semibold tabular-nums text-[var(--color-text-primary)]">
+              <p className="text-sm text-[var(--color-text-tertiary)]">
+                <span className="font-semibold tabular-nums text-[var(--color-text-secondary)]">
                   <CountUp value={products.length} duration={700} />
                 </span>
-                개 상품
+                개
               </p>
             </div>
 
@@ -188,7 +183,7 @@ export default async function SearchPage({
                   <Link
                     key={s.value}
                     href={href}
-                    className={`inline-flex h-8 items-center rounded-full border px-3.5 text-xs font-medium transition-colors ${
+                    className={`inline-flex h-7 items-center rounded-full border px-3 text-xs font-medium transition-colors ${
                       active
                         ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                         : "border-[var(--color-border-light)] text-[var(--color-text-secondary)] hover:border-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
@@ -203,7 +198,7 @@ export default async function SearchPage({
 
           {/* 그리드 또는 빈 상태 */}
           {products.length === 0 ? (
-            <div className="mt-12">
+            <div className="mt-10">
               <EmptyState
                 icon={SearchX}
                 title={
@@ -237,9 +232,9 @@ export default async function SearchPage({
               />
             </div>
           ) : (
-            <div className="mt-12 grid gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {products.map((p, i) => (
-                <Reveal key={p.id} delay={(i % 8) * 60}>
+                <Reveal key={p.id} delay={(i % 12) * 40}>
                   <ProductCard product={p} />
                 </Reveal>
               ))}
@@ -248,7 +243,7 @@ export default async function SearchPage({
         </section>
 
         {/* 푸터 여백 */}
-        <div className="h-24 md:h-32" />
+        <div className="h-16 md:h-24" />
       </main>
     </div>
   );
@@ -265,7 +260,6 @@ function PageHeader({
   filterVendorName,
   filterVendorId,
   productCount,
-  vendorCount,
 }: {
   isFiltered: boolean;
   query: string;
@@ -273,107 +267,69 @@ function PageHeader({
   filterVendorName: string | null;
   filterVendorId: string | null;
   productCount: number;
-  vendorCount: number;
 }) {
-  // 필터·검색 모드에서는 헤더를 가볍게 (간단 메타만)
-  if (isFiltered) {
-    // vendorId 모드 — vendor 이름 헤더 + 전체 카탈로그로 돌아가기
-    if (filterVendorId) {
-      return (
-        <header className="py-12 md:py-16">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-            공급업체
-          </p>
-          <h1 className="mt-4 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
+  // vendorId 모드 — vendor 이름 헤더 + 전체 카탈로그로 돌아가기
+  if (isFiltered && filterVendorId) {
+    return (
+      <header className="py-8 md:py-10">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">
+          공급업체
+        </p>
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 className="break-keep text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
             {filterVendorName ?? "공급업체 상품"}
           </h1>
-          <div className="mt-4 flex flex-wrap items-baseline gap-3">
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              <span className="font-semibold tabular-nums text-[var(--color-text-primary)]">
-                <CountUp value={productCount} duration={700} />
-              </span>
-              개 상품을 판매 중입니다.
-            </p>
-            <Link
-              href="/search"
-              className="text-xs font-medium text-[var(--color-accent)] hover:underline"
-            >
-              전체 카탈로그 보기 →
-            </Link>
-          </div>
-        </header>
-      );
-    }
-
-    return (
-      <header className="py-12 md:py-16">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-          {query ? "검색 모드" : "카테고리"}
-        </p>
-        <h1 className="mt-4 break-keep text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-          {query ? `"${query}"` : (filterCategoryName ?? "필터 결과")}
-        </h1>
-        <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
-          <span className="font-semibold tabular-nums text-[var(--color-text-primary)]">
-            <CountUp value={productCount} duration={700} />
-          </span>
-          개 상품이 매칭됐습니다.
-        </p>
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            <span className="font-semibold tabular-nums text-[var(--color-text-secondary)]">
+              <CountUp value={productCount} duration={700} />
+            </span>
+            개 상품
+          </p>
+          <Link
+            href="/search"
+            className="text-xs font-medium text-[var(--color-accent)] hover:underline"
+          >
+            전체 카탈로그 →
+          </Link>
+        </div>
       </header>
     );
   }
 
-  // 기본 — 카탈로그 전체 헤더 (큰 타이포 + 우측 stats)
-  return (
-    <header className="border-b border-[var(--color-border-light)] py-16 md:py-24">
-      <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-end lg:gap-16">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-            의료 카탈로그
-          </p>
-          <h1 className="mt-5 break-keep text-4xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-5xl">
-            전국 공급업체의
-            <br />
-            모든 상품을 한 곳에서.
+  // 검색·카테고리 필터 — 한 줄 헤더
+  if (isFiltered) {
+    return (
+      <header className="py-8 md:py-10">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 className="break-keep text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+            {query ? `"${query}"` : (filterCategoryName ?? "필터 결과")}
           </h1>
-          <p className="mt-6 max-w-xl text-sm text-[var(--color-text-secondary)]">
-            식약처 인증을 받은 의료기기·소모품. 가격은 투명하게, 정산은 영업일
-            3일.
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            <span className="font-semibold tabular-nums text-[var(--color-text-secondary)]">
+              <CountUp value={productCount} duration={700} />
+            </span>
+            개 {query ? "검색 결과" : "상품"}
           </p>
         </div>
+      </header>
+    );
+  }
 
-        {/* 우측 — quick stats (박스 없이 numbers 만) */}
-        <dl className="grid grid-cols-3 gap-4 border-t border-[var(--color-border-light)] pt-6 lg:border-t-0 lg:pt-0">
-          <StatItem value={productCount} label="상품" />
-          <StatItem value={vendorCount} label="공급업체" hasDivider />
-          <StatItem value={9} label="카테고리" hasDivider />
-        </dl>
+  // 기본 — 카탈로그 전체 헤더 (컴팩트, 한 줄 + 총 N개 메타)
+  return (
+    <header className="py-8 md:py-10">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h1 className="break-keep text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+          의료 카탈로그
+        </h1>
+        <p className="text-sm text-[var(--color-text-tertiary)]">
+          식약처 인증 의료기기·소모품{" "}
+          <span className="font-semibold tabular-nums text-[var(--color-text-secondary)]">
+            <CountUp value={productCount} duration={700} />
+          </span>
+          개
+        </p>
       </div>
     </header>
-  );
-}
-
-function StatItem({
-  value,
-  label,
-  hasDivider,
-}: {
-  value: number;
-  label: string;
-  hasDivider?: boolean;
-}) {
-  return (
-    <div
-      className={`px-1 lg:px-4 ${
-        hasDivider ? "lg:border-l lg:border-[var(--color-border-light)]" : ""
-      }`}
-    >
-      <p className="text-2xl font-semibold tracking-[-0.03em] tabular-nums md:text-3xl">
-        <CountUp value={value} duration={900} />
-      </p>
-      <p className="mt-1.5 text-xs text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-    </div>
   );
 }

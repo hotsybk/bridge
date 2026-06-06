@@ -16,6 +16,28 @@ import type { Product } from "@/lib/types";
 const DEVICE_CLASS_VALUES = ["CLASS_1", "CLASS_2", "CLASS_3", "CLASS_4", "NON_DEVICE"] as const;
 const SORT_VALUES = ["latest", "priceAsc", "priceDesc", "popular"] as const;
 
+/**
+ * Wave 2 — 대분류(진료과) categoryId 필터 보강.
+ *
+ * 상품은 소분류 categoryId(예: `cat-oriental-needle`)를 가진다. 대분류
+ * (예: `cat-oriental`)를 클릭하면 하위 소분류 상품이 모두 포함되어야 한다.
+ *
+ * 전략 (DB 추가 read 없이 in-memory 판정):
+ *  - 정확히 일치하면 그대로 통과 (소분류 클릭)
+ *  - `${categoryId}-` 로 시작하면 통과 (대분류의 하위 소분류 — id prefix 규칙 활용)
+ *
+ * 진료과 카테고리 id 규칙: 대분류 = `cat-{slug}`, 소분류 = `cat-{slug}-{sub}`.
+ * 따라서 prefix 검사만으로 대→소 포함이 성립한다. 구 nanoid/cat-* 체계는
+ * prefix 가 겹치지 않아 안전하게 무시된다.
+ */
+function matchesCategory(productCategoryId: string, filterId: string): boolean {
+  if (!productCategoryId) return false;
+  return (
+    productCategoryId === filterId ||
+    productCategoryId.startsWith(`${filterId}-`)
+  );
+}
+
 export const productRouter = createTRPCRouter({
   // ─────────────────────────────────────────────────────────
   // list — 카탈로그 검색·필터
@@ -50,9 +72,10 @@ export const productRouter = createTRPCRouter({
         (p) => (p as { status?: string }).status === "ACTIVE",
       );
 
-      // 2) 추가 필터
+      // 2) 추가 필터 (대분류 클릭 시 하위 소분류 상품 포함)
       if (input.categoryId) {
-        products = products.filter((p) => p.categoryId === input.categoryId);
+        const filterId = input.categoryId;
+        products = products.filter((p) => matchesCategory(p.categoryId, filterId));
       }
       if (input.vendorId) {
         products = products.filter(
@@ -201,7 +224,8 @@ export const productRouter = createTRPCRouter({
       );
 
       if (input.categoryId) {
-        products = products.filter((p) => p.categoryId === input.categoryId);
+        const filterId = input.categoryId;
+        products = products.filter((p) => matchesCategory(p.categoryId, filterId));
       }
       if (input.vendorId) {
         products = products.filter(
@@ -282,8 +306,10 @@ type Category = {
   id: string;
   slug: string;
   name: string;
-  parentId?: string;
+  parentId?: string | null;
   depth: number;
   sortOrder: number;
   path: string[];
+  icon?: string;        // Wave 1 — 진료과 대분류만 보유 (lucide 아이콘명)
+  isActive?: boolean;
 };
