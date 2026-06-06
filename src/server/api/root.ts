@@ -21,6 +21,7 @@ import { adminFeatureFlagRouter } from "./routers/admin/feature-flag";
 import { adminDebugRouter } from "./routers/admin/debug";
 import { adminSearchRouter } from "./routers/admin/search";
 import { productRouter } from "./routers/product";
+import { rfqRouter } from "./routers/rfq";
 import { disputeRouter } from "./routers/dispute";
 import { couponRouter } from "./routers/coupon";
 import { groupbuyRouter } from "./routers/groupbuy";
@@ -58,6 +59,7 @@ export const appRouter = createTRPCRouter({
   vendor: vendorRouter,
   admin: adminRouter,
   product: productRouter,
+  rfq: rfqRouter,
   dispute: disputeRouter,
   coupon: couponRouter,
   groupbuy: groupbuyRouter,

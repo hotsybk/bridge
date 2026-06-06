@@ -15,6 +15,7 @@ import {
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { ProductCard } from "@/components/buyer/product-card";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { trpcServer } from "@/lib/trpc/server";
@@ -135,15 +136,13 @@ export default async function VendorPublicProfilePage({
 
       <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
         {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="text-xs text-[var(--color-text-tertiary)]">
-          <Link href="/search" className="hover:text-[var(--color-accent)]">
-            카탈로그
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-[var(--color-text-secondary)]">공급업체</span>
-          <span className="mx-2">/</span>
-          <span className="text-[var(--color-text-primary)]">{vendor.companyName}</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "카탈로그", href: "/search" },
+            { label: "공급업체" },
+            { label: vendor.companyName },
+          ]}
+        />
 
         {/* Hero — 라인 only, 박스 없음 */}
         <header className="mt-6 grid gap-6 border-b border-[var(--color-border-light)] pb-10 md:grid-cols-[1fr_auto] md:items-end md:gap-10 md:pb-14">

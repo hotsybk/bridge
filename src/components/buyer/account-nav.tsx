@@ -23,6 +23,7 @@ type Item = {
 
 const ITEMS: Item[] = [
   { href: "/account", label: "프로필", exact: true },
+  { href: "/account/analytics", label: "지출 분석" },
   { href: "/account/addresses", label: "배송지" },
   { href: "/account/billing", label: "결제 수단" },
   { href: "/account/team", label: "팀원" },

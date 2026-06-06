@@ -28,6 +28,7 @@ const ITEMS: Array<{
   { href: "/seller/rfq", label: "견적" },
   { href: "/seller/disputes", label: "분쟁" },
   { href: "/seller/settlement", label: "정산" },
+  { href: "/seller/udi-reports", label: "UDI" },
   { href: "/seller/analytics", label: "분석" },
   { href: "/seller/profile", label: "프로필" },
   { href: "/seller/staff", label: "팀원" },

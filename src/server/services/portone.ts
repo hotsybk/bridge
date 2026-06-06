@@ -5,6 +5,7 @@ if (typeof window !== "undefined") {
 }
 
 // Wave D / Phase β-1 — PortOne V2 API 클라이언트 (server-only).
+// [SYNCED: functions/src/lib/portone.ts] PortOne 호출 로직 변경 시 양쪽 동기화 (Functions 측은 captureAuth·cancelPayment 만 노출).
 //
 // env:
 //   PORTONE_API_SECRET    — PortOne V2 API Secret (server-to-server 인증)

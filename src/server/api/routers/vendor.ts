@@ -19,6 +19,7 @@ import { vendorRfqRouter } from "./vendor/rfq";
 import { vendorProfileRouter } from "./vendor/profile";
 import { vendorStaffRouter } from "./vendor/staff";
 import { vendorPublicProfileRouter } from "./vendor/public-profile";
+import { vendorUdiRouter } from "./vendor/udi";
 
 export const vendorRouter = createTRPCRouter({
   /** 본인 상품 관리 (Wave P1). list/counts/getById/create/update/submit/pause/resume/archive. */
@@ -47,6 +48,9 @@ export const vendorRouter = createTRPCRouter({
 
   /** Phase ν-5 — buyer/public facing 공급사 프로필. getById. 민감 정보 제외 whitelist. */
   publicProfile: vendorPublicProfileRouter,
+
+  /** Phase Φ-C — 본인 상품 UDI 보고 현황 (read-only). list. */
+  udi: vendorUdiRouter,
 
   /**
    * 공급업체 온보딩 — Phase 1.7 vendor flow 의 핵심 mutation.

@@ -6,7 +6,7 @@ if (typeof window !== "undefined") {
 
 // Wave I — NEXUS FATE distributed counter 패턴.
 // Cloud Function 측과 동일한 인터페이스를 tRPC procedure 에서도 사용.
-// functions/src/lib/distributed-counter.ts 와 동기화 유지.
+// [SYNCED: functions/src/lib/distributed-counter.ts] 변경 시 양쪽 동기화.
 
 // eslint-disable-next-line import/first
 import { FieldValue } from "firebase-admin/firestore";

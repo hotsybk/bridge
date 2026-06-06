@@ -13,10 +13,14 @@ import type { Hospital } from "@/lib/types";
 import { hospitalStaffRouter } from "./hospital/staff";
 import { hospitalSettingsRouter } from "./hospital/settings";
 import { hospitalApprovalRouter } from "./hospital/approval";
+import { hospitalSpendingProcedure } from "./hospital/spending";
 
 export const hospitalRouter = createTRPCRouter({
   /** Phase ν-3 — 본인 병원 멤버 관리. list/invite/cancelInvite/updateRole/remove/setApprover/acceptInvite. */
   staff: hospitalStaffRouter,
+
+  /** Phase Φ-C — 본인 병원 지출 분석 (월별·카테고리·공급사·top상품). */
+  spending: hospitalSpendingProcedure,
 
   /** Phase ν-3 — 결재 워크플로우 설정. getSettings/updateSettings. */
   settings: hospitalSettingsRouter,

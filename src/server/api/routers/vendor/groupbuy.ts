@@ -333,7 +333,7 @@ export const vendorGroupbuyRouter = createTRPCRouter({
             await p.ref.update({ voidedAt: FieldValue.serverTimestamp() });
             voidedCount++;
           } catch (err) {
-            console.error("vendor.groupbuy.cancel void failed", p.id, err);
+            console.error("[vendor.groupbuy.cancel] void failed", p.id, err);
           }
         } else {
           await p.ref.update({ voidedAt: FieldValue.serverTimestamp() });

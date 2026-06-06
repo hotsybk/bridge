@@ -27,6 +27,7 @@ import {
 import {formatKRW} from "@/lib/format";
 import {adminDb} from "@/server/firebase/admin";
 import {COLLECTIONS} from "@/server/firebase/collections";
+import {maskBankAccount, tsToMs} from "./settlement-helpers";
 import type {Settlement, Payout} from "@/lib/types";
 
 const StatusEnum = z.enum([
@@ -47,41 +48,6 @@ const PayoutMethodEnum = z.enum([
 type AnySettlement = Settlement & {
   toMillis?: never;
 };
-
-/**
- * Phase α-7 — 계좌번호 마스킹.
- * 4자 이하면 그대로, 그 외엔 마지막 4자리만 노출 (앞부분은 • 로 치환).
- * 예: "1234567890" → "••••••7890"
- */
-function maskBankAccount(account: string | undefined | null): string {
-  if (!account) return "";
-  const s = String(account);
-  if (s.length <= 4) return s;
-  return s.slice(0, -4).replace(/[0-9]/g, "•") + s.slice(-4);
-}
-
-function tsToMs(ts: unknown): number {
-  if (!ts || typeof ts !== "object") return 0;
-  const w1 = ts as {toMillis?: () => number; toDate?: () => Date};
-  if (typeof w1.toMillis === "function") {
-    try {
-      return w1.toMillis();
-    } catch {
-      /* fallthrough */
-    }
-  }
-  if (typeof w1.toDate === "function") {
-    try {
-      return w1.toDate().getTime();
-    } catch {
-      /* fallthrough */
-    }
-  }
-  const w2 = ts as {seconds?: number; _seconds?: number};
-  const sec = w2.seconds ?? w2._seconds;
-  if (typeof sec === "number") return sec * 1000;
-  return 0;
-}
 
 export const adminSettlementRouter = createTRPCRouter({
   /** Settlement 목록. status·vendorId·isFastSettlement 필터 + cursor pagination. */

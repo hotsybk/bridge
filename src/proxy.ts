@@ -157,7 +157,7 @@ export async function proxy(request: NextRequest) {
       return redirectToLogin(request, { path: "/login", publicPaths: PUBLIC_PATHS });
     },
     handleError: async (e) => {
-      console.error("Auth proxy error:", e);
+      console.error("[auth-proxy] error:", e);
       const { pathname } = request.nextUrl;
       if (isPublicPath(pathname)) {
         return NextResponse.next({ request: { headers: request.headers } });

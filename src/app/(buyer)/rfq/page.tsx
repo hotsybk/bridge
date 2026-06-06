@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
-import { LaunchAlertButton } from "@/components/shared/launch-alert-modal";
 import { PageHeader } from "@/components/shared/page-header";
 
 export const dynamic = "force-dynamic";
@@ -78,17 +77,16 @@ export default function RfqPage() {
 
       <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
         <PageHeader
-          label="견적 요청 · 곧 시작"
+          label="견적 요청 · RFQ"
           title="한 번의 요청, 여러 공급업체."
           description="비카탈로그 품목·대량 단가·맞춤 사양. 한 번에 다중 견적."
         >
-          <LaunchAlertButton
-            type="RFQ_LAUNCH"
-            title="RFQ 출시 알림"
-            description="견적 요청(RFQ) 정식 출시 시점을 가장 먼저 알려드려요. 베타 테스터 모집 시 우선 안내도 함께 받아보실 수 있습니다."
-            buttonClassName="inline-flex h-12 items-center gap-1.5 rounded-full bg-[var(--color-text-primary)] px-6 text-sm font-medium text-white transition-opacity hover:opacity-90 active:scale-[0.98]"
-            buttonLabel="출시 알림 받기"
-          />
+          <Link
+            href="/rfq/new"
+            className="inline-flex h-12 items-center gap-1.5 rounded-full bg-[var(--color-accent)] px-6 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)] active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />새 견적 요청
+          </Link>
         </PageHeader>
 
         {/* Flow diagram — 라인 패턴 */}
@@ -126,9 +124,12 @@ export default function RfqPage() {
             <h2 className="text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
               최근 견적 요청
             </h2>
-            <p className="text-xs text-[var(--color-text-tertiary)]">
-              아래는 디자인 미리보기 — 정식 출시 후 실제 등록 가능
-            </p>
+            <Link
+              href="/rfq/new"
+              className="text-xs font-medium text-[var(--color-accent)] underline-offset-4 hover:underline"
+            >
+              새 견적 요청 →
+            </Link>
           </header>
 
           <ul className="mt-8 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
@@ -216,15 +217,15 @@ export default function RfqPage() {
             한 번의 요청, 여러 공급업체.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-white/80">
-            출시 알림을 신청하시면 가장 먼저 알려드립니다.
+            품목과 수량만 입력하면 적격 공급사에 동시 발송됩니다.
           </p>
           <div className="mt-8 flex justify-center">
-            <LaunchAlertButton
-              type="RFQ_LAUNCH"
-              title="RFQ 출시 알림"
-              description="견적 요청(RFQ) 정식 출시 시점을 가장 먼저 알려드려요. 베타 테스터 모집 시 우선 안내도 함께 받아보실 수 있습니다."
-              buttonClassName="inline-flex h-12 items-center gap-1.5 rounded-full bg-white px-7 text-sm font-semibold text-[var(--color-accent)] transition-opacity hover:opacity-90 active:scale-[0.98]"
-            />
+            <Link
+              href="/rfq/new"
+              className="inline-flex h-12 items-center gap-1.5 rounded-full bg-white px-7 text-sm font-semibold text-[var(--color-accent)] transition-opacity hover:opacity-90 active:scale-[0.98]"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.5} />새 견적 요청
+            </Link>
           </div>
         </section>
       </main>

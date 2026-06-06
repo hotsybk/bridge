@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, Package, Repeat, Truck, Users } from "lucide-react";
+import { Repeat, Truck, Users } from "lucide-react";
 
 import { CatalogNav } from "@/components/buyer/catalog-nav";
 import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { ProductBuyPanel } from "@/components/buyer/product-buy-panel";
 import { ProductCard } from "@/components/buyer/product-card";
+import { ProductGallery } from "@/components/buyer/product-gallery";
+import { Breadcrumb, type BreadcrumbItem } from "@/components/shared/breadcrumb";
 import { Reveal } from "@/components/shared/reveal";
 import { serializeFirestore } from "@/lib/utils/serialize-firestore";
 import { trpcServer } from "@/lib/trpc/server";
@@ -86,6 +87,24 @@ export default async function ProductDetailPage({
   const classLabel = DEVICE_CLASS_LABEL[product.deviceClass];
   const classTextColor = DEVICE_CLASS_TEXT[product.deviceClass];
   const description = (product as { description?: string }).description;
+  const galleryImages =
+    (product as { images?: string[] }).images?.length
+      ? (product as { images?: string[] }).images!
+      : product.thumbnail
+        ? [product.thumbnail]
+        : [];
+
+  const breadcrumbItems: BreadcrumbItem[] = [
+    { label: "홈", href: "/" },
+    { label: "둘러보기", href: "/search" },
+    ...((product.categoryPath ?? []).map((p, i, arr) => ({
+      label: p,
+      href:
+        i === arr.length - 1
+          ? `/search?categoryId=${product.categoryId}`
+          : "/search",
+    })) satisfies BreadcrumbItem[]),
+  ];
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
@@ -93,53 +112,18 @@ export default async function ProductDetailPage({
       <CatalogNav />
 
       {/* Breadcrumb */}
-      <nav className="mx-auto max-w-7xl px-6 pt-8 text-xs text-[var(--color-text-tertiary)] md:px-12">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link
-              href="/"
-              className="transition-colors hover:text-[var(--color-text-primary)]"
-            >
-              홈
-            </Link>
-          </li>
-          <ChevronRight className="h-3 w-3" />
-          <li>
-            <Link
-              href="/search"
-              className="transition-colors hover:text-[var(--color-text-primary)]"
-            >
-              둘러보기
-            </Link>
-          </li>
-          {product.categoryPath?.map((p, i) => (
-            <span key={i} className="flex items-center gap-1.5">
-              <ChevronRight className="h-3 w-3" />
-              <li>
-                <Link
-                  href={
-                    i === product.categoryPath.length - 1
-                      ? `/search?categoryId=${product.categoryId}`
-                      : "/search"
-                  }
-                  className="transition-colors hover:text-[var(--color-text-primary)]"
-                >
-                  {p}
-                </Link>
-              </li>
-            </span>
-          ))}
-        </ol>
-      </nav>
+      <div className="mx-auto max-w-7xl px-6 pt-8 md:px-12">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
 
       {/* ─── Hero — 좌측 큰 이미지 sticky / 우측 정보·CTA ─── */}
       {/* pb-32 = 모바일 sticky CTA(약 70px) + bottom tab bar(56px) 공간 확보 */}
       <main className="mx-auto max-w-7xl px-6 py-10 pb-32 md:px-12 md:py-16 md:pb-16">
         <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
-          {/* Left — Hero 이미지 + thumbnail */}
+          {/* Left — 갤러리 (데스크탑 썸네일 strip / 모바일 swipe carousel) */}
           <div className="lg:sticky lg:top-40 lg:self-start">
-            <ProductHero
-              image={product.thumbnail}
+            <ProductGallery
+              images={galleryImages}
               alt={product.name}
               classLabel={classLabel}
               classTextColor={classTextColor}
@@ -380,98 +364,6 @@ export default async function ProductDetailPage({
 // ─────────────────────────────────────────────────────────────
 // Sub components
 // ─────────────────────────────────────────────────────────────
-
-/**
- * 상품 hero 이미지 — 큰 사각 + accent 글로우 + 등급 글래스 배지.
- */
-function ProductHero({
-  image,
-  alt,
-  classLabel,
-  classTextColor,
-}: {
-  image: string | null | undefined;
-  alt: string;
-  classLabel?: string;
-  classTextColor: string;
-}) {
-  return (
-    <div className="relative">
-      {/* 글로우 배경 */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 translate-y-8 rounded-[3rem] bg-[var(--color-accent)]/8 blur-3xl"
-      />
-
-      {/* 메인 이미지 */}
-      <div className="relative aspect-square overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)] md:rounded-[2.5rem]">
-        {image ? (
-          <Image
-            src={image}
-            alt={alt}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Package
-              className="h-24 w-24 text-[var(--color-text-tertiary)]/40"
-              strokeWidth={1}
-            />
-          </div>
-        )}
-
-        {/* 등급 배지 — 글래스 효과 좌상단 */}
-        {classLabel && (
-          <span
-            className={`absolute left-5 top-5 inline-flex items-center rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold shadow-sm backdrop-blur-md ${classTextColor}`}
-          >
-            {classLabel}
-          </span>
-        )}
-      </div>
-
-      {/* 썸네일 strip — 가운데 active, 양옆 placeholder */}
-      <div className="mt-5 grid grid-cols-5 gap-2.5">
-        <ThumbItem image={image} alt={alt} active />
-        {[1, 2, 3, 4].map((i) => (
-          <ThumbItem key={i} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ThumbItem({
-  image,
-  alt,
-  active,
-}: {
-  image?: string | null;
-  alt?: string;
-  active?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      className={`relative aspect-square overflow-hidden rounded-2xl transition-all ${
-        active
-          ? "ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg-primary)]"
-          : "border border-[var(--color-border-light)] hover:border-[var(--color-text-secondary)]/40"
-      }`}
-    >
-      {image ? (
-        <Image src={image} alt={alt ?? ""} fill sizes="80px" className="object-cover" />
-      ) : (
-        <span className="grid h-full w-full place-items-center text-xs text-[var(--color-text-tertiary)]">
-          +
-        </span>
-      )}
-    </button>
-  );
-}
 
 /**
  * Feature chip — 라인 only.

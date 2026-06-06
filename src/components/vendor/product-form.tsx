@@ -365,7 +365,7 @@ export function ProductForm({
         <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
           파트너센터 · 카탈로그
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
           {mode === "create" ? "새 상품 등록" : "상품 편집"}
         </h1>
         <p className="mt-3 text-sm text-[var(--color-text-secondary)]">

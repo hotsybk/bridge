@@ -140,7 +140,7 @@ function AdminUserMenu() {
       toast.success("로그아웃되었습니다");
       router.push("/login");
     } catch (err) {
-      console.error(err);
+      console.error("[admin-top-bar] logout failed", err);
       toast.error("로그아웃 중 오류가 발생했습니다");
       setLoggingOut(false);
     }
