@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/buyer/product-card";
 import { CountUp } from "@/components/shared/count-up";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal } from "@/components/shared/reveal";
+import { serializeFirestore } from "@/lib/utils/serialize-firestore";
 import { trpcServer } from "@/lib/trpc/server";
 
 export const metadata: Metadata = {
@@ -64,7 +65,9 @@ export default async function SearchPage({
   >["items"] = [];
   let searchSource: "algolia" | "firestore-fallback" | "list" = "list";
 
-  const [categories] = await Promise.all([trpc.product.categories()]);
+  const [categoriesRaw] = await Promise.all([trpc.product.categories()]);
+  // Firestore Timestamp(클래스) → plain object 변환 (Server→Client 직렬화).
+  const categories = serializeFirestore(categoriesRaw);
 
   if (useSearch) {
     const sr = await trpc.product.search({
@@ -75,7 +78,7 @@ export default async function SearchPage({
       hitsPerPage: 60,
       page: 0,
     });
-    products = sr.hits as typeof products;
+    products = serializeFirestore(sr.hits) as typeof products;
     searchSource = sr.source;
   } else {
     const lr = await trpc.product.list({
@@ -84,7 +87,7 @@ export default async function SearchPage({
       sort,
       limit: 60,
     });
-    products = lr.items;
+    products = serializeFirestore(lr.items);
     searchSource = "list";
   }
 

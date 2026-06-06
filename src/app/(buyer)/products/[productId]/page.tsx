@@ -9,6 +9,7 @@ import { CatalogTopNav } from "@/components/buyer/catalog-top-nav";
 import { ProductBuyPanel } from "@/components/buyer/product-buy-panel";
 import { ProductCard } from "@/components/buyer/product-card";
 import { Reveal } from "@/components/shared/reveal";
+import { serializeFirestore } from "@/lib/utils/serialize-firestore";
 import { trpcServer } from "@/lib/trpc/server";
 
 export const dynamic = "force-dynamic";
@@ -71,12 +72,16 @@ export default async function ProductDetailPage({
     notFound();
   }
   if (!product) notFound();
+  // Firestore Timestamp(클래스) → plain object (Server→Client 직렬화).
+  product = serializeFirestore(product);
 
   const { items: sameCategory } = await trpc.product.list({
     categoryId: product.categoryId,
     limit: 8,
   });
-  const related = sameCategory.filter((p) => p.id !== productId).slice(0, 4);
+  const related = serializeFirestore(
+    sameCategory.filter((p) => p.id !== productId).slice(0, 4),
+  );
 
   const classLabel = DEVICE_CLASS_LABEL[product.deviceClass];
   const classTextColor = DEVICE_CLASS_TEXT[product.deviceClass];
