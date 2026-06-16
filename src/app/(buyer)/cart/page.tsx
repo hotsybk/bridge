@@ -158,7 +158,7 @@ export default function CartPage() {
 
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 py-16 pb-32 md:px-12 md:py-24 md:pb-24"
+        className="mx-auto max-w-7xl px-6 py-16 pb-32 md:px-12 md:py-24 md:pb-24"
       >
         {/* Header */}
         <div className="border-b border-[var(--color-border-light)] pb-10">

@@ -95,7 +95,7 @@ export default function GroupBuysPage() {
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         <PageHeader
           label="공동구매 · 곧 시작"
           title="지금 진행 중인 공동구매."

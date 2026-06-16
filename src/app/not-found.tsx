@@ -35,7 +35,7 @@ export default function NotFound() {
       </div>
 
       {/* 로고 */}
-      <header className="mx-auto max-w-6xl px-6 pt-10 md:px-12">
+      <header className="mx-auto max-w-7xl px-6 pt-10 md:px-12">
         <Link href="/" className="inline-flex items-center gap-2">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
             <Stethoscope className="h-4 w-4" />

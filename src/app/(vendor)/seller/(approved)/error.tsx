@@ -28,7 +28,7 @@ export default function SellerError({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-28">
+    <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
       <div className="mx-auto max-w-md text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-error)]/10 px-3 py-1 text-xs font-medium text-[var(--color-error)]">
           <AlertCircle className="h-3.5 w-3.5" />

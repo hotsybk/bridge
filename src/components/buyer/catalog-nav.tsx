@@ -135,7 +135,7 @@ export function CatalogNav({
       aria-label="카테고리"
       className="sticky top-14 z-20 border-b border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/90 backdrop-blur-md"
     >
-      <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
         <ul
           ref={listRef}
           className="relative flex h-14 items-stretch gap-0 overflow-x-auto md:justify-center md:gap-1 [&::-webkit-scrollbar]:hidden"

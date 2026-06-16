@@ -94,7 +94,7 @@ function HeroSection() {
         </svg>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 pt-32 pb-32 md:px-12 md:pt-48 md:pb-48">
+      <div className="mx-auto max-w-7xl px-6 pt-32 pb-32 md:px-12 md:pt-48 md:pb-48">
         <div className="grid items-center gap-16 lg:grid-cols-[1.15fr_1fr]">
           {/* Left — 텍스트 */}
           <div>
@@ -223,7 +223,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 function StatsBar() {
   return (
     <section className="border-y border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/40">
-      <div className="mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-24">
+      <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-24">
         <div className="grid grid-cols-2 gap-y-10 md:grid-cols-4 md:gap-y-0">
           <StatColumn value={3} prefix="" suffix="일" label="평균 정산" hint="기존 4~6개월 → MedPlace" />
           <StatColumn value={5} prefix="" suffix="%" label="플랫폼 수수료" hint="기존 도매상 평균 15~30%" />
@@ -269,7 +269,7 @@ function ProblemSection() {
   return (
     <section
       id="problem"
-      className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48"
+      className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48"
     >
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
@@ -465,7 +465,7 @@ const VALUES: Array<{
 function ValuesSection() {
   return (
     <section className="border-t border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/30">
-      <div className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
             우리의 접근
@@ -646,7 +646,7 @@ const PRINCIPLES = [
 
 function PrinciplesSection() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48">
+    <section className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
           운영 원칙
@@ -743,7 +743,7 @@ function RoadmapSection() {
 
   return (
     <section className="border-t border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/30">
-      <div className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
         {/* 헤더 */}
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
@@ -963,7 +963,7 @@ function CtaSection() {
         />
       </div>
 
-      <div className="relative mx-auto max-w-4xl px-6 py-32 text-center md:px-12 md:py-56">
+      <div className="relative mx-auto max-w-7xl px-6 py-32 text-center md:px-12 md:py-56">
         <Reveal>
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/70">
             함께 시작하기

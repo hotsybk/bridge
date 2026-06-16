@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  */
 export default function VendorNotificationsPage() {
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20">
       <PageHeader
         label="파트너센터 · 알림"
         title="알림"

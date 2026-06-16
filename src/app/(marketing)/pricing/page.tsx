@@ -139,7 +139,7 @@ function HeroSection() {
         </svg>
       </div>
 
-      <div className="mx-auto max-w-5xl px-6 pt-32 pb-32 text-center md:px-12 md:pt-48 md:pb-48">
+      <div className="mx-auto max-w-7xl px-6 pt-32 pb-32 text-center md:px-12 md:pt-48 md:pb-48">
         <span
           className="landing-fade-up inline-flex items-center gap-2 rounded-full bg-[var(--color-accent-light)] px-3 py-1 text-xs font-medium text-[var(--color-accent)]"
           style={{ animationDelay: "0ms" }}
@@ -180,7 +180,7 @@ function HeroSection() {
 
 function BigPricingSection() {
   return (
-    <section className="mx-auto max-w-6xl px-6 pt-16 pb-32 md:px-12 md:pt-24 md:pb-48">
+    <section className="mx-auto max-w-7xl px-6 pt-16 pb-32 md:px-12 md:pt-24 md:pb-48">
       <Reveal>
         <div className="grid gap-16 lg:grid-cols-[1fr_1.3fr] lg:gap-24">
           {/* Left — narrative */}
@@ -278,7 +278,7 @@ function SavingsCalculatorSection() {
 
   return (
     <section className="border-y border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/40">
-      <div className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
             <Calculator className="mr-1.5 inline h-3.5 w-3.5" />
@@ -429,7 +429,7 @@ function CompareLine({
 
 function ComparisonSection() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48">
+    <section className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
           업계 비교
@@ -619,7 +619,7 @@ function DonutCompare({
 function IncludedSection() {
   return (
     <section className="border-t border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/30">
-      <div className="mx-auto max-w-6xl px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
             수수료에 포함된 것 / 별도
@@ -751,8 +751,8 @@ function FeatureColumn({
 
 function FaqSection() {
   return (
-    <section className="mx-auto max-w-4xl px-6 py-32 md:px-12 md:py-48">
-      <div className="text-center">
+    <section className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-3xl text-center">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-text-tertiary)]">
           자주 묻는 질문
         </p>
@@ -761,7 +761,7 @@ function FaqSection() {
         </h2>
       </div>
 
-      <div className="mt-16 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
+      <div className="mx-auto mt-16 max-w-3xl divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
         {FAQ.map((f) => (
           <details
             key={f.q}
@@ -837,7 +837,7 @@ function CtaSection() {
         />
       </div>
 
-      <div className="relative mx-auto max-w-4xl px-6 py-32 text-center md:px-12 md:py-56">
+      <div className="relative mx-auto max-w-7xl px-6 py-32 text-center md:px-12 md:py-56">
         <Reveal>
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/70">
             공급업체로 시작하기

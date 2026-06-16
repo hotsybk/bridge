@@ -201,7 +201,7 @@ export default function SellerGroupbuysPage() {
   ];
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
       <PageHeader
         label="파트너센터 · 공동구매"
         title="공동구매"

@@ -214,7 +214,7 @@ export default function SellerGroupbuyDetailPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
       <Link
         href="/seller/groupbuys"
         className="mb-6 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"

@@ -49,7 +49,7 @@ export default function SellerUdiReportsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
       <PageHeader
         label="파트너센터 · UDI 보고"
         title="UDI 보고"

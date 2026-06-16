@@ -491,7 +491,7 @@ export default function SellerOrdersPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
       <PageHeader
         label="파트너센터 · 주문"
         title="주문 관리"
@@ -764,7 +764,7 @@ export default function SellerOrdersPage() {
           className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-6 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
           style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
         >
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
             <p className="text-sm font-medium">
               {bulkTargets.length}건 선택됨
               <span className="ml-2 text-[11px] text-[var(--color-text-tertiary)]">

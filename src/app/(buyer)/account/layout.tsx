@@ -8,7 +8,7 @@ import { AccountNav } from "@/components/buyer/account-nav";
  *  - CatalogTopNav (글로벌 nav) → 본문 그리드 (좌 sub-nav · 우 children)
  *  - 박스 없음. 좌측 sub-nav active 표시는 vertical 3px accent line
  *  - 헤더: eyebrow + 큰 H1 (T2) + 본문 sub-text (T4)
- *  - max-w-6xl · 가로 padding 통일
+ *  - max-w-7xl · 가로 padding 통일
  */
 export default function AccountLayout({
   children,
@@ -20,7 +20,7 @@ export default function AccountLayout({
       <CatalogTopNav />
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-20"
+        className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20"
       >
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
           계정 · Account

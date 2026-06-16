@@ -209,7 +209,7 @@ export default async function OrderDetailPage({
   return (
     <>
       <CatalogTopNav />
-      <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-20">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20">
         {/* Phase 1.5 안내 — 실 데이터 연결 진행 중 */}
         <div className="mb-8 rounded-2xl border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/5 p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-warning)]">

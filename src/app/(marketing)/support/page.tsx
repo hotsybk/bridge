@@ -23,7 +23,7 @@ export const metadata = {
  * 디자인 DNA:
  *  - 박스 금지, divide-y / border-y 라인만
  *  - eyebrow + T2 + body 패턴
- *  - max-w-6xl 마이크로 컨테이너
+ *  - max-w-7xl 컨테이너 (로고 nav 정렬)
  */
 export default function SupportPage() {
   return (
@@ -66,7 +66,7 @@ function HeroSection() {
         </svg>
       </div>
 
-      <div className="mx-auto max-w-5xl px-6 pt-32 pb-20 text-center md:px-12 md:pt-40 md:pb-28">
+      <div className="mx-auto max-w-7xl px-6 pt-32 pb-20 text-center md:px-12 md:pt-40 md:pb-28">
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
           고객 지원
         </p>
@@ -132,7 +132,7 @@ const CHANNELS: Array<{
 function ChannelsSection() {
   return (
     <section className="border-t border-[var(--color-border-light)]">
-      <div className="mx-auto max-w-6xl px-6 py-16 md:px-12 md:py-24">
+      <div className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
         <ul className="divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
           {CHANNELS.map((c) => (
             <ChannelRow key={c.title} channel={c} />
@@ -212,7 +212,7 @@ function ChannelRow({ channel }: { channel: (typeof CHANNELS)[number] }) {
 function ContactStripSection() {
   return (
     <section className="border-t border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/40">
-      <div className="mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-28">
+      <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
         <div className="max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-text-tertiary)]">
             직접 연락

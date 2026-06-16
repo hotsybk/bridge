@@ -173,7 +173,7 @@ export default async function SellerPendingPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <header className="border-b border-[var(--color-border-light)]">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 md:px-12">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-12">
           <Link href="/" className="inline-flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--color-accent)] text-white">
               <Stethoscope className="h-4 w-4" />

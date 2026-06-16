@@ -11,7 +11,7 @@ import Link from "next/link";
 export function MinimalFooter() {
   return (
     <footer className="mt-24 border-t border-[var(--color-border-light)]">
-      <div className="mx-auto max-w-6xl px-6 py-10 md:px-12 md:py-12">
+      <div className="mx-auto max-w-7xl px-6 py-10 md:px-12 md:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* 좌측: 워드마크 + 사업자 정보 */}
           <div>

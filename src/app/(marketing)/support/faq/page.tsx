@@ -25,7 +25,7 @@ export default function SupportFaqPage() {
 function Header() {
   return (
     <section className="border-b border-[var(--color-border-light)]">
-      <div className="mx-auto max-w-4xl px-6 pt-24 pb-16 text-center md:px-12 md:pt-32 md:pb-20">
+      <div className="mx-auto max-w-7xl px-6 pt-24 pb-16 text-center md:px-12 md:pt-32 md:pb-20">
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
           자주 묻는 질문
         </p>
@@ -242,7 +242,8 @@ const CATEGORIES: Category[] = [
 
 function Body() {
   return (
-    <section className="mx-auto max-w-4xl px-6 py-16 md:px-12 md:py-24">
+    <section className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
+      <div className="mx-auto max-w-3xl">
       <nav aria-label="카테고리 바로가기" className="mb-12">
         <ul className="flex flex-wrap gap-2 text-xs">
           {CATEGORIES.map((c, i) => (
@@ -265,6 +266,7 @@ function Body() {
         {CATEGORIES.map((c, i) => (
           <CategoryBlock key={c.id} category={c} index={i} />
         ))}
+      </div>
       </div>
     </section>
   );
@@ -321,7 +323,7 @@ function CategoryBlock({
 function FootNote() {
   return (
     <section className="border-t border-[var(--color-border-light)] bg-[var(--color-bg-secondary)]/40">
-      <div className="mx-auto max-w-4xl px-6 py-16 text-center md:px-12 md:py-24">
+      <div className="mx-auto max-w-7xl px-6 py-16 text-center md:px-12 md:py-24">
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-text-tertiary)]">
           답을 찾지 못하셨다면
         </p>

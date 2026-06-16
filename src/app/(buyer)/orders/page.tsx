@@ -206,7 +206,7 @@ export default function OrdersPage() {
 
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 py-16 md:px-12 md:py-24"
+        className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24"
       >
         {/* Phase 1.5 안내 — 실 데이터 연결 진행 중 */}
         <div className="mb-10 rounded-2xl border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/5 p-5">

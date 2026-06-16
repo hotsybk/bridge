@@ -95,7 +95,7 @@ export default function VendorStaffPage() {
   const invites = data?.invites ?? [];
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20">
       <PageHeader
         label="파트너센터 · 팀원"
         title="팀원 관리"

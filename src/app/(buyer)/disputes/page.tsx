@@ -161,7 +161,7 @@ export default async function BuyerDisputesPage({
 
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-20"
+        className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20"
       >
         <Breadcrumb
           items={[

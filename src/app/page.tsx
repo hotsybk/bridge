@@ -86,7 +86,7 @@ function LandingExtraCtas() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto max-w-6xl px-6 pt-20 pb-24 md:px-12 md:pt-28 md:pb-32">
+    <section className="relative mx-auto max-w-7xl px-6 pt-20 pb-24 md:px-12 md:pt-28 md:pb-32">
       {/* Hero 영역 한정 SVG mesh blob (배경, 카드 뒤에) */}
       <HeroMeshBackground />
 
@@ -327,7 +327,7 @@ function Flow() {
       id="flow"
       className="border-y border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] py-24 md:py-32 scroll-mt-24"
     >
-      <div className="mx-auto max-w-5xl px-6 md:px-12">
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
             어떻게 동작하나
@@ -495,7 +495,7 @@ function Features() {
   return (
     <section
       id="features"
-      className="mx-auto max-w-6xl scroll-mt-24 px-6 py-32 md:px-12 md:py-40"
+      className="mx-auto max-w-7xl scroll-mt-24 px-6 py-32 md:px-12 md:py-40"
     >
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
@@ -538,7 +538,7 @@ function Audience() {
   return (
     <section
       id="audience"
-      className="mx-auto max-w-6xl scroll-mt-24 px-6 py-32 md:px-12 md:py-40"
+      className="mx-auto max-w-7xl scroll-mt-24 px-6 py-32 md:px-12 md:py-40"
     >
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
@@ -665,7 +665,7 @@ const STEPS = [
 function Steps() {
   return (
     <section id="steps" className="bg-[var(--color-bg-secondary)] py-32 md:py-40">
-      <div className="mx-auto max-w-6xl px-6 md:px-12">
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
             어떻게 시작하나
@@ -731,7 +731,7 @@ function BottomCTA() {
       {/* 풀블리드 mesh background */}
       <CtaMeshBackground />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-32 text-center md:px-12 md:py-48">
+      <div className="relative mx-auto max-w-7xl px-6 py-32 text-center md:px-12 md:py-48">
         <Reveal>
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/70">
             지금 시작하기
@@ -845,7 +845,7 @@ function CtaMeshBackground() {
 function Footer() {
   return (
     <footer className="relative bg-[var(--color-bg-secondary)]">
-      <div className="mx-auto max-w-6xl px-6 pt-20 pb-10 md:px-12 md:pt-24">
+      <div className="mx-auto max-w-7xl px-6 pt-20 pb-10 md:px-12 md:pt-24">
         {/* 큰 워드마크 — Footer 의 visual anchor */}
         <div className="border-b border-[var(--color-border-light)] pb-10">
           <Link href="/" className="inline-flex items-center gap-3">

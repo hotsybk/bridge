@@ -75,7 +75,7 @@ export default function RfqPage() {
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         <PageHeader
           label="견적 요청 · RFQ"
           title="한 번의 요청, 여러 공급업체."

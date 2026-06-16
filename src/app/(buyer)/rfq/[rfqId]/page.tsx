@@ -184,7 +184,7 @@ export default function RfqDetailPage({
   return (
     <>
       <CatalogTopNav />
-      <main className="mx-auto max-w-6xl px-6 py-12 pb-32 md:px-12 md:py-20 md:pb-20">
+      <main className="mx-auto max-w-7xl px-6 py-12 pb-32 md:px-12 md:py-20 md:pb-20">
         <Link
           href="/rfq"
           className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)]"

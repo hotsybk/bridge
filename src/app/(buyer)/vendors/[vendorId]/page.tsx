@@ -134,7 +134,7 @@ export default async function VendorPublicProfilePage({
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         {/* Breadcrumb */}
         <Breadcrumb
           items={[

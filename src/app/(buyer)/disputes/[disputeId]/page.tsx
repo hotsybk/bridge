@@ -166,7 +166,7 @@ export default async function BuyerDisputeDetailPage({
     return (
       <div className="min-h-screen bg-[var(--color-bg-primary)]">
         <CatalogTopNav />
-        <main className="mx-auto max-w-6xl px-6 py-20 md:px-12">
+        <main className="mx-auto max-w-7xl px-6 py-20 md:px-12">
           <BackLink href="/disputes" label="분쟁 list" />
           <p className="mt-12 text-sm text-[var(--color-text-secondary)]">
             분쟁을 찾을 수 없습니다.
@@ -190,7 +190,7 @@ export default async function BuyerDisputeDetailPage({
 
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 py-12 pb-32 md:px-12 md:py-20 md:pb-20"
+        className="mx-auto max-w-7xl px-6 py-12 pb-32 md:px-12 md:py-20 md:pb-20"
       >
         <Breadcrumb
           items={[

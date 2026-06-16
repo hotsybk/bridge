@@ -110,7 +110,7 @@ export default async function SearchPage({
       <CatalogTopNav initialQ={q} />
       <CatalogNav categories={categories} />
 
-      <main className="mx-auto max-w-screen-2xl px-4 md:px-8">
+      <main className="mx-auto max-w-7xl px-6 md:px-12">
         {/* ─── 미니멀 페이지 헤더 ─── */}
         <PageHeader
           isFiltered={isFiltered}
@@ -235,7 +235,7 @@ export default async function SearchPage({
               />
             </div>
           ) : (
-            <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {products.map((p, i) => (
                 <Reveal key={p.id} delay={(i % 12) * 40}>
                   <ProductCard product={p} />

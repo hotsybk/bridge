@@ -82,7 +82,7 @@ export default function VendorProfilePage() {
   const isOwner = myRole === "VENDOR_OWNER";
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20">
       <PageHeader
         label="파트너센터 · 프로필"
         title="공급업체 프로필"

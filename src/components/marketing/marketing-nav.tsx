@@ -68,7 +68,7 @@ export function MarketingNav({
   return (
     <>
       <header className="sticky top-0 z-50 isolate border-b border-[var(--color-border-light)]/70 bg-[var(--color-bg-primary)]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6 md:h-16 md:px-12">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6 md:h-16 md:px-12">
           {/* 워드마크 — 아이콘 박스 제거, 텍스트 + accent dot */}
           <Link
             href="/"
@@ -160,7 +160,7 @@ export function MarketingNav({
         >
           <nav
             aria-label="메인 메뉴 (모바일)"
-            className="mx-auto flex max-w-6xl flex-col divide-y divide-[var(--color-border-light)] px-6"
+            className="mx-auto flex max-w-7xl flex-col divide-y divide-[var(--color-border-light)] px-6"
           >
             {NAV_ITEMS.map((item) => (
               <Link

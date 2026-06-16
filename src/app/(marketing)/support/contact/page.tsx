@@ -18,7 +18,7 @@ export default function SupportContactPage() {
     <div className="relative isolate min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
       <Header />
 
-      <section className="mx-auto max-w-6xl px-6 py-16 md:px-12 md:py-24">
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
         <div className="grid gap-16 lg:grid-cols-[1.4fr_1fr] lg:gap-20">
           <div>
             <ContactForm />
@@ -118,7 +118,7 @@ export default function SupportContactPage() {
 function Header() {
   return (
     <section className="border-b border-[var(--color-border-light)]">
-      <div className="mx-auto max-w-4xl px-6 pt-24 pb-12 md:px-12 md:pt-32 md:pb-16">
+      <div className="mx-auto max-w-7xl px-6 pt-24 pb-12 md:px-12 md:pt-32 md:pb-16">
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-accent)]">
           문의하기
         </p>

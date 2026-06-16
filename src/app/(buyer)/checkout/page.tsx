@@ -243,7 +243,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-6xl px-6 py-16 md:px-12 md:py-24">
+      <main className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
         <Link
           href="/cart"
           className="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
@@ -539,7 +539,7 @@ export default function CheckoutPage() {
           className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--color-border-light)] bg-[var(--color-bg-primary)]/95 backdrop-blur lg:hidden"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-3">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 py-3">
             <div className="min-w-0">
               <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-text-tertiary)]">
                 최종 결제 금액

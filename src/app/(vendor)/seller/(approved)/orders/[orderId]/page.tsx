@@ -252,7 +252,7 @@ export default function SellerOrderDetailPage() {
     | undefined;
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-16">
+    <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
       <Link
         href="/seller/orders"
         className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"

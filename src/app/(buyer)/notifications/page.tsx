@@ -23,7 +23,7 @@ export default function BuyerNotificationsPage() {
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-20">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-20">
         <div className="border-b border-[var(--color-border-light)] pb-8 md:pb-10">
           <PageHeader
             label="알림 센터"

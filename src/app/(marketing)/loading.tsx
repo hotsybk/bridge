@@ -3,7 +3,7 @@
 export default function MarketingLoading() {
   return (
     <main className="min-h-screen bg-[var(--color-bg-primary)]">
-      <div className="mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-28">
+      <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent)] opacity-60" />

@@ -5,7 +5,7 @@
 export default function RootLoading() {
   return (
     <main className="min-h-screen bg-[var(--color-bg-primary)]">
-      <div className="mx-auto max-w-6xl px-6 py-24 md:px-12 md:py-32">
+      <div className="mx-auto max-w-7xl px-6 py-24 md:px-12 md:py-32">
         <div className="flex flex-col items-center text-center">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent)] opacity-60" />

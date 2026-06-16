@@ -103,7 +103,7 @@ export default async function SubscriptionsPage() {
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         <PageHeader
           label="정기구독"
           title="한 번 설정, 매달 자동 발주."

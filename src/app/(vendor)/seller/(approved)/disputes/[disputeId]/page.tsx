@@ -147,7 +147,7 @@ export default async function VendorDisputeDetailPage({
 
   if (!dispute) {
     return (
-      <main id="main-content" className="mx-auto max-w-6xl px-6 py-16 md:px-12">
+      <main id="main-content" className="mx-auto max-w-7xl px-6 py-16 md:px-12">
         <BackLink href="/seller/disputes" label="분쟁 list" />
         <p className="mt-12 text-sm text-[var(--color-text-secondary)]">
           분쟁을 찾을 수 없습니다.

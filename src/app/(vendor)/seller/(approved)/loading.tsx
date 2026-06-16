@@ -4,7 +4,7 @@
 export default function SellerLoading() {
   return (
     <main className="min-h-[60vh] bg-[var(--color-bg-primary)]">
-      <div className="mx-auto max-w-6xl px-6 py-10 md:px-12 md:py-14">
+      <div className="mx-auto max-w-7xl px-6 py-10 md:px-12 md:py-14">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent)] opacity-60" />

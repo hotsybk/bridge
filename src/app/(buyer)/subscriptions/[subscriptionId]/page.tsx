@@ -127,7 +127,7 @@ export default async function SubscriptionDetailPage({
     <div className="min-h-screen bg-[var(--color-bg-primary)]">
       <CatalogTopNav />
 
-      <main className="mx-auto max-w-4xl px-6 py-12 md:px-12 md:py-16">
+      <main className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         <Link
           href="/subscriptions"
           className="inline-flex items-center gap-1 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)]"
