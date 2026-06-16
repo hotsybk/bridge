@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Download, Loader2 } from "lucide-react";
 
 import { app } from "@/lib/firebase/client";
@@ -33,7 +34,7 @@ export function ExportCsvButton({ status }: { status?: string }) {
       window.location.href = data.url;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`CSV 내보내기 실패: ${msg}`);
+      toast.error(`CSV 내보내기 실패: ${msg}`);
     } finally {
       setLoading(false);
     }

@@ -31,9 +31,6 @@ const ITEMS: Item[] = [
   { href: "/disputes", label: "분쟁" },
 ];
 
-const PLACEHOLDER_ITEMS: Item[] = [
-  { href: "#", label: "알림 설정", soon: true },
-];
 
 function isActive(pathname: string, item: Item): boolean {
   if (item.exact) return pathname === item.href;
@@ -90,21 +87,6 @@ export function AccountNav() {
           })}
         </ul>
 
-        <p className="mt-10 text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-text-tertiary)]">
-          Coming Soon
-        </p>
-        <ul className="mt-6 space-y-0.5">
-          {PLACEHOLDER_ITEMS.map((item) => (
-            <li key={item.label}>
-              <span className="flex items-center justify-between py-2.5 pl-4 text-sm text-[var(--color-text-tertiary)]/70">
-                <span>{item.label}</span>
-                <span className="text-[11px] uppercase tracking-[0.15em]">
-                  Phase 2+
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
       </nav>
 
       {/* Mobile — 가로 underline tab strip */}

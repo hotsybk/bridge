@@ -4,6 +4,7 @@
 // master + items 받아 KPI + Tab + table 렌더. 재시도 mutation 호출.
 
 import {useMemo, useState} from "react";
+import {toast} from "sonner";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {ArrowLeft, ChevronDown, Loader2} from "lucide-react";
@@ -150,7 +151,7 @@ export function UdiReportDetailClient({
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`재시도 실패: ${msg}`);
+      toast.error(`재시도 실패: ${msg}`);
     } finally {
       setRetryingId(null);
     }

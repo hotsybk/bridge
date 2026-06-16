@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 
 import { CountUp } from "@/components/shared/count-up";
@@ -182,7 +183,7 @@ export function AdminSubscriptionsClient({
       await forceResumeMutation.mutateAsync({ subscriptionId: row.id });
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "재개에 실패했습니다.");
+      toast.error(err instanceof Error ? err.message : "재개에 실패했습니다.");
     }
   }
 

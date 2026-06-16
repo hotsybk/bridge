@@ -1,15 +1,16 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
+import { toast } from "sonner";
+
+import { trpc } from "@/lib/trpc/client";
 
 /**
- * /account/addresses — 등록된 배송지 관리.
+ * /account/addresses — 등록된 배송지 관리 (Firestore 영속).
  *
- * 디자인 DNA:
- *  - 박스 없음. 헤더 row (H2 + CTA) → divide-y list rows
- *  - 각 row: 라벨(+default badge) · 수령인·전화 · 주소 · underline 액션 link
- *  - 빈 상태: 가운데 정렬 라인 일러스트 없이 단순 텍스트 + CTA
+ * hospitals/{hid}/addresses 서브컬렉션 CRUD (hospital.addresses router).
+ * 기본 배송지는 1개만 유지되고 체크아웃에서 자동 선택된다.
  */
 
 type Address = {
@@ -23,99 +24,147 @@ type Address = {
   isDefault: boolean;
 };
 
-const MOCK_ADDRESSES: Address[] = [
-  {
-    id: "addr-1",
-    label: "본원 자재실",
-    recipient: "서울메디컬의원 자재실",
-    phone: "02-1234-5678",
-    zipcode: "06236",
-    address: "서울특별시 강남구 테헤란로 123",
-    detail: "5층 502호",
-    isDefault: true,
-  },
-  {
-    id: "addr-2",
-    label: "별관 영상실",
-    recipient: "서울메디컬의원 영상실",
-    phone: "02-1234-5679",
-    zipcode: "06236",
-    address: "서울특별시 강남구 테헤란로 123",
-    detail: "4층 401호",
-    isDefault: false,
-  },
-  {
-    id: "addr-3",
-    label: "동대문 분원",
-    recipient: "서울메디컬의원 동대문분원",
-    phone: "02-2233-1100",
-    zipcode: "02564",
-    address: "서울특별시 동대문구 왕산로 50",
-    detail: "3층",
-    isDefault: false,
-  },
-  {
-    id: "addr-4",
-    label: "원장 자택",
-    recipient: "김민지",
-    phone: "010-1234-5678",
-    zipcode: "06521",
-    address: "서울특별시 서초구 서초대로 200",
-    detail: "11동 1502호",
-    isDefault: false,
-  },
-];
+type FormState = Omit<Address, "id" | "isDefault"> & { isDefault: boolean };
+
+const EMPTY_FORM: FormState = {
+  label: "",
+  recipient: "",
+  phone: "",
+  zipcode: "",
+  address: "",
+  detail: "",
+  isDefault: false,
+};
 
 export default function AccountAddressesPage() {
-  const [addresses, setAddresses] = useState<Address[]>(MOCK_ADDRESSES);
+  const utils = trpc.useUtils();
+  const { data: addresses = [], isLoading } =
+    trpc.hospital.addresses.list.useQuery();
 
-  function setDefault(id: string) {
-    setAddresses((prev) =>
-      prev.map((a) => ({ ...a, isDefault: a.id === id })),
-    );
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+
+  function invalidate() {
+    void utils.hospital.addresses.list.invalidate();
   }
 
-  function remove(id: string) {
-    setAddresses((prev) => prev.filter((a) => a.id !== id));
+  const createMut = trpc.hospital.addresses.create.useMutation({
+    onSuccess: () => {
+      toast.success("배송지를 추가했습니다.");
+      closeForm();
+      invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateMut = trpc.hospital.addresses.update.useMutation({
+    onSuccess: () => {
+      toast.success("배송지를 수정했습니다.");
+      closeForm();
+      invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const setDefaultMut = trpc.hospital.addresses.setDefault.useMutation({
+    onSuccess: () => {
+      toast.success("기본 배송지로 설정했습니다.");
+      invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const removeMut = trpc.hospital.addresses.remove.useMutation({
+    onSuccess: () => {
+      toast.success("배송지를 삭제했습니다.");
+      invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  function openAdd() {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setFormOpen(true);
   }
+  function openEdit(addr: Address) {
+    setEditingId(addr.id);
+    setForm({
+      label: addr.label,
+      recipient: addr.recipient,
+      phone: addr.phone,
+      zipcode: addr.zipcode,
+      address: addr.address,
+      detail: addr.detail,
+      isDefault: addr.isDefault,
+    });
+    setFormOpen(true);
+  }
+  function closeForm() {
+    setFormOpen(false);
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+  }
+
+  function submit() {
+    if (!form.label || !form.recipient || !form.phone || !form.zipcode || !form.address) {
+      toast.error("라벨·수령인·연락처·우편번호·주소는 필수입니다.");
+      return;
+    }
+    if (editingId) {
+      updateMut.mutate({ ...form, id: editingId });
+    } else {
+      createMut.mutate(form);
+    }
+  }
+
+  const saving = createMut.isPending || updateMut.isPending;
 
   return (
     <div className="space-y-16">
-      {/* Phase 1.5 안내 — 실 데이터 연결 진행 중 */}
-      <div className="rounded-2xl border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/5 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-warning)]">
-          Phase 1.5 출시 예정
-        </p>
-        <p className="mt-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
-          이 페이지는 실 데이터 연결이 진행 중입니다. 현재 화면은 디자인
-          미리보기로, 등록·삭제해도 저장되지 않습니다.
-        </p>
-      </div>
-
       {/* 1. 등록된 배송지 list */}
       <section>
         <header className="flex items-baseline justify-between gap-4">
           <h2 className="text-2xl font-semibold tracking-[-0.025em] md:text-3xl">
             등록된 배송지
           </h2>
-          <button
-            type="button"
-            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[var(--color-accent)] px-6 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)] active:scale-[0.98]"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2.5} />새 주소 추가
-          </button>
+          {!formOpen && (
+            <button
+              type="button"
+              onClick={openAdd}
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[var(--color-accent)] px-6 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)] active:scale-[0.98]"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.5} />새 주소 추가
+            </button>
+          )}
         </header>
 
-        {addresses.length === 0 ? (
-          <EmptyState />
+        {/* 추가/편집 폼 */}
+        {formOpen && (
+          <AddressForm
+            form={form}
+            setForm={setForm}
+            editing={Boolean(editingId)}
+            saving={saving}
+            onSubmit={submit}
+            onCancel={closeForm}
+          />
+        )}
+
+        {isLoading ? (
+          <p className="mt-8 text-sm text-[var(--color-text-tertiary)]">
+            불러오는 중…
+          </p>
+        ) : addresses.length === 0 ? (
+          !formOpen && <EmptyState onAdd={openAdd} />
         ) : (
           <ul className="mt-8 divide-y divide-[var(--color-border-light)] border-y border-[var(--color-border-light)]">
             {addresses.map((addr) => (
               <AddressRow
                 key={addr.id}
                 addr={addr}
-                onSetDefault={() => setDefault(addr.id)}
-                onRemove={() => remove(addr.id)}
+                onSetDefault={() => setDefaultMut.mutate({ id: addr.id })}
+                onEdit={() => openEdit(addr)}
+                onRemove={() => removeMut.mutate({ id: addr.id })}
+                busy={setDefaultMut.isPending || removeMut.isPending}
               />
             ))}
           </ul>
@@ -137,10 +186,7 @@ export default function AccountAddressesPage() {
             label="배송 가능 지역"
             value="전국 (제주·도서산간 일부 추가비 발생)"
           />
-          <PolicyRow
-            label="평일 발주 마감"
-            value="오후 3시 (이후 익영업일 출고)"
-          />
+          <PolicyRow label="평일 발주 마감" value="오후 3시 (이후 익영업일 출고)" />
           <PolicyRow
             label="냉장 의료기기"
             value="별도 콜드체인 — 입력한 배송지 1km 이내 검수 필요"
@@ -152,21 +198,130 @@ export default function AccountAddressesPage() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// AddressForm — inline 추가/편집 폼
+// ─────────────────────────────────────────────────────────────
+
+function AddressForm({
+  form,
+  setForm,
+  editing,
+  saving,
+  onSubmit,
+  onCancel,
+}: {
+  form: FormState;
+  setForm: (f: FormState) => void;
+  editing: boolean;
+  saving: boolean;
+  onSubmit: () => void;
+  onCancel: () => void;
+}) {
+  const field =
+    "h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-3.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]";
+  return (
+    <div className="mt-8 rounded-2xl border border-[var(--color-border-light)] p-5 md:p-6">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold">
+          {editing ? "배송지 수정" : "새 배송지 추가"}
+        </p>
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label="닫기"
+          className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <LabeledInput label="라벨 (예: 본원 자재실)" value={form.label} onChange={(v) => setForm({ ...form, label: v })} className={field} />
+        <LabeledInput label="수령인" value={form.recipient} onChange={(v) => setForm({ ...form, recipient: v })} className={field} />
+        <LabeledInput label="연락처" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} className={field} />
+        <LabeledInput label="우편번호" value={form.zipcode} onChange={(v) => setForm({ ...form, zipcode: v })} className={field} />
+        <div className="md:col-span-2">
+          <LabeledInput label="주소" value={form.address} onChange={(v) => setForm({ ...form, address: v })} className={field} />
+        </div>
+        <div className="md:col-span-2">
+          <LabeledInput label="상세주소 (선택)" value={form.detail} onChange={(v) => setForm({ ...form, detail: v })} className={field} />
+        </div>
+      </div>
+
+      <label className="mt-4 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+        <input
+          type="checkbox"
+          checked={form.isDefault}
+          onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
+          className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]"
+        />
+        기본 배송지로 설정
+      </label>
+
+      <div className="mt-6 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={saving}
+          className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--color-accent)] px-6 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+        >
+          {saving ? "저장 중…" : editing ? "수정 저장" : "배송지 추가"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--color-border-light)] px-6 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-[var(--color-text-secondary)]"
+        >
+          취소
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LabeledInput({
+  label,
+  value,
+  onChange,
+  className,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  className: string;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-text-tertiary)]">
+        {label}
+      </span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={className}
+      />
+    </label>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 // AddressRow — line divider row
 // ─────────────────────────────────────────────────────────────
 
 function AddressRow({
   addr,
   onSetDefault,
+  onEdit,
   onRemove,
+  busy,
 }: {
   addr: Address;
   onSetDefault: () => void;
+  onEdit: () => void;
   onRemove: () => void;
+  busy: boolean;
 }) {
   return (
     <li className="grid gap-3 py-6 md:grid-cols-[200px_1fr_auto] md:items-start md:gap-8">
-      {/* Left — label + default badge */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-[var(--color-text-primary)]">
@@ -183,7 +338,6 @@ function AddressRow({
         </p>
       </div>
 
-      {/* Center — phone + address */}
       <div className="min-w-0">
         <p className="font-mono text-xs tabular-nums text-[var(--color-text-secondary)]">
           {addr.phone}
@@ -191,24 +345,27 @@ function AddressRow({
         <p className="mt-2 text-sm text-[var(--color-text-primary)]">
           ({addr.zipcode}) {addr.address}
         </p>
-        <p className="text-xs text-[var(--color-text-tertiary)]">
-          {addr.detail}
-        </p>
+        {addr.detail && (
+          <p className="text-xs text-[var(--color-text-tertiary)]">
+            {addr.detail}
+          </p>
+        )}
       </div>
 
-      {/* Right — actions */}
       <div className="flex flex-wrap items-center gap-4 md:justify-end">
         {!addr.isDefault && (
           <button
             type="button"
             onClick={onSetDefault}
-            className="text-xs text-[var(--color-text-secondary)] underline underline-offset-4 transition-colors hover:text-[var(--color-accent)]"
+            disabled={busy}
+            className="text-xs text-[var(--color-text-secondary)] underline underline-offset-4 transition-colors hover:text-[var(--color-accent)] disabled:opacity-40"
           >
             기본으로 설정
           </button>
         )}
         <button
           type="button"
+          onClick={onEdit}
           className="text-xs text-[var(--color-text-secondary)] underline underline-offset-4 transition-colors hover:text-[var(--color-text-primary)]"
         >
           편집
@@ -216,7 +373,7 @@ function AddressRow({
         <button
           type="button"
           onClick={onRemove}
-          disabled={addr.isDefault}
+          disabled={addr.isDefault || busy}
           className="text-xs text-[var(--color-text-secondary)] underline underline-offset-4 transition-colors hover:text-[var(--color-error)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           삭제
@@ -237,7 +394,7 @@ function PolicyRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="mt-12 border-y border-[var(--color-border-light)] py-16 text-center">
       <p className="text-sm font-medium text-[var(--color-text-primary)]">
@@ -248,6 +405,7 @@ function EmptyState() {
       </p>
       <button
         type="button"
+        onClick={onAdd}
         className="mt-6 inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[var(--color-accent)] px-6 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)]"
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} />

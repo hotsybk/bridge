@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Download, X } from "lucide-react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
@@ -73,7 +74,7 @@ export function AuditLogDrawerList({ logs }: { logs: LogItem[] }) {
 
   async function handleExport(format: "csv" | "json") {
     if (PREVIEW_MODE) {
-      alert(`PREVIEW · ${format.toUpperCase()} export 는 운영 환경에서만 동작합니다.`);
+      toast.info(`PREVIEW · ${format.toUpperCase()} export 는 운영 환경에서만 동작합니다.`);
       return;
     }
     setExporting(format);
@@ -84,10 +85,10 @@ export function AuditLogDrawerList({ logs }: { logs: LogItem[] }) {
         { url: string; filename: string; rowCount: number; format: string }
       >(functions, "exportAuditLogs");
       const { data } = await fn({ format });
-      alert(`${data.rowCount}건 export 완료 (${data.format.toUpperCase()})`);
+      toast.success(`${data.rowCount}건 export 완료 (${data.format.toUpperCase()})`);
       window.location.href = data.url;
     } catch (err) {
-      alert("export 실패: " + (err as Error).message);
+      toast.error("export 실패: " + (err as Error).message);
     } finally {
       setExporting(null);
     }

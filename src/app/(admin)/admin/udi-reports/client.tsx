@@ -4,6 +4,7 @@
 // timeline + KPI + Tab + Table + 즉시 보고 Cloud Function 호출.
 
 import {useMemo, useState} from "react";
+import {toast} from "sonner";
 import Link from "next/link";
 import {ChevronDown, Loader2} from "lucide-react";
 
@@ -175,13 +176,13 @@ export function UdiReportsClient({
       >(functions, "triggerUdiReport");
       const {data} = await fn({period: target});
       setReportOpen(false);
-      alert(
-        `${data.period} 보고 완료\n총 ${data.total}건 / 성공 ${data.success} / 실패 ${data.fail}`,
+      toast.success(
+        `${data.period} 보고 완료 · 총 ${data.total}건 / 성공 ${data.success} / 실패 ${data.fail}`,
       );
       window.location.reload();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`즉시 보고 실패: ${msg}`);
+      toast.error(`즉시 보고 실패: ${msg}`);
     } finally {
       setSubmitting(false);
     }

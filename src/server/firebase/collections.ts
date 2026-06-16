@@ -22,6 +22,7 @@ export const COLLECTIONS = {
 
 export const SUB_COLLECTIONS = {
   hospitalMembers: (hospitalId: string) => `hospitals/${hospitalId}/members`,
+  hospitalAddresses: (hospitalId: string) => `hospitals/${hospitalId}/addresses`,
   vendorMembers: (vendorId: string) => `vendors/${vendorId}/members`,
   subOrders: (orderId: string) => `orders/${orderId}/subOrders`,
   subOrderItems: (orderId: string, subOrderId: string) =>

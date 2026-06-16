@@ -14,6 +14,7 @@ import { hospitalStaffRouter } from "./hospital/staff";
 import { hospitalSettingsRouter } from "./hospital/settings";
 import { hospitalApprovalRouter } from "./hospital/approval";
 import { hospitalSpendingProcedure } from "./hospital/spending";
+import { hospitalAddressesRouter } from "./hospital/addresses";
 
 export const hospitalRouter = createTRPCRouter({
   /** Phase ν-3 — 본인 병원 멤버 관리. list/invite/cancelInvite/updateRole/remove/setApprover/acceptInvite. */
@@ -27,6 +28,9 @@ export const hospitalRouter = createTRPCRouter({
 
   /** Phase ν-3 — 결재 큐. listPending/listMyHistory/getDetail/approve/reject. */
   approval: hospitalApprovalRouter,
+
+  /** 배송지 관리 — list/create/update/setDefault/remove. */
+  addresses: hospitalAddressesRouter,
 
   /**
    * 병원 온보딩 — Phase 1.6 buyer flow 의 핵심 mutation.

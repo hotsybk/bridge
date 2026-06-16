@@ -309,15 +309,11 @@ export function ProductBuyPanel({ product }: { product: BuyPanelProduct }) {
           {product.groupBuyable && (
             <button
               type="button"
-              onClick={() =>
-                alert(
-                  `공동구매 참여 (mock)\n\n${product.name}\n현재 진행 중인 공동구매에 참여합니다.\n\n* Phase 4 공동구매에서 정식 출시`,
-                )
-              }
+              onClick={() => router.push("/groupbuys")}
               className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[var(--color-accent-light)] text-sm font-medium text-[var(--color-accent)] transition-colors hover:bg-[var(--color-accent-light)]/70"
             >
               <Users className="h-3.5 w-3.5" />
-              공동구매
+              공동구매 보기
             </button>
           )}
         </div>
