@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+# 동일 브랜치 중복 실행 취소 (최신 커밋만 검증)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web — typecheck · lint · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # 린트는 현재 advisory — scripts/ 및 일부 client 컴포넌트에 누적된
+      # React-compiler 권고 룰(impure-during-render 등) 정리 전까지 빌드를 막지 않음.
+      # typecheck + build 가 hard gate. lint 부채 청산 후 continue-on-error 제거 예정.
+      - name: Lint (advisory)
+        run: pnpm lint
+        continue-on-error: true
+
+      - name: Build
+        run: pnpm build
+        env:
+          # 빌드 통과용 더미 값 (실제 비밀 아님 — 런타임에 Vercel env 사용)
+          NEXT_PUBLIC_FIREBASE_API_KEY: "ci-dummy"
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "ci.firebaseapp.com"
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: "ci-dummy"
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "ci-dummy.appspot.com"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "0"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:0:web:ci"
+          # Sentry: auth token 없으면 소스맵 업로드 자동 skip
+          SENTRY_AUTH_TOKEN: ""
+
+  functions:
+    name: Functions — build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: functions/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (tsc)
+        run: pnpm build

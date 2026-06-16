@@ -19,6 +19,8 @@ import {Timestamp} from "firebase-admin/firestore";
 // eslint-disable-next-line import/first
 import {db, FieldValue, COLLECTIONS} from "../lib/firestore";
 // eslint-disable-next-line import/first
+import {recordHeartbeat} from "../lib/heartbeat";
+// eslint-disable-next-line import/first
 import {calculateSettlement, calculateFastFee} from "../lib/settlement-calc";
 
 type SubOrderData = {
@@ -293,5 +295,11 @@ export const settlementDaily = onSchedule(
     logger.info(
       `[settlement-daily] done — created ${createdCount}, skipped ${skippedCount}`,
     );
+
+    // Σ-3 — dead-man's-switch heartbeat
+    await recordHeartbeat("settlementDaily", {
+      lastCreated: createdCount,
+      lastSkipped: skippedCount,
+    });
   },
 );

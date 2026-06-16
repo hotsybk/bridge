@@ -27,6 +27,8 @@ import {logger} from "firebase-functions/v2";
 import {db, FieldValue, Timestamp, COLLECTIONS} from "../lib/firestore";
 // eslint-disable-next-line import/first
 import {shortId} from "../lib/id-gen";
+// eslint-disable-next-line import/first
+import {recordHeartbeat} from "../lib/heartbeat";
 
 type ProductDoc = {
   basePrice?: number;
@@ -197,8 +199,11 @@ export const subscriptionRunner = onSchedule(
 
         const orderRef = db.collection(COLLECTIONS.orders).doc();
         const serverNow = FieldValue.serverTimestamp();
+        // Σ-1 — order + subOrder + item + 구독 nextRunAt 갱신 + run 을 한 배치로 원자화.
+        // 중간 실패 시 nextRunAt 미갱신 → 다음 cron 중복 발주(이중 청구) 방지.
+        const batch = db.batch();
 
-        await orderRef.set({
+        batch.set(orderRef, {
           orderNo,
           hospitalId: sub.hospitalId,
           hospitalName: sub.hospitalName ?? "병원",
@@ -261,7 +266,7 @@ export const subscriptionRunner = onSchedule(
         const commissionVat = Math.floor(commission * 0.1);
         const payoutAmount = subtotal - commission - commissionVat;
 
-        await subOrderRef.set({
+        batch.set(subOrderRef, {
           subOrderNo,
           orderId: orderRef.id,
           orderNo,
@@ -289,7 +294,8 @@ export const subscriptionRunner = onSchedule(
           updatedAt: serverNow,
         });
 
-        await subOrderRef.collection("items").add({
+        const itemRef = subOrderRef.collection("items").doc();
+        batch.set(itemRef, {
           productId: sub.productId,
           productName: sub.productName ?? "상품",
           productImage: sub.productImage ?? null,
@@ -299,10 +305,10 @@ export const subscriptionRunner = onSchedule(
           unit: sub.unit ?? "EA",
         });
 
-        // 4) Subscription 갱신
+        // 4) Subscription 갱신 (nextRunAt 전진 — 중복 발주 방지의 핵심)
         const cadence = sub.cadence ?? "MONTHLY";
         const newNextRunAt = calculateNextRunAt(cadence, new Date());
-        await subDoc.ref.update({
+        batch.update(subDoc.ref, {
           lastRunAt: serverNow,
           nextRunAt: Timestamp.fromDate(newNextRunAt),
           unitPrice, // 최신 가격 스냅샷 갱신
@@ -314,7 +320,8 @@ export const subscriptionRunner = onSchedule(
         });
 
         // 5) SubscriptionRun 적재 (SUCCESS)
-        await subDoc.ref.collection("runs").add({
+        const runRef = subDoc.ref.collection("runs").doc();
+        batch.set(runRef, {
           subscriptionId: subId,
           scheduledAt: sub.nextRunAt ?? Timestamp.now(),
           status: "SUCCESS",
@@ -324,18 +331,28 @@ export const subscriptionRunner = onSchedule(
           completedAt: serverNow,
         });
 
-        // 6) hospital 알림
-        await db.collection(COLLECTIONS.notifications).add({
-          targetType: "HOSPITAL",
-          targetId: sub.hospitalId,
-          type: "SUBSCRIPTION_ORDER_PLACED",
-          title: "정기구독 자동 발주",
-          body: `${sub.productName ?? "상품"} ${qty}${sub.unit ?? "EA"} 자동 발주됨 (${orderNo})`,
-          channels: ["KAKAO", "IN_APP"],
-          kakaoSent: false,
-          emailSent: false,
-          createdAt: serverNow,
-        });
+        // Σ-1 — 원자적 커밋: order + subOrder + item + 구독 갱신 + run 일괄
+        await batch.commit();
+
+        // 6) hospital 알림 (best-effort, 커밋 후 — 알림 실패가 주문을 롤백하면 안 됨)
+        try {
+          await db.collection(COLLECTIONS.notifications).add({
+            targetType: "HOSPITAL",
+            targetId: sub.hospitalId,
+            type: "SUBSCRIPTION_ORDER_PLACED",
+            title: "정기구독 자동 발주",
+            body: `${sub.productName ?? "상품"} ${qty}${sub.unit ?? "EA"} 자동 발주됨 (${orderNo})`,
+            channels: ["KAKAO", "IN_APP"],
+            kakaoSent: false,
+            emailSent: false,
+            createdAt: FieldValue.serverTimestamp(),
+          });
+        } catch (notifyErr) {
+          logger.warn("[subscription-runner] notify failed", {
+            subId,
+            err: notifyErr instanceof Error ? notifyErr.message : String(notifyErr),
+          });
+        }
 
         success++;
       } catch (err) {
@@ -392,6 +409,13 @@ export const subscriptionRunner = onSchedule(
       success,
       failed,
       priceHold,
+    });
+
+    // Σ-3 — dead-man's-switch heartbeat
+    await recordHeartbeat("subscriptionRunner", {
+      lastScanned: snap.size,
+      lastSuccess: success,
+      lastFailed: failed,
     });
   },
 );

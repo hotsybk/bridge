@@ -27,6 +27,8 @@ import {db, FieldValue, Timestamp, COLLECTIONS} from "../lib/firestore";
 // eslint-disable-next-line import/first
 import {sumCounter} from "../lib/distributed-counter";
 // eslint-disable-next-line import/first
+import {recordHeartbeat} from "../lib/heartbeat";
+// eslint-disable-next-line import/first
 import {captureAuth, cancelPayment} from "../lib/portone";
 
 type ParticipationDoc = {
@@ -108,6 +110,12 @@ export const groupbuyCloser = onSchedule(
       scanned: docs.length,
       processed: totalProcessed,
       failed: totalFailed,
+    });
+
+    // Σ-3 — dead-man's-switch heartbeat
+    await recordHeartbeat("groupbuyCloser", {
+      lastScanned: docs.length,
+      lastProcessed: totalProcessed,
     });
   },
 );

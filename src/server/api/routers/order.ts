@@ -25,6 +25,7 @@ import {z} from "zod";
 import {buyerProcedure, createTRPCRouter} from "@/server/api/trpc";
 import {adminDb} from "@/server/firebase/admin";
 import {COLLECTIONS} from "@/server/firebase/collections";
+import {DEFAULT_COMMISSION_RATE, VAT_RATE} from "@/lib/constants/billing";
 import {
   cancelPayment,
   getPayment,
@@ -143,7 +144,7 @@ async function calculateCartPrice(
 
   const shippingAmount = 0; // Wave Q1 mock
   const taxableAmount = Math.max(0, subtotalAmount - discountAmount);
-  const vatAmount = Math.floor(taxableAmount * 0.1);
+  const vatAmount = Math.floor(taxableAmount * VAT_RATE);
   const totalAmount = taxableAmount + shippingAmount;
 
   return {
@@ -259,14 +260,85 @@ export const orderRouter = createTRPCRouter({
       }
       const vendorIds = Array.from(byVendor.keys());
 
-      // 6) orders doc 생성
+      // 5.4) Σ-3 — 재고 검증 (oversell 방지).
+      //   product.stock 이 유한값(숫자)인 상품만 검사 — null/undefined 는 무제한.
+      //   batch 내 FieldValue.increment(-qty) 로 원자적 차감 (lost-decrement 없음).
+      const qtyByProduct = new Map<string, number>();
+      for (const it of items) {
+        qtyByProduct.set(
+          it.productId,
+          (qtyByProduct.get(it.productId) ?? 0) + it.qty,
+        );
+      }
+      const productIds = Array.from(qtyByProduct.keys());
+      const productRefs = productIds.map((pid) =>
+        db.collection(COLLECTIONS.products).doc(pid),
+      );
+      const productSnaps =
+        productRefs.length > 0 ? await db.getAll(...productRefs) : [];
+      const finiteStockDecrements: Array<{
+        ref: FirebaseFirestore.DocumentReference;
+        qty: number;
+      }> = [];
+      for (const snap of productSnaps) {
+        if (!snap.exists) {
+          // 삭제된 상품이 카트에 남아있는 경우
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "장바구니에 더 이상 판매하지 않는 상품이 있습니다. 장바구니를 확인해주세요.",
+          });
+        }
+        const p = snap.data() as {
+          stock?: number;
+          name?: string;
+          status?: string;
+        };
+        const requested = qtyByProduct.get(snap.id) ?? 0;
+        // Σ-3 — ARCHIVE cascade: 판매 중지(ARCHIVED 등) 상품 주문 차단
+        if (p.status && p.status !== "ACTIVE") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `'${p.name ?? "상품"}' 은(는) 현재 판매하지 않습니다. 장바구니에서 제거해주세요.`,
+          });
+        }
+        if (typeof p.stock === "number" && Number.isFinite(p.stock)) {
+          if (p.stock < requested) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `'${p.name ?? "상품"}' 재고가 부족합니다 (재고 ${p.stock}, 요청 ${requested}).`,
+            });
+          }
+          finiteStockDecrements.push({ ref: snap.ref, qty: requested });
+        }
+      }
+
+      // 5.5) Σ-1 — 500-doc 배치 한계 가드 (CLAUDE.md §1.4)
+      //   writes = order(1) + subOrders(V) + items(I) + coupon(0~1) + cart(1) + stock(S)
+      const totalWrites =
+        1 +
+        vendorIds.length +
+        items.length +
+        (cart.couponCode ? 1 : 0) +
+        1 +
+        finiteStockDecrements.length;
+      if (totalWrites > 450) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "한 번에 주문 가능한 상품 종류가 너무 많습니다. 공급사를 나눠 주문해주세요.",
+        });
+      }
+
+      // 6) orders doc 생성 — Σ-1: 전체를 writeBatch 로 원자화 (§1.4)
       const orderRef = db.collection(COLLECTIONS.orders).doc();
       const serverNow = FieldValue.serverTimestamp();
       const mockPaymentId = `mock_pay_${Date.now()}_${Math.random()
         .toString(36)
         .slice(2, 8)}`;
+      const batch = db.batch();
 
-      await orderRef.set({
+      batch.set(orderRef, {
         orderNo,
         hospitalId,
         hospitalName: hospital.name ?? "병원",
@@ -331,15 +403,16 @@ export const orderRouter = createTRPCRouter({
       for (const [vendorId, vendorItems] of byVendor) {
         subIdx += 1;
         const subTotal = vendorItems.reduce((s, i) => s + i.amount, 0);
-        const subVat = Math.floor(subTotal * 0.1);
-        const commissionRate = 0.05; // 기본 5%, 추후 vendor.defaultCommissionRate 적용
+        const subVat = Math.floor(subTotal * VAT_RATE);
+        // denorm 추정치 — 실제 정산은 settlement-calc 가 카테고리/벤더 rate 로 재계산
+        const commissionRate = DEFAULT_COMMISSION_RATE;
         const commission = Math.floor(subTotal * commissionRate);
-        const commissionVat = Math.floor(commission * 0.1);
+        const commissionVat = Math.floor(commission * VAT_RATE);
         const payoutAmount = subTotal - commission - commissionVat;
         const subOrderRef = orderRef.collection("subOrders").doc();
         const subOrderNo = `${orderNo}-${String(subIdx).padStart(2, "0")}`;
 
-        await subOrderRef.set({
+        batch.set(subOrderRef, {
           subOrderNo,
           orderId: orderRef.id,
           orderNo,
@@ -368,7 +441,8 @@ export const orderRouter = createTRPCRouter({
         });
 
         for (const item of vendorItems) {
-          await subOrderRef.collection("items").add({
+          const itemRef = subOrderRef.collection("items").doc();
+          batch.set(itemRef, {
             productId: item.productId,
             productName: item.productName,
             productImage: item.thumbnail ?? null,
@@ -382,30 +456,28 @@ export const orderRouter = createTRPCRouter({
         subOrderIds.push(subOrderRef.id);
       }
 
-      // 8) 쿠폰 redemption 기록 (있을 경우)
+      // 8) 쿠폰 redemption 기록 (있을 경우) — 배치에 포함, 주문과 원자적으로 기록
       //    onCouponRedeemed Cloud Function 이 usedCount 증가 (Wave H 기존)
       if (couponData) {
-        try {
-          await db
-            .collection(COLLECTIONS.coupons)
-            .doc(couponData.couponId)
-            .collection("redemptions")
-            .add({
-              couponId: couponData.couponId,
-              couponCode: couponData.code,
-              hospitalId,
-              userId: uid,
-              orderId: orderRef.id,
-              discountAmount,
-              redeemedAt: serverNow,
-            });
-        } catch {
-          // best-effort
-        }
+        const redemptionRef = db
+          .collection(COLLECTIONS.coupons)
+          .doc(couponData.couponId)
+          .collection("redemptions")
+          .doc();
+        batch.set(redemptionRef, {
+          couponId: couponData.couponId,
+          couponCode: couponData.code,
+          hospitalId,
+          userId: uid,
+          orderId: orderRef.id,
+          discountAmount,
+          redeemedAt: serverNow,
+        });
       }
 
-      // 9) 카트 비우기
-      await cartRef.set(
+      // 9) 카트 비우기 — 배치에 포함 (주문 생성과 카트 비움 원자화 → 중복주문 방지)
+      batch.set(
+        cartRef,
         {
           items: [],
           couponCode: null,
@@ -413,6 +485,17 @@ export const orderRouter = createTRPCRouter({
         },
         {merge: true},
       );
+
+      // 9.3) Σ-3 — 재고 차감 (주문과 원자적). 유한 재고 상품만.
+      for (const dec of finiteStockDecrements) {
+        batch.update(dec.ref, {
+          stock: FieldValue.increment(-dec.qty),
+          updatedAt: serverNow,
+        });
+      }
+
+      // 9.5) Σ-1 — 원자적 커밋: order + subOrders + items + coupon + cart + stock 일괄
+      await batch.commit();
 
       // 10) audit log
       try {
@@ -544,11 +627,24 @@ export const orderRouter = createTRPCRouter({
       }
       const vendorIds = Array.from(byVendor.keys());
 
+      // 6.5) Σ-1 — 500-doc 배치 한계 가드
+      const totalWrites =
+        1 + vendorIds.length + items.length + 1; // order + subOrders + items + cart(없음, 여긴 draft)
+      if (totalWrites > 450) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "한 번에 주문 가능한 상품 종류가 너무 많습니다. 공급사를 나눠 주문해주세요.",
+        });
+      }
+
       // 7) draft order doc (status: PENDING_PAYMENT) — subOrders/items 까지 적재
+      //    Σ-1: order + subOrders + items 를 writeBatch 로 원자화 (§1.4)
       const orderRef = db.collection(COLLECTIONS.orders).doc();
       const serverNow = FieldValue.serverTimestamp();
+      const batch = db.batch();
 
-      await orderRef.set({
+      batch.set(orderRef, {
         orderNo,
         hospitalId,
         hospitalName: hospital.name ?? "병원",
@@ -620,15 +716,16 @@ export const orderRouter = createTRPCRouter({
       for (const [vendorId, vendorItems] of byVendor) {
         subIdx += 1;
         const subTotal = vendorItems.reduce((s, i) => s + i.amount, 0);
-        const subVat = Math.floor(subTotal * 0.1);
-        const commissionRate = 0.05;
+        const subVat = Math.floor(subTotal * VAT_RATE);
+        // denorm 추정치 — 실제 정산은 settlement-calc 가 카테고리/벤더 rate 로 재계산
+        const commissionRate = DEFAULT_COMMISSION_RATE;
         const commission = Math.floor(subTotal * commissionRate);
-        const commissionVat = Math.floor(commission * 0.1);
+        const commissionVat = Math.floor(commission * VAT_RATE);
         const payoutAmount = subTotal - commission - commissionVat;
         const subOrderRef = orderRef.collection("subOrders").doc();
         const subOrderNo = `${orderNo}-${String(subIdx).padStart(2, "0")}`;
 
-        await subOrderRef.set({
+        batch.set(subOrderRef, {
           subOrderNo,
           orderId: orderRef.id,
           orderNo,
@@ -657,7 +754,8 @@ export const orderRouter = createTRPCRouter({
         });
 
         for (const item of vendorItems) {
-          await subOrderRef.collection("items").add({
+          const itemRef = subOrderRef.collection("items").doc();
+          batch.set(itemRef, {
             productId: item.productId,
             productName: item.productName,
             productImage: item.thumbnail ?? null,
@@ -669,6 +767,9 @@ export const orderRouter = createTRPCRouter({
           });
         }
       }
+
+      // 8.5) Σ-1 — 원자적 커밋: draft order + subOrders + items 일괄
+      await batch.commit();
 
       // 9) audit log
       try {

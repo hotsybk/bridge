@@ -62,15 +62,14 @@ export const productRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const db = adminDb();
-      // Phase 2 초기 — composite index 회피 위해 in-memory filter.
-      // 시드 + 초기 데이터 규모(<수백) 에서는 안전. Phase 2.5 에서 Algolia + composite index 도입.
-      const snap = await db.collection(COLLECTIONS.products).get();
+      // Σ-3 — status==ACTIVE 를 Firestore 단일필드 인덱스로 push (ARCHIVED 미전송 → read 절감).
+      //   나머지 필터/정렬은 여전히 in-memory (대분류→소분류 prefix 매칭 때문).
+      //   Phase 2.5 에서 Algolia 전환 시 전면 서버측 검색으로 이관.
+      const snap = await db
+        .collection(COLLECTIONS.products)
+        .where("status", "==", "ACTIVE")
+        .get();
       let products = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product);
-
-      // 1) status == ACTIVE
-      products = products.filter(
-        (p) => (p as { status?: string }).status === "ACTIVE",
-      );
 
       // 2) 추가 필터 (대분류 클릭 시 하위 소분류 상품 포함)
       if (input.categoryId) {
@@ -211,16 +210,15 @@ export const productRouter = createTRPCRouter({
 
       // 2) Firestore fallback
       const db = adminDb();
-      const snap = await db.collection(COLLECTIONS.products).get();
+      // Σ-3 — status==ACTIVE 를 Firestore 단일필드 인덱스로 push (read 절감).
+      const snap = await db
+        .collection(COLLECTIONS.products)
+        .where("status", "==", "ACTIVE")
+        .get();
       let products = snap.docs.map(
         (d) => ({ id: d.id, ...d.data() }) as Product & {
           objectID?: string;
         },
-      );
-
-      // ACTIVE 필터
-      products = products.filter(
-        (p) => (p as { status?: string }).status === "ACTIVE",
       );
 
       if (input.categoryId) {

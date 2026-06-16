@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "typecheck:functions": "tsc --noEmit -p functions/tsconfig.json",
+    "test:rules": "vitest run --config vitest.rules.config.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
     "seed:auth-users": "tsx scripts/reseed-users-after-auth.ts",
     "seed:categories": "tsx scripts/seed-categories.ts",
@@ -49,6 +52,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -60,6 +64,7 @@
     "shadcn": "^4.7.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }

@@ -17,7 +17,7 @@ import {
 } from "@/server/api/trpc";
 import { adminDb } from "@/server/firebase/admin";
 import { COLLECTIONS } from "@/server/firebase/collections";
-import { sumCounter } from "@/server/lib/distributed-counter";
+import { sumCounter, incrementCounterTx } from "@/server/lib/distributed-counter";
 import type { GroupBuy } from "@/lib/types";
 
 function tsToMillis(v: unknown): number {
@@ -217,14 +217,8 @@ export const groupbuyRouter = createTRPCRouter({
           createdAt: FieldValue.serverTimestamp(),
         });
 
-        // counter shard increment — random shard (10개)
-        const shardId = `shard-${Math.floor(Math.random() * 10)}`;
-        const shardRef = gbRef.collection("counterShards").doc(shardId);
-        tx.set(
-          shardRef,
-          { count: FieldValue.increment(input.qty) },
-          { merge: true },
-        );
+        // counter shard increment — helper로 "0".."9" 규약 통일 (Σ-1)
+        incrementCounterTx(tx, gbRef, input.qty);
 
         // groupBuy denorm 갱신
         const newQty = (cur.currentQty ?? 0) + input.qty;
@@ -325,13 +319,8 @@ export const groupbuyRouter = createTRPCRouter({
         }
         tx.update(pRef, { voidedAt: FieldValue.serverTimestamp() });
 
-        const shardId = `shard-${Math.floor(Math.random() * 10)}`;
-        const shardRef = gbRef.collection("counterShards").doc(shardId);
-        tx.set(
-          shardRef,
-          { count: FieldValue.increment(-p.qty) },
-          { merge: true },
-        );
+        // counter shard decrement — helper로 "0".."9" 규약 통일 (Σ-1)
+        incrementCounterTx(tx, gbRef, -p.qty);
 
         tx.update(gbRef, {
           currentQty: FieldValue.increment(-p.qty),

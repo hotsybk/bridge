@@ -11,6 +11,7 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { adminDb } from "@/server/firebase/admin";
+import { enforceRateLimit } from "@/server/lib/rate-limit";
 
 export const MARKETING_SUBSCRIPTION_TYPES = [
   "GROUPBUY_LAUNCH",
@@ -37,7 +38,14 @@ export const marketingSubscriptionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const db = adminDb();
 
-      // Rate limit — 5분에 5건
+      // Σ-3 — IP 기반 rate limit (email 변경 우회 차단): 5분 20건
+      await enforceRateLimit({
+        key: `marketing:${ctx.ip ?? "unknown"}`,
+        limit: 20,
+        windowSec: 300,
+      });
+
+      // Rate limit — 5분에 5건 (email 기반, 기존)
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
       const recentSnap = await db
         .collection("marketingSubscriptions")

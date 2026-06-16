@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { adminDb } from "@/server/firebase/admin";
+import { enforceRateLimit } from "@/server/lib/rate-limit";
 
 /**
  * Wave AA — 마케팅 보조 페이지 (/support/contact) 의 문의 폼 처리.
@@ -27,7 +28,14 @@ export const supportRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const db = adminDb();
 
-      // Phase β-3 작업 4 — rate limit.
+      // Σ-3 — IP 기반 rate limit (email 변경 우회 차단): 10분 10건
+      await enforceRateLimit({
+        key: `support:${ctx.ip ?? "unknown"}`,
+        limit: 10,
+        windowSec: 600,
+      });
+
+      // Phase β-3 작업 4 — rate limit (email 기반, 기존).
       // 같은 이메일이 5분 내 3건 이상 제출 시 차단.
       // (reCAPTCHA 는 별도 작업으로 분리 — Phase γ 또는 δ)
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);

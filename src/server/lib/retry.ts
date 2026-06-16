@@ -59,3 +59,23 @@ export async function withRetry<T>(
   }
   throw lastErr;
 }
+
+/**
+ * Σ-1 — fetch + AbortController 타임아웃.
+ * 외부 API 가 응답 없이 hang 되면 함수가 무한 대기 → Cloud Function 타임아웃까지 소진되는
+ * 문제 방지. timeout 초과 시 AbortError throw (withRetry 와 조합 시 재시도됨).
+ * `typeof fetch` 기반 타입으로 DOM lib 의존 없음 (Node 18+/Edge/브라우저 공통).
+ */
+export async function fetchWithTimeout(
+  input: Parameters<typeof fetch>[0],
+  init?: Parameters<typeof fetch>[1],
+  timeoutMs = 10_000,
+): Promise<Awaited<ReturnType<typeof fetch>>> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...(init ?? {}), signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}

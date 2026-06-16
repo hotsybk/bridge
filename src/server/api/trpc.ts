@@ -1,6 +1,7 @@
 // tRPC v11 server-side 셋업.
 // Phase 1.6-B 에서 도입. tRPC procedure 들의 context 와 role-based middleware 정의.
 
+import { headers } from "next/headers";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -17,26 +18,42 @@ export type Ctx = {
   role?: string;
   hospitalId?: string;
   vendorId?: string;
+  /** Σ-3 — client IP (rate limit 용). x-forwarded-for 첫 항목. */
+  ip?: string;
 };
+
+/** Σ-3 — 프록시 헤더에서 client IP 추출 (Vercel: x-forwarded-for). */
+async function resolveClientIp(): Promise<string | undefined> {
+  try {
+    const h = await headers();
+    const fwd = h.get("x-forwarded-for");
+    if (fwd) return fwd.split(",")[0]?.trim() || undefined;
+    return h.get("x-real-ip")?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * tRPC context — 모든 procedure 가 받는다.
  * next-firebase-auth-edge 의 getTokens 로 서명 쿠키를 검증하고
- * uid + Custom Claims(role/hospitalId/vendorId) 를 노출한다.
+ * uid + Custom Claims(role/hospitalId/vendorId) + client IP 를 노출한다.
  */
 export async function createContext(): Promise<Ctx> {
+  const ip = await resolveClientIp();
   try {
     const tokens = await getServerTokens();
-    if (!tokens) return {};
+    if (!tokens) return { ip };
     const dt = tokens.decodedToken as Record<string, unknown>;
     return {
       uid: tokens.decodedToken.uid,
       role: dt.role as string | undefined,
       hospitalId: dt.hospitalId as string | undefined,
       vendorId: dt.vendorId as string | undefined,
+      ip,
     };
   } catch {
-    return {};
+    return { ip };
   }
 }
 

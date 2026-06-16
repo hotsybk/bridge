@@ -1,0 +1,51 @@
+name: Firestore Rules Test
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "firestore.rules"
+      - "tests/rules/**"
+      - "vitest.rules.config.ts"
+      - ".github/workflows/firestore-rules.yml"
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "firestore.rules"
+      - "tests/rules/**"
+      - "vitest.rules.config.ts"
+
+concurrency:
+  group: rules-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rules:
+    name: Security Rules — emulator test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Firebase 에뮬레이터는 JRE 필요
+      - name: Setup Java (for Firestore emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Rules tests on emulator
+        run: pnpm exec firebase emulators:exec --only firestore --project bridge-rules-test "pnpm test:rules"

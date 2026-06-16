@@ -11,12 +11,20 @@ if (typeof window !== "undefined") {
 // eslint-disable-next-line import/first
 import { FieldValue } from "firebase-admin/firestore";
 // eslint-disable-next-line import/first
-import type { DocumentReference } from "firebase-admin/firestore";
+import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 
 // eslint-disable-next-line import/first
 import { adminDb } from "@/server/firebase/admin";
 
 export const SHARD_COUNT = 10;
+
+/**
+ * 랜덤 shard ID 1개 선택 — init/seed/e2e 와 동일한 "0".."9" 규약.
+ * 절대 "shard-N" 형식 사용 금지 (split-brain 방지, Σ-1).
+ */
+function randomShardId(): string {
+  return Math.floor(Math.random() * SHARD_COUNT).toString();
+}
 
 export async function initCounterShards(gbRef: DocumentReference): Promise<void> {
   const batch = adminDb().batch();
@@ -30,8 +38,24 @@ export async function incrementCounter(
   gbRef: DocumentReference,
   delta: number,
 ): Promise<void> {
-  const shardId = Math.floor(Math.random() * SHARD_COUNT).toString();
-  await gbRef.collection("counterShards").doc(shardId).set(
+  await gbRef.collection("counterShards").doc(randomShardId()).set(
+    { count: FieldValue.increment(delta) },
+    { merge: true },
+  );
+}
+
+/**
+ * 트랜잭션 내부에서 shard 증감.
+ * 라우터(participate/cancel)가 참여 기록과 shard 증감을 한 트랜잭션으로 원자화할 때 사용.
+ * 인라인 "shard-N" 직접 기록 대신 반드시 이 helper 를 통해 "0".."9" 규약 통일.
+ */
+export function incrementCounterTx(
+  tx: Transaction,
+  gbRef: DocumentReference,
+  delta: number,
+): void {
+  tx.set(
+    gbRef.collection("counterShards").doc(randomShardId()),
     { count: FieldValue.increment(delta) },
     { merge: true },
   );
